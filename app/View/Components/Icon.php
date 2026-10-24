@@ -1,0 +1,85 @@
+<?php
+
+namespace App\View\Components;
+
+use Illuminate\View\Component;
+use Illuminate\View\View;
+use InvalidArgumentException;
+
+/**
+ * The single line icon set: 24px grid, round caps and joins, 1.5px stroke by default.
+ */
+class Icon extends Component
+{
+    /**
+     * @var array<string, string>
+     */
+    public const PATHS = [
+        'pin' => 'M12 21s-7-6.2-7-11.5a7 7 0 0 1 14 0C19 14.8 12 21 12 21zM12 12a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5z',
+        'bed' => 'M3 19V6M3 15h18M21 19v-6a2 2 0 0 0-2-2h-8v4M6.5 12.5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3z',
+        'building' => 'M5 21V4a1 1 0 0 1 1-1h8a1 1 0 0 1 1 1v17M15 9h3a1 1 0 0 1 1 1v11M3 21h18M8.5 7h3M8.5 11h3M8.5 15h3',
+        'house' => 'M3 11l9-7 9 7M5 9.5V20h14V9.5M10 20v-5h4v5',
+        'car' => 'M5 16h14M3.5 16v-3l2-5a1.5 1.5 0 0 1 1.4-1h10.2a1.5 1.5 0 0 1 1.4 1l2 5v3M3.5 16v2.5M20.5 16v2.5M7 13h.01M17 13h.01',
+        'wrench' => 'M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z',
+        'briefcase' => 'M3 8h18v12H3zM8 8V5a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v3M3 13h18',
+        'fork' => 'M6 3v8M4 3v5a2 2 0 0 0 4 0V3M6 11v10M17 21V3c-2 1.5-3 4-3 7v3h3',
+        'calendar' => 'M4 6h16v15H4zM4 10h16M8 3v4M16 3v4',
+        'users' => 'M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM2 21v-1a6 6 0 0 1 12 0v1M16 3.5a4 4 0 0 1 0 7.5M22 21v-1a6 6 0 0 0-4-5.6',
+        'tag' => 'M3 12V4a1 1 0 0 1 1-1h8l9 9-9 9-9-9zM8 8h.01',
+        'search' => 'M11 18a7 7 0 1 0 0-14 7 7 0 0 0 0 14zM20 20l-4-4',
+        'grid' => 'M4 4h7v7H4zM13 4h7v7h-7zM4 13h7v7H4zM13 13h7v7h-7z',
+        'clock' => 'M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18zM12 7v5l3 2',
+        'area' => 'M3 9V3h6M21 9V3h-6M3 15v6h6M21 15v6h-6',
+        'door' => 'M6 21V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v17M3 21h18M14 12h.01',
+        'layers' => 'M12 3l9 5-9 5-9-5zM3 13l9 5 9-5',
+        'sofa' => 'M5 10V8a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v2M3 12a1.5 1.5 0 0 1 3 0v2h12v-2a1.5 1.5 0 0 1 3 0v5H3zM5 17v2M19 17v2',
+        'bike' => 'M6 18a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7zM18 18a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7zM6 14.5l4-7h5l3 7M10 7.5h-2M15 7.5l-3 7H6',
+        'menu' => 'M4 7h16M4 12h16M4 17h16',
+        'close' => 'M6 6l12 12M18 6L6 18',
+        'plus' => 'M12 5v14M5 12h14',
+        'arrow-right' => 'M5 12h14M13 6l6 6-6 6',
+        'chevron-left' => 'M15 6l-6 6 6 6',
+        'chevron-right' => 'M9 6l6 6-6 6',
+        'chevron-down' => 'M6 9l6 6 6-6',
+        'heart' => 'M12 20s-7-4.5-9-9a4.5 4.5 0 0 1 9-3 4.5 4.5 0 0 1 9 3c-2 4.5-9 9-9 9z',
+        'waves' => 'M2 10c2 0 2-1.5 4-1.5s2 1.5 4 1.5 2-1.5 4-1.5 2 1.5 4 1.5 2-1.5 4-1.5M2 16c2 0 2-1.5 4-1.5s2 1.5 4 1.5 2-1.5 4-1.5 2 1.5 4 1.5 2-1.5 4-1.5',
+        'sun' => 'M12 16a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4',
+        'exchange' => 'M4 7h13l-3-3M20 17H7l3 3',
+        'plane' => 'M17.8 19.2L16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.1-1.1.5l-.3.5c-.2.5-.1 1 .3 1.3L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.5 5.3c.3.4.8.5 1.3.3l.5-.2c.4-.3.6-.7.5-1.2z',
+        'train' => 'M7 3h10a3 3 0 0 1 3 3v9a3 3 0 0 1-3 3H7a3 3 0 0 1-3-3V6a3 3 0 0 1 3-3zM4 11h16M8 14.5h.01M16 14.5h.01M8 18l-2 3M16 18l2 3',
+        'phone' => 'M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2',
+        'mail' => 'M3 6h18v12H3zM3 7l9 6 9-6',
+        'facebook' => 'M15 3h-2.5A3.5 3.5 0 0 0 9 6.5V9H7v3.5h2V21h3.5v-8.5H15l.5-3.5h-3V7a1 1 0 0 1 1-1H15z',
+        'instagram' => 'M7 3h10a4 4 0 0 1 4 4v10a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4V7a4 4 0 0 1 4-4zM12 16a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM17.5 6.5h.01',
+        'youtube' => 'M3 8a3 3 0 0 1 3-3h12a3 3 0 0 1 3 3v8a3 3 0 0 1-3 3H6a3 3 0 0 1-3-3zM10 9l5 3-5 3z',
+        'telegram' => 'M21 4L3 11l6 2 2 6 3-4 5 4zM9 13l12-9',
+        'check' => 'M5 12.5l4.5 4.5L19 7.5',
+        'check-circle' => 'M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18zM8 12.5l2.7 2.7L16 9.8',
+        'info' => 'M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18zM12 11v5M12 8h.01',
+        'alert' => 'M12 9v4M12 17h.01M10.3 3.9L2.4 18a2 2 0 0 0 1.7 3h15.8a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z',
+        'upload' => 'M12 16V4M7 9l5-5 5 5M4 16v3a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-3',
+        'image' => 'M5 4h14a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1zM4 16l4.5-4.5 4 4 2.5-2.5 5 5M15.5 9h.01',
+        'inbox' => 'M3 13h5l1.5 3h5l1.5-3h5M5.5 5h13L21 13v6a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1v-6z',
+        'filter' => 'M4 6h16M7 12h10M10 18h4',
+    ];
+
+    public function __construct(
+        public string $name,
+        public int|float $size = 20,
+        public int|float $stroke = 1.5,
+    ) {
+        if (! array_key_exists($name, self::PATHS)) {
+            throw new InvalidArgumentException("Unknown icon [{$name}].");
+        }
+    }
+
+    public function path(): string
+    {
+        return self::PATHS[$this->name];
+    }
+
+    public function render(): View
+    {
+        return view('components.icon');
+    }
+}

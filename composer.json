@@ -11,6 +11,7 @@
         "laravel/horizon": "^5.50",
         "laravel/scout": "^11.9",
         "laravel/tinker": "^3.0",
+        "livewire/livewire": "^4.0",
         "meilisearch/meilisearch-php": "^1.17"
     },
     "require-dev": {
@@ -32,7 +33,10 @@
             "App\\": "app/",
             "Database\\Factories\\": "database/factories/",
             "Database\\Seeders\\": "database/seeders/"
-        }
+        },
+        "files": [
+            "app/helpers.php"
+        ]
     },
     "autoload-dev": {
         "psr-4": {

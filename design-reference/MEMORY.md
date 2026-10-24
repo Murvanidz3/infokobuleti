@@ -12,6 +12,7 @@
 4. Header CTA made livelier: coral pill, white circle with “+”, glow, lift on hover.
 5. **Second brand color = coral `#d4602a`** (user liked it; noted similarity to Bank of Georgia orange). Applied to all primary buttons, search button, CTA banner button, category hover, hearts, “ახალი” badge, carousel arrow hover, link hover, footer social hover; prices in `#b44f1e`. Navy stays for header/footer/headings/ratings/sale-rent badges/active filters.
 6. Logo: icon mark (sun over waves) tried, then replaced by a pure wordmark in Outfit — “info” 300 / “kobuleti” 700, coral glowing sun-dot on the last “i”.
+7. Contrast (Phase 2): white text on coral `#d4602a` is 3.82:1, below WCAG AA. Fills that carry white text at rest (primary/CTA buttons, header “add listing” pill, search buttons, “ახალი” badge) use coral-pressed `#bf5323` (4.69:1) and lighten to `#d4602a` on hover. Hearts, icons, outlines and hover-only fills (category tiles, arrows, social icons) stay `#d4602a`.
 
 ## Open items
 - Real photography needed for all image slots.

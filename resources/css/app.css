@@ -1,9 +1,308 @@
 @import 'tailwindcss';
 
-@source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
 @source '../../storage/framework/views/*.php';
 
+/*
+ * Self-hosted fonts (fontsource). Only the subsets the portal needs are declared, so each locale
+ * downloads just its own script: Georgian for ka, Latin for en, Cyrillic (Noto Sans/Serif) for ru.
+ */
+@font-face {
+    font-family: 'Noto Sans Georgian Variable';
+    font-style: normal;
+    font-display: swap;
+    font-weight: 100 900;
+    src: url('../../node_modules/@fontsource-variable/noto-sans-georgian/files/noto-sans-georgian-georgian-wght-normal.woff2') format('woff2-variations');
+    unicode-range: U+0589, U+10A0-10FF, U+1C90-1CBA, U+1CBD-1CBF, U+205A, U+2D00-2D2F, U+2E31;
+}
+
+@font-face {
+    font-family: 'Noto Sans Georgian Variable';
+    font-style: normal;
+    font-display: swap;
+    font-weight: 100 900;
+    src: url('../../node_modules/@fontsource-variable/noto-sans-georgian/files/noto-sans-georgian-latin-ext-wght-normal.woff2') format('woff2-variations');
+    unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+
+@font-face {
+    font-family: 'Noto Sans Georgian Variable';
+    font-style: normal;
+    font-display: swap;
+    font-weight: 100 900;
+    src: url('../../node_modules/@fontsource-variable/noto-sans-georgian/files/noto-sans-georgian-latin-wght-normal.woff2') format('woff2-variations');
+    unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+    font-family: 'Noto Sans Variable';
+    font-style: normal;
+    font-display: swap;
+    font-weight: 100 900;
+    src: url('../../node_modules/@fontsource-variable/noto-sans/files/noto-sans-cyrillic-ext-wght-normal.woff2') format('woff2-variations');
+    unicode-range: U+0460-052F, U+1C80-1C8A, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
+
+@font-face {
+    font-family: 'Noto Sans Variable';
+    font-style: normal;
+    font-display: swap;
+    font-weight: 100 900;
+    src: url('../../node_modules/@fontsource-variable/noto-sans/files/noto-sans-cyrillic-wght-normal.woff2') format('woff2-variations');
+    unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+
+@font-face {
+    font-family: 'Noto Serif Georgian';
+    font-style: normal;
+    font-display: swap;
+    font-weight: 600;
+    src: url('../../node_modules/@fontsource/noto-serif-georgian/files/noto-serif-georgian-georgian-600-normal.woff2') format('woff2');
+    unicode-range: U+0589, U+10A0-10FF, U+1C90-1CBA, U+1CBD-1CBF, U+205A, U+2D00-2D2F, U+2E31;
+}
+
+@font-face {
+    font-family: 'Noto Serif Georgian';
+    font-style: normal;
+    font-display: swap;
+    font-weight: 600;
+    src: url('../../node_modules/@fontsource/noto-serif-georgian/files/noto-serif-georgian-latin-ext-600-normal.woff2') format('woff2');
+    unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+
+@font-face {
+    font-family: 'Noto Serif Georgian';
+    font-style: normal;
+    font-display: swap;
+    font-weight: 600;
+    src: url('../../node_modules/@fontsource/noto-serif-georgian/files/noto-serif-georgian-latin-600-normal.woff2') format('woff2');
+    unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+    font-family: 'Noto Serif';
+    font-style: normal;
+    font-display: swap;
+    font-weight: 600;
+    src: url('../../node_modules/@fontsource/noto-serif/files/noto-serif-cyrillic-ext-600-normal.woff2') format('woff2');
+    unicode-range: U+0460-052F, U+1C80-1C8A, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
+
+@font-face {
+    font-family: 'Noto Serif';
+    font-style: normal;
+    font-display: swap;
+    font-weight: 600;
+    src: url('../../node_modules/@fontsource/noto-serif/files/noto-serif-cyrillic-600-normal.woff2') format('woff2');
+    unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+
+@font-face {
+    font-family: 'Outfit';
+    font-style: normal;
+    font-display: swap;
+    font-weight: 300;
+    src: url('../../node_modules/@fontsource/outfit/files/outfit-latin-300-normal.woff2') format('woff2');
+    unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+    font-family: 'Outfit';
+    font-style: normal;
+    font-display: swap;
+    font-weight: 700;
+    src: url('../../node_modules/@fontsource/outfit/files/outfit-latin-700-normal.woff2') format('woff2');
+    unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+/*
+ * Design tokens. Default palettes, radii and shadows are reset so only the approved tokens exist.
+ */
 @theme {
-    --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
-        'Segoe UI Symbol', 'Noto Color Emoji';
+    --breakpoint-*: initial;
+    --breakpoint-xs: 35rem;
+    --breakpoint-md: 45rem;
+    --breakpoint-lg: 68.75rem;
+    --breakpoint-xl: 77.5rem;
+
+    --color-*: initial;
+    --color-white: #ffffff;
+    --color-navy: #0a1a2f;
+    --color-navy-hover: #1b304d;
+    --color-secondary: #3a4a5f;
+    --color-line: #e8edf3;
+    --color-line-strong: #c9d3df;
+    --color-surface-alt: #f5f7fa;
+    --color-coral: #d4602a;
+    --color-coral-hover: #e06d36;
+    --color-coral-pressed: #bf5323;
+    --color-coral-tint: #fcece2;
+    --color-price: #b44f1e;
+    --color-sun: #e8703a;
+    --color-sea: #2f6f9f;
+    --color-tab-hotels: #2f6f9f;
+    --color-tab-realestate: #2e7d6b;
+    --color-tab-classifieds: #b5622f;
+    --color-tab-jobs: #6a4f9e;
+
+    --font-sans: 'Noto Sans Georgian Variable', 'Noto Sans Variable', system-ui, sans-serif;
+    --font-serif: 'Noto Serif Georgian', 'Noto Serif', Georgia, serif;
+    --font-logo: 'Outfit', 'Noto Sans Georgian Variable', sans-serif;
+
+    /* Sizes carry no line-height: the design relies on the font's normal leading unless set explicitly. */
+    --text-*: initial;
+    --text-xs: 0.75rem;
+    --text-sm: 0.875rem;
+    --text-base: 1rem;
+    --text-lg: 1.125rem;
+    --text-xl: 1.25rem;
+    --text-2xl: 1.5rem;
+
+    --radius-*: initial;
+    --radius-chip: 8px;
+    --radius-field: 10px;
+    --radius-button: 12px;
+    --radius-tile: 14px;
+    --radius-card: 16px;
+    --radius-panel: 20px;
+
+    --shadow-*: initial;
+    --shadow-card: 0 1px 2px rgba(10, 26, 47, 0.03);
+    --shadow-card-soft: 0 6px 24px -8px rgba(10, 26, 47, 0.14);
+    --shadow-card-hover: 0 20px 40px -16px rgba(10, 26, 47, 0.22);
+    --shadow-feature-hover: 0 22px 44px -18px rgba(10, 26, 47, 0.35);
+    --shadow-tile-hover: 0 16px 32px -12px rgba(212, 96, 42, 0.55);
+    --shadow-cta: 0 6px 20px -6px rgba(212, 96, 42, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.25);
+    --shadow-cta-hover: 0 12px 28px -8px rgba(212, 96, 42, 0.75), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+    --shadow-button-hover: 0 14px 30px -10px rgba(212, 96, 42, 0.6);
+    --shadow-search-button-hover: 0 10px 24px -8px rgba(212, 96, 42, 0.6);
+    --shadow-overlay: 0 24px 60px -20px rgba(10, 26, 47, 0.5);
+    --shadow-overlay-compact: 0 20px 50px -20px rgba(10, 26, 47, 0.6);
+    --shadow-device: 0 30px 80px -20px rgba(10, 26, 47, 0.35);
+
+    --ease-soft: cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+@layer base {
+    html {
+        scroll-behavior: smooth;
+        scroll-padding-top: 80px;
+        line-height: normal;
+        -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+        font-family: var(--font-sans);
+        color: var(--color-navy);
+        background: var(--color-white);
+        -webkit-font-smoothing: antialiased;
+        text-rendering: optimizeLegibility;
+    }
+
+    :focus-visible {
+        outline: 2px solid var(--color-coral);
+        outline-offset: 2px;
+    }
+
+    [x-cloak] {
+        display: none !important;
+    }
+
+    html:has(dialog[open]:modal) {
+        overflow: hidden;
+    }
+
+    input[type='date']::-webkit-calendar-picker-indicator {
+        opacity: 0;
+        position: absolute;
+        inset: 0;
+        width: auto;
+        height: auto;
+        cursor: pointer;
+    }
+}
+
+@utility container-page {
+    width: 100%;
+    max-width: 1408px;
+    margin-inline: auto;
+    padding-inline: clamp(20px, 4.5vw, 64px);
+}
+
+@utility section-y {
+    padding-block: clamp(56px, 7vw, 104px);
+}
+
+@utility scrollbar-none {
+    scrollbar-width: none;
+
+    &::-webkit-scrollbar {
+        display: none;
+    }
+}
+
+/* Card lift: shadow always, movement only when the user allows motion. */
+@utility card-lift {
+    transition:
+        transform 0.35s var(--ease-soft),
+        box-shadow 0.35s ease;
+
+    &:hover {
+        box-shadow: var(--shadow-card-hover);
+    }
+
+    @media (prefers-reduced-motion: no-preference) {
+        &:hover {
+            transform: translateY(-4px);
+        }
+    }
+}
+
+/* Image zoom inside a .group card. */
+@utility media-zoom {
+    transition: transform 0.7s var(--ease-soft);
+
+    @media (prefers-reduced-motion: no-preference) {
+        :where(.group):hover & {
+            transform: scale(1.05);
+        }
+    }
+}
+
+/* Extends a small control's hit area to 44px without changing its visual size. Needs a positioned element. */
+@utility hit-44 {
+    &::after {
+        content: '';
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        width: max(100%, 44px);
+        height: max(100%, 44px);
+        transform: translate(-50%, -50%);
+    }
+}
+
+/* Scroll reveal: app.js adds .reveal-pending to sections below the fold, then removes it in view. */
+[data-reveal] {
+    transition:
+        opacity 0.8s ease,
+        transform 0.8s var(--ease-soft);
+}
+
+[data-reveal].reveal-pending {
+    opacity: 0;
+    transform: translateY(24px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    html {
+        scroll-behavior: auto;
+    }
+
+    *,
+    ::before,
+    ::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
 }
