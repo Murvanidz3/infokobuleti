@@ -1,0 +1,862 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;700&family=Noto+Sans+Georgian:wght@400;500;600;700&amp;family=Noto+Serif+Georgian:wght@500;600;700&amp;display=swap" rel="stylesheet">
+<script src="./image-slot.js"></script>
+<style>
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;font-family:'Noto Sans Georgian',system-ui,sans-serif;color:#0a1a2f;background:#fff;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+button,input{font-family:inherit}
+a{color:#0a1a2f;text-decoration:none}
+a:hover{color:#d4602a}
+</style>
+</helmet>
+
+<div style="background:{{ stageBg }};min-height:100vh;padding:{{ stagePad }}">
+<div ref="{{ rootRef }}" style="container-type:inline-size;max-width:{{ frameW }};margin:0 auto;background:#fff;box-shadow:{{ frameShadow }};border-radius:{{ frameRadius }};overflow:{{ frameOverflow }}">
+
+<!-- HEADER -->
+<header data-screen-label="Header" style="position:sticky;top:0;z-index:50;background:{{ headerBg }};backdrop-filter:{{ headerBlur }};-webkit-backdrop-filter:{{ headerBlur }};border-bottom:1px solid rgba(255,255,255,0.07);transition:background .3s ease">
+  <div style="max-width:1408px;margin:0 auto;padding:0 clamp(20px,4.5cqw,64px);height:{{ headerH }};display:flex;align-items:center;gap:28px;transition:height .3s ease">
+    <a href="#" aria-label="infokobuleti" style="display:flex;align-items:center;color:#fff;flex-shrink:0;transition:opacity .2s" style-hover="opacity:0.85;color:#fff"><span style="font-family:'Outfit','Noto Sans Georgian',sans-serif;font-size:26px;line-height:1;letter-spacing:-0.025em;white-space:nowrap"><span style="font-weight:300;color:rgba(255,255,255,0.7)">info</span><span style="font-weight:700;color:#fff">kobulet</span><span style="position:relative;display:inline-block;font-weight:700;color:#fff">ı<span style="position:absolute;left:50%;top:0.14em;width:0.24em;height:0.24em;margin-left:-0.12em;border-radius:50%;background:#e8703a;box-shadow:0 0 0 0.07em rgba(232,112,58,0.25), 0 0 14px rgba(232,112,58,0.7)"></span></span></span></a>
+    <sc-if value="{{ showNav }}" hint-placeholder-val="{{ true }}">
+      <nav style="display:flex;gap:28px;flex:1;justify-content:center">
+        <a href="#hotels" style="color:rgba(255,255,255,0.78);font-size:14.5px;font-weight:500;white-space:nowrap;transition:color .2s" style-hover="color:#fff">სასტუმროები</a>
+        <a href="#realestate" style="color:rgba(255,255,255,0.78);font-size:14.5px;font-weight:500;white-space:nowrap;transition:color .2s" style-hover="color:#fff">უძრავი ქონება</a>
+        <a href="#classifieds" style="color:rgba(255,255,255,0.78);font-size:14.5px;font-weight:500;white-space:nowrap;transition:color .2s" style-hover="color:#fff">განცხადებები</a>
+        <a href="#classifieds" style="color:rgba(255,255,255,0.78);font-size:14.5px;font-weight:500;white-space:nowrap;transition:color .2s" style-hover="color:#fff">ვაკანსიები</a>
+        <a href="#guide" style="color:rgba(255,255,255,0.78);font-size:14.5px;font-weight:500;white-space:nowrap;transition:color .2s" style-hover="color:#fff">გზამკვლევი</a>
+        <a href="#news" style="color:rgba(255,255,255,0.78);font-size:14.5px;font-weight:500;white-space:nowrap;transition:color .2s" style-hover="color:#fff">სიახლეები</a>
+      </nav>
+    </sc-if>
+    <sc-if value="{{ hideNav }}" hint-placeholder-val="{{ false }}"><div style="flex:1"></div></sc-if>
+    <div style="display:flex;align-items:center;gap:14px;flex-shrink:0">
+      <sc-if value="{{ showHeaderExtras }}" hint-placeholder-val="{{ true }}">
+        <div style="display:flex;gap:2px;padding:3px;border:1px solid rgba(255,255,255,0.18);border-radius:999px">
+          <sc-for list="{{ langs }}" as="l" hint-placeholder-count="3">
+            <button onClick="{{ l.on }}" style="border:0;cursor:pointer;padding:5px 10px;border-radius:999px;font-size:12px;font-weight:600;letter-spacing:0.04em;background:{{ l.bg }};color:{{ l.color }};transition:background .2s, color .2s">{{ l.code }}</button>
+          </sc-for>
+        </div>
+        <a href="#post" style="display:inline-flex;align-items:center;gap:10px;background:#d4602a;color:#fff;font-size:14px;font-weight:600;padding:6px 18px 6px 6px;border-radius:999px;white-space:nowrap;box-shadow:0 6px 20px -6px rgba(212,96,42,0.55), inset 0 1px 0 rgba(255,255,255,0.25);transition:transform .25s cubic-bezier(.2,.7,.2,1), box-shadow .25s ease, filter .25s ease" style-hover="color:#fff;transform:translateY(-2px);background:#e06d36;box-shadow:0 12px 28px -8px rgba(212,96,42,0.75), inset 0 1px 0 rgba(255,255,255,0.3)">
+          <span style="width:28px;height:28px;display:grid;place-items:center;border-radius:999px;background:#fff;color:#d4602a">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"></path></svg>
+          </span>
+          განცხადების დამატება
+        </a>
+      </sc-if>
+      <sc-if value="{{ hideNav }}" hint-placeholder-val="{{ false }}">
+        <button onClick="{{ toggleMenu }}" aria-label="მენიუ" style="width:44px;height:44px;display:grid;place-items:center;background:transparent;border:1px solid rgba(255,255,255,0.2);border-radius:10px;color:#fff;cursor:pointer">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="{{ menuIcon }}"></path></svg>
+        </button>
+      </sc-if>
+    </div>
+  </div>
+  <sc-if value="{{ drawerOpen }}" hint-placeholder-val="{{ false }}">
+    <div style="border-top:1px solid rgba(255,255,255,0.08);padding:12px clamp(20px,4.5cqw,64px) 24px;display:flex;flex-direction:column;gap:2px">
+      <a href="#hotels" onClick="{{ closeMenu }}" style="color:#fff;font-size:17px;font-weight:500;padding:14px 0;border-bottom:1px solid rgba(255,255,255,0.08)">სასტუმროები</a>
+      <a href="#realestate" onClick="{{ closeMenu }}" style="color:#fff;font-size:17px;font-weight:500;padding:14px 0;border-bottom:1px solid rgba(255,255,255,0.08)">უძრავი ქონება</a>
+      <a href="#classifieds" onClick="{{ closeMenu }}" style="color:#fff;font-size:17px;font-weight:500;padding:14px 0;border-bottom:1px solid rgba(255,255,255,0.08)">განცხადებები</a>
+      <a href="#classifieds" onClick="{{ closeMenu }}" style="color:#fff;font-size:17px;font-weight:500;padding:14px 0;border-bottom:1px solid rgba(255,255,255,0.08)">ვაკანსიები</a>
+      <a href="#guide" onClick="{{ closeMenu }}" style="color:#fff;font-size:17px;font-weight:500;padding:14px 0;border-bottom:1px solid rgba(255,255,255,0.08)">გზამკვლევი</a>
+      <a href="#news" onClick="{{ closeMenu }}" style="color:#fff;font-size:17px;font-weight:500;padding:14px 0;border-bottom:1px solid rgba(255,255,255,0.08)">სიახლეები</a>
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:18px;flex-wrap:wrap">
+        <div style="display:flex;gap:2px;padding:3px;border:1px solid rgba(255,255,255,0.18);border-radius:999px">
+          <sc-for list="{{ langs }}" as="l" hint-placeholder-count="3">
+            <button onClick="{{ l.on }}" style="border:0;cursor:pointer;padding:8px 14px;border-radius:999px;font-size:13px;font-weight:600;letter-spacing:0.04em;background:{{ l.bg }};color:{{ l.color }}">{{ l.code }}</button>
+          </sc-for>
+        </div>
+        <a href="#post" style="display:inline-flex;align-items:center;gap:10px;background:#d4602a;color:#fff;font-size:14px;font-weight:600;padding:7px 20px 7px 7px;border-radius:999px;box-shadow:0 6px 20px -6px rgba(212,96,42,0.55)">
+          <span style="width:30px;height:30px;display:grid;place-items:center;border-radius:999px;background:#fff;color:#d4602a">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"></path></svg>
+          </span>
+          განცხადების დამატება
+        </a>
+      </div>
+    </div>
+  </sc-if>
+</header>
+
+<!-- HERO -->
+<section data-screen-label="Hero" style="position:relative;min-height:clamp(560px,48cqw,720px);display:flex;align-items:flex-end;background:#0a1a2f">
+  <div style="position:absolute;inset:0;overflow:hidden">
+    <image-slot id="hero-boulevard" shape="rect" placeholder="Kobuleti seaside boulevard at golden hour"></image-slot>
+  </div>
+  <div style="position:absolute;inset:0;pointer-events:none;background:{{ heroOverlay }}"></div>
+  <div style="position:relative;width:100%;max-width:1408px;margin:0 auto;padding:clamp(80px,9cqw,140px) clamp(20px,4.5cqw,64px) clamp(40px,5cqw,72px);pointer-events:none">
+    <div style="display:inline-flex;align-items:center;gap:8px;color:rgba(255,255,255,0.85);font-size:14px;font-weight:500;margin-bottom:20px">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-6.2-7-11.5a7 7 0 0 1 14 0C19 14.8 12 21 12 21zM12 12a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5z"></path></svg>
+      ქობულეთი, აჭარა · შავი ზღვის სანაპირო
+    </div>
+    <h1 style="margin:0;max-width:880px;font-family:'Noto Serif Georgian',serif;font-weight:600;font-size:clamp(34px,4.5cqw,66px);line-height:1.18;color:#fff;letter-spacing:-0.01em;text-wrap:balance">ყველაფერი ქობულეთის შესახებ ერთ სივრცეში</h1>
+    <p style="margin:20px 0 0;max-width:620px;font-size:clamp(16px,1.3cqw,19px);line-height:1.65;color:rgba(255,255,255,0.84);text-wrap:pretty">სასტუმროები, უძრავი ქონება, განცხადებები, ვაკანსიები და ქალაქის გზამკვლევი. დაგეგმე დასვენება, იპოვე სახლი ან სამსახური ზღვისპირა ქალაქში.</p>
+
+    <sc-if value="{{ fullSearch }}" hint-placeholder-val="{{ true }}">
+      <div style="pointer-events:auto;margin-top:clamp(28px,3.5cqw,44px);background:rgba(255,255,255,0.14);border:1px solid rgba(255,255,255,0.28);backdrop-filter:blur(18px) saturate(140%);-webkit-backdrop-filter:blur(18px) saturate(140%);border-radius:20px;padding:8px;box-shadow:0 24px 60px -20px rgba(10,26,47,0.5)">
+        <div style="display:flex;gap:4px;padding:2px 2px 8px;overflow-x:auto;scrollbar-width:none">
+          <sc-for list="{{ tabs }}" as="t" hint-placeholder-count="4">
+            <button onClick="{{ t.on }}" style="display:inline-flex;align-items:center;gap:10px;border:0;cursor:pointer;padding:7px 18px 7px 7px;border-radius:12px;font-size:14.5px;font-weight:600;white-space:nowrap;background:{{ t.bg }};color:#fff;box-shadow:{{ t.shadow }};transition:background .25s ease, box-shadow .25s ease, transform .2s ease" style-hover="transform:translateY(-1px)">
+              <span style="width:30px;height:30px;display:grid;place-items:center;border-radius:9px;background:{{ t.chip }};transition:background .25s ease">
+                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="{{ t.icon }}"></path></svg>
+              </span>
+              {{ t.label }}
+            </button>
+          </sc-for>
+        </div>
+        <div style="background:rgba(255,255,255,0.97);border-radius:14px;padding:10px;display:flex;flex-direction:{{ panelDir }};gap:10px;opacity:{{ fieldsOpacity }};transform:{{ fieldsTransform }};transition:opacity .22s ease, transform .22s ease">
+          <div style="flex:1;display:grid;grid-template-columns:{{ fieldCols }};gap:8px;min-width:0">
+            <sc-for list="{{ fields }}" as="f" hint-placeholder-count="4">
+              <div style="background:#f5f7fa;border-radius:10px;padding:12px 16px;display:flex;align-items:center;gap:12px;cursor:pointer;min-width:0;min-height:64px;transition:background .2s" style-hover="background:#e8edf3">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0a1a2f" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><path d="{{ f.icon }}"></path></svg>
+                <div style="min-width:0;flex:1">
+                  <div style="font-size:12px;color:#3a4a5f;font-weight:500;margin-bottom:3px">{{ f.label }}</div>
+                  <sc-if value="{{ f.isText }}" hint-placeholder-val="{{ true }}">
+                    <div style="font-size:15px;font-weight:600;color:{{ f.color }};white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ f.value }}</div>
+                  </sc-if>
+                  <sc-if value="{{ f.isToggle }}" hint-placeholder-val="{{ false }}">
+                    <div style="display:flex;gap:4px">
+                      <sc-for list="{{ f.pills }}" as="p" hint-placeholder-count="2">
+                        <button onClick="{{ p.on }}" style="border:0;cursor:pointer;padding:4px 14px;border-radius:999px;font-size:13px;font-weight:600;background:{{ p.bg }};color:{{ p.color }};transition:background .2s, color .2s">{{ p.label }}</button>
+                      </sc-for>
+                    </div>
+                  </sc-if>
+                </div>
+              </div>
+            </sc-for>
+          </div>
+          <button style="display:inline-flex;align-items:center;justify-content:center;gap:10px;border:0;cursor:pointer;background:#d4602a;color:#fff;font-size:15px;font-weight:600;padding:0 32px;min-height:56px;border-radius:12px;transition:background .3s, transform .2s, box-shadow .2s" style-hover="background:#bf5323;transform:translateY(-1px);box-shadow:0 10px 24px -8px rgba(212,96,42,0.6)">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M11 18a7 7 0 1 0 0-14 7 7 0 0 0 0 14zM20 20l-4-4"></path></svg>
+            ძიება
+          </button>
+        </div>
+      </div>
+    </sc-if>
+    <sc-if value="{{ compactSearch }}" hint-placeholder-val="{{ false }}">
+      <div style="pointer-events:auto;margin-top:28px;display:flex;align-items:center;gap:8px;background:rgba(255,255,255,0.94);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border:1px solid rgba(255,255,255,0.5);border-radius:16px;padding:6px 6px 6px 16px;box-shadow:0 20px 50px -20px rgba(10,26,47,0.6)">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#3a4a5f" stroke-width="1.5" stroke-linecap="round" style="flex-shrink:0"><path d="M11 18a7 7 0 1 0 0-14 7 7 0 0 0 0 14zM20 20l-4-4"></path></svg>
+        <input placeholder="სასტუმრო, ბინა, ვაკანსია…" style="flex:1;min-width:0;border:0;background:transparent;outline:none;font-size:15px;color:#0a1a2f;height:44px">
+        <button aria-label="ძიება" style="width:48px;height:48px;flex-shrink:0;display:grid;place-items:center;border:0;border-radius:12px;background:#d4602a;color:#fff;cursor:pointer">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"></path></svg>
+        </button>
+      </div>
+    </sc-if>
+  </div>
+</section>
+
+<!-- CATEGORIES -->
+<section data-screen-label="Categories" style="background:#fff;padding:clamp(48px,5cqw,72px) 0">
+  <div data-reveal="" style="max-width:1408px;margin:0 auto;padding:0 clamp(20px,4.5cqw,64px)">
+    <div style="display:grid;grid-template-columns:{{ catCols }};gap:14px">
+      <sc-for list="{{ cats }}" as="c" hint-placeholder-count="8">
+        <a href="#" style="display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:14px;height:100%;min-height:156px;padding:22px 12px;border:1px solid #e8edf3;border-radius:14px;background:#fff;color:#0a1a2f;cursor:pointer;transition:background .25s ease, color .25s ease, border-color .25s ease, transform .25s ease, box-shadow .25s ease" style-hover="background:#d4602a;color:#fff;border-color:#d4602a;transform:translateY(-4px);box-shadow:0 16px 32px -12px rgba(212,96,42,0.55)">
+          <span style="width:52px;height:52px;flex-shrink:0;display:grid;place-items:center;border-radius:999px;border:1px solid currentColor">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="{{ c.icon }}"></path></svg>
+          </span>
+          <span style="display:flex;flex-direction:column;align-items:center;gap:4px;width:100%;min-width:0">
+            <span style="display:block;width:100%;font-size:14px;font-weight:600;line-height:1.35;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ c.name }}</span>
+            <span style="display:block;width:100%;font-size:13px;line-height:1.35;opacity:0.65;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ c.count }}</span>
+          </span>
+        </a>
+      </sc-for>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURED HOTELS -->
+<section id="hotels" data-screen-label="Featured hotels" style="background:#f5f7fa;padding:clamp(56px,7cqw,104px) 0">
+  <div data-reveal="" style="max-width:1408px;margin:0 auto;padding:0 clamp(20px,4.5cqw,64px)">
+    <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:24px;flex-wrap:wrap;margin-bottom:36px">
+      <div>
+        <h2 style="margin:0;font-family:'Noto Serif Georgian',serif;font-weight:600;font-size:clamp(28px,2.6cqw,40px);line-height:1.2;color:#0a1a2f">რჩეული სასტუმროები</h2>
+        <p style="margin:10px 0 0;color:#3a4a5f;font-size:16px;line-height:1.6">ზღვასთან ახლოს, სტუმრების შეფასებით</p>
+      </div>
+      <div style="display:flex;align-items:center;gap:20px">
+        <a href="#" style="display:inline-flex;align-items:center;gap:8px;font-size:14.5px;font-weight:600;color:#0a1a2f;transition:gap .2s" style-hover="gap:12px;color:#d4602a">ყველა სასტუმრო
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"></path></svg>
+        </a>
+        <sc-if value="{{ showArrows }}" hint-placeholder-val="{{ true }}">
+          <div style="display:flex;gap:8px">
+            <button onClick="{{ railPrev }}" aria-label="წინა" style="width:44px;height:44px;display:grid;place-items:center;border:1px solid #c9d3df;background:#fff;border-radius:999px;cursor:pointer;color:#0a1a2f;transition:background .2s, color .2s, border-color .2s" style-hover="background:#d4602a;color:#fff;border-color:#d4602a">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"></path></svg>
+            </button>
+            <button onClick="{{ railNext }}" aria-label="შემდეგი" style="width:44px;height:44px;display:grid;place-items:center;border:1px solid #c9d3df;background:#fff;border-radius:999px;cursor:pointer;color:#0a1a2f;transition:background .2s, color .2s, border-color .2s" style-hover="background:#d4602a;color:#fff;border-color:#d4602a">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"></path></svg>
+            </button>
+          </div>
+        </sc-if>
+      </div>
+    </div>
+    <div ref="{{ railRef }}" style="display:flex;gap:24px;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;padding:6px 6px 28px;margin:-6px -6px -28px;scroll-padding:6px">
+      <sc-for list="{{ hotels }}" as="h" hint-placeholder-count="4">
+        <article style="flex:0 0 {{ hotelBasis }};scroll-snap-align:start;background:#fff;border-radius:16px;overflow:hidden;border:{{ cardBorder }};box-shadow:{{ cardShadow }};transition:transform .35s cubic-bezier(.2,.7,.2,1), box-shadow .35s ease" style-hover="transform:translateY(-4px);box-shadow:0 20px 40px -16px rgba(10,26,47,0.22)">
+          <div style="position:relative;aspect-ratio:4/3;overflow:hidden;background:#e8edf3">
+            <div style="position:absolute;inset:0;transition:transform .7s cubic-bezier(.2,.7,.2,1)" style-hover="transform:scale(1.05)">
+              <image-slot id="{{ h.slot }}" shape="rect" placeholder="{{ h.ph }}"></image-slot>
+            </div>
+            <button onClick="{{ h.toggleFav }}" aria-label="რჩეულებში" style="position:absolute;top:12px;right:12px;width:38px;height:38px;display:grid;place-items:center;border:0;border-radius:999px;background:rgba(255,255,255,0.9);backdrop-filter:blur(8px);cursor:pointer;color:#d4602a;transition:transform .2s" style-hover="transform:scale(1.08)">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="{{ h.heartFill }}" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"><path d="M12 20s-7-4.5-9-9a4.5 4.5 0 0 1 9-3 4.5 4.5 0 0 1 9 3c-2 4.5-9 9-9 9z"></path></svg>
+            </button>
+          </div>
+          <div style="padding:18px 20px 20px">
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px">
+              <h3 style="margin:0;font-size:17px;font-weight:600;line-height:1.4;color:#0a1a2f">{{ h.name }}</h3>
+              <div style="flex-shrink:0;background:#0a1a2f;color:#fff;font-size:13px;font-weight:700;padding:4px 8px;border-radius:8px">{{ h.rating }}</div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:6px;margin-top:10px;font-size:13.5px;color:#3a4a5f">
+              <div style="display:flex;align-items:center;gap:8px">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0a1a2f" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-6.2-7-11.5a7 7 0 0 1 14 0C19 14.8 12 21 12 21zM12 12a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5z"></path></svg>
+                {{ h.loc }}
+              </div>
+              <div style="display:flex;align-items:center;gap:8px">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0a1a2f" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 10c2 0 2-1.5 4-1.5s2 1.5 4 1.5 2-1.5 4-1.5 2 1.5 4 1.5 2-1.5 4-1.5M2 16c2 0 2-1.5 4-1.5s2 1.5 4 1.5 2-1.5 4-1.5 2 1.5 4 1.5 2-1.5 4-1.5"></path></svg>
+                {{ h.sea }}
+              </div>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:baseline;margin-top:16px;padding-top:14px;border-top:1px solid #e8edf3">
+              <div><span style="font-size:20px;font-weight:700;color:#b44f1e">{{ h.price }}</span><span style="font-size:13px;color:#3a4a5f"> / ღამე</span></div>
+              <div style="font-size:12.5px;color:#3a4a5f">{{ h.reviews }}</div>
+            </div>
+          </div>
+        </article>
+      </sc-for>
+    </div>
+  </div>
+</section>
+
+<!-- REAL ESTATE -->
+<section id="realestate" data-screen-label="Real estate" style="background:#fff;padding:clamp(56px,7cqw,104px) 0">
+  <div data-reveal="" style="max-width:1408px;margin:0 auto;padding:0 clamp(20px,4.5cqw,64px)">
+    <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:24px;flex-wrap:wrap;margin-bottom:36px">
+      <div>
+        <h2 style="margin:0;font-family:'Noto Serif Georgian',serif;font-weight:600;font-size:clamp(28px,2.6cqw,40px);line-height:1.2;color:#0a1a2f">უძრავი ქონება</h2>
+        <p style="margin:10px 0 0;color:#3a4a5f;font-size:16px;line-height:1.6">ბინები, სახლები და ნაკვეთები გასაყიდად და ქირით</p>
+      </div>
+      <div style="display:flex;gap:4px;padding:4px;border:1px solid #e8edf3;border-radius:999px;background:#f5f7fa">
+        <sc-for list="{{ reTabs }}" as="t" hint-placeholder-count="3">
+          <button onClick="{{ t.on }}" style="border:0;cursor:pointer;padding:9px 18px;border-radius:999px;font-size:14px;font-weight:600;background:{{ t.bg }};color:{{ t.color }};transition:background .25s ease, color .25s ease">{{ t.label }}</button>
+        </sc-for>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,340px),1fr));gap:24px">
+      <sc-for list="{{ estates }}" as="e" hint-placeholder-count="6">
+        <article style="background:#fff;border-radius:16px;overflow:hidden;border:{{ cardBorder }};box-shadow:{{ cardShadow }};transition:transform .35s cubic-bezier(.2,.7,.2,1), box-shadow .35s ease" style-hover="transform:translateY(-4px);box-shadow:0 20px 40px -16px rgba(10,26,47,0.22)">
+          <div style="position:relative;aspect-ratio:3/2;overflow:hidden;background:#e8edf3">
+            <div style="position:absolute;inset:0;transition:transform .7s cubic-bezier(.2,.7,.2,1)" style-hover="transform:scale(1.05)">
+              <image-slot id="{{ e.slot }}" shape="rect" placeholder="{{ e.ph }}"></image-slot>
+            </div>
+            <div style="position:absolute;top:14px;left:14px;background:#0a1a2f;color:#fff;font-size:12.5px;font-weight:600;padding:6px 12px;border-radius:999px;pointer-events:none">{{ e.badge }}</div>
+            <button onClick="{{ e.toggleFav }}" aria-label="რჩეულებში" style="position:absolute;top:12px;right:12px;width:38px;height:38px;display:grid;place-items:center;border:0;border-radius:999px;background:rgba(255,255,255,0.9);backdrop-filter:blur(8px);cursor:pointer;color:#d4602a;transition:transform .2s" style-hover="transform:scale(1.08)">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="{{ e.heartFill }}" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"><path d="M12 20s-7-4.5-9-9a4.5 4.5 0 0 1 9-3 4.5 4.5 0 0 1 9 3c-2 4.5-9 9-9 9z"></path></svg>
+            </button>
+          </div>
+          <div style="padding:20px">
+            <div style="display:flex;align-items:baseline;gap:10px;flex-wrap:wrap">
+              <span style="font-size:22px;font-weight:700;color:#b44f1e">{{ e.price }}</span>
+              <span style="font-size:13.5px;color:#3a4a5f">{{ e.alt }}</span>
+            </div>
+            <h3 style="margin:8px 0 0;font-size:15.5px;font-weight:500;line-height:1.5;color:#0a1a2f">{{ e.title }}</h3>
+            <div style="display:flex;align-items:center;gap:8px;margin-top:6px;font-size:13.5px;color:#3a4a5f">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0a1a2f" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-6.2-7-11.5a7 7 0 0 1 14 0C19 14.8 12 21 12 21zM12 12a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5z"></path></svg>
+              {{ e.loc }}
+            </div>
+            <div style="display:flex;gap:18px;flex-wrap:wrap;margin-top:16px;padding-top:14px;border-top:1px solid #e8edf3">
+              <sc-for list="{{ e.feats }}" as="ft" hint-placeholder-count="3">
+                <div style="display:flex;align-items:center;gap:7px;font-size:13.5px;color:#0a1a2f;font-weight:500">
+                  <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#0a1a2f" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="{{ ft.icon }}"></path></svg>
+                  {{ ft.text }}
+                </div>
+              </sc-for>
+            </div>
+          </div>
+        </article>
+      </sc-for>
+    </div>
+  </div>
+</section>
+
+<!-- CLASSIFIEDS + VACANCIES -->
+<section id="classifieds" data-screen-label="Classifieds and vacancies" style="background:#f5f7fa;padding:clamp(56px,7cqw,104px) 0">
+  <div data-reveal="" style="max-width:1408px;margin:0 auto;padding:0 clamp(20px,4.5cqw,64px);display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,460px),1fr));gap:clamp(40px,3cqw,48px) 32px">
+    <div>
+      <div style="display:flex;align-items:baseline;justify-content:space-between;gap:16px;margin-bottom:20px">
+        <h2 style="margin:0;font-family:'Noto Serif Georgian',serif;font-weight:600;font-size:clamp(24px,2cqw,30px);line-height:1.25;color:#0a1a2f">ბოლო განცხადებები</h2>
+        <a href="#" style="display:inline-flex;align-items:center;gap:8px;font-size:14px;font-weight:600;color:#0a1a2f;white-space:nowrap;transition:gap .2s" style-hover="gap:12px;color:#d4602a">ყველა
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"></path></svg>
+        </a>
+      </div>
+      <div style="background:#fff;border:1px solid #e8edf3;border-radius:16px;overflow:hidden">
+        <sc-for list="{{ ads }}" as="c" hint-placeholder-count="5">
+          <a href="#" style="display:flex;align-items:center;gap:16px;padding:16px 20px;border-top:{{ c.border }};transition:background .2s" style-hover="background:#f5f7fa">
+            <div style="width:48px;height:48px;flex-shrink:0;display:grid;place-items:center;border-radius:12px;background:#e8edf3;color:#0a1a2f">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="{{ c.icon }}"></path></svg>
+            </div>
+            <div style="flex:1;min-width:0">
+              <div style="display:flex;align-items:center;gap:8px;min-width:0">
+                <span style="font-size:15px;font-weight:600;color:#0a1a2f;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ c.title }}</span>
+                <sc-if value="{{ c.isNew }}" hint-placeholder-val="{{ false }}"><span style="flex-shrink:0;background:#d4602a;color:#fff;font-size:11px;font-weight:600;padding:2px 8px;border-radius:999px">ახალი</span></sc-if>
+              </div>
+              <div style="font-size:13px;color:#3a4a5f;margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ c.meta }}</div>
+            </div>
+            <div style="text-align:right;flex-shrink:0">
+              <div style="font-size:15px;font-weight:700;color:#0a1a2f;white-space:nowrap">{{ c.price }}</div>
+              <div style="font-size:12.5px;color:#3a4a5f;margin-top:4px;white-space:nowrap">{{ c.time }}</div>
+            </div>
+          </a>
+        </sc-for>
+      </div>
+    </div>
+    <div>
+      <div style="display:flex;align-items:baseline;justify-content:space-between;gap:16px;margin-bottom:20px">
+        <h2 style="margin:0;font-family:'Noto Serif Georgian',serif;font-weight:600;font-size:clamp(24px,2cqw,30px);line-height:1.25;color:#0a1a2f">ახალი ვაკანსიები</h2>
+        <a href="#" style="display:inline-flex;align-items:center;gap:8px;font-size:14px;font-weight:600;color:#0a1a2f;white-space:nowrap;transition:gap .2s" style-hover="gap:12px;color:#d4602a">ყველა
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"></path></svg>
+        </a>
+      </div>
+      <div style="background:#fff;border:1px solid #e8edf3;border-radius:16px;overflow:hidden">
+        <sc-for list="{{ jobs }}" as="j" hint-placeholder-count="5">
+          <a href="#" style="display:flex;align-items:flex-start;gap:16px;padding:16px 20px;border-top:{{ j.border }};transition:background .2s" style-hover="background:#f5f7fa">
+            <div style="width:48px;height:48px;flex-shrink:0;display:grid;place-items:center;border-radius:12px;background:#e8edf3;color:#0a1a2f">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8h18v12H3zM8 8V5a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v3M3 13h18"></path></svg>
+            </div>
+            <div style="flex:1;min-width:0">
+              <div style="font-size:15px;font-weight:600;color:#0a1a2f;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ j.title }}</div>
+              <div style="font-size:13px;color:#3a4a5f;margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ j.employer }}</div>
+              <div style="display:flex;align-items:center;gap:10px;margin-top:8px;flex-wrap:wrap">
+                <span style="background:{{ j.typeBg }};color:{{ j.typeColor }};border:1px solid #c9d3df;font-size:12px;font-weight:600;padding:2px 10px;border-radius:999px">{{ j.type }}</span>
+                <span style="display:inline-flex;align-items:center;gap:5px;font-size:12.5px;color:#3a4a5f">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18zM12 7v5l3 2"></path></svg>
+                  {{ j.date }}
+                </span>
+              </div>
+            </div>
+            <div style="text-align:right;flex-shrink:0">
+              <div style="font-size:15px;font-weight:700;color:#0a1a2f;white-space:nowrap">{{ j.salary }}</div>
+              <div style="font-size:12.5px;color:#3a4a5f;margin-top:3px">თვეში</div>
+            </div>
+          </a>
+        </sc-for>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CITY GUIDE -->
+<section id="guide" data-screen-label="Discover Kobuleti" style="background:#fff;padding:clamp(56px,7cqw,104px) 0">
+  <div data-reveal="" style="max-width:1408px;margin:0 auto;padding:0 clamp(20px,4.5cqw,64px)">
+    <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:24px;flex-wrap:wrap;margin-bottom:36px">
+      <div>
+        <h2 style="margin:0;font-family:'Noto Serif Georgian',serif;font-weight:600;font-size:clamp(28px,2.6cqw,40px);line-height:1.2;color:#0a1a2f">აღმოაჩინე ქობულეთი</h2>
+        <p style="margin:10px 0 0;color:#3a4a5f;font-size:16px;line-height:1.6;max-width:560px">სანაპირო, დაცული ტერიტორიები და ისტორიული ადგილები ქალაქში და მის შემოგარენში</p>
+      </div>
+      <a href="#" style="display:inline-flex;align-items:center;gap:8px;font-size:14.5px;font-weight:600;color:#0a1a2f;transition:gap .2s" style-hover="gap:12px;color:#d4602a">სრული გზამკვლევი
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"></path></svg>
+      </a>
+    </div>
+    <div style="display:grid;grid-template-columns:{{ guideCols }};gap:20px">
+      <sc-for list="{{ guide }}" as="g" hint-placeholder-count="5">
+        <div style="position:relative;border-radius:16px;overflow:hidden;grid-column:{{ g.col }};grid-row:{{ g.row }};min-height:{{ g.minH }};background:#0a1a2f;cursor:pointer;transition:transform .35s cubic-bezier(.2,.7,.2,1), box-shadow .35s ease" style-hover="transform:translateY(-4px);box-shadow:0 22px 44px -18px rgba(10,26,47,0.35)">
+          <div style="position:absolute;inset:0;transition:transform .8s cubic-bezier(.2,.7,.2,1)" style-hover="transform:scale(1.05)">
+            <image-slot id="{{ g.slot }}" shape="rect" placeholder="{{ g.ph }}"></image-slot>
+          </div>
+          <div style="position:absolute;inset:0;pointer-events:none;background:linear-gradient(to top, rgba(10,26,47,0.88) 0%, rgba(10,26,47,0.35) 45%, rgba(10,26,47,0) 70%)"></div>
+          <div style="position:absolute;left:0;right:0;bottom:0;padding:{{ g.pad }};pointer-events:none;color:#fff">
+            <span style="display:inline-block;font-size:12px;font-weight:600;padding:4px 10px;border-radius:999px;background:rgba(255,255,255,0.16);border:1px solid rgba(255,255,255,0.3);backdrop-filter:blur(8px)">{{ g.tag }}</span>
+            <h3 style="margin:12px 0 0;font-family:'Noto Serif Georgian',serif;font-weight:600;font-size:{{ g.titleSize }};line-height:1.25;color:#fff">{{ g.title }}</h3>
+            <sc-if value="{{ g.hasDesc }}" hint-placeholder-val="{{ false }}">
+              <p style="margin:12px 0 0;max-width:520px;font-size:15.5px;line-height:1.65;color:rgba(255,255,255,0.85)">{{ g.desc }}</p>
+            </sc-if>
+            <div style="display:flex;align-items:center;gap:6px;margin-top:10px;font-size:13px;color:rgba(255,255,255,0.8)">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-6.2-7-11.5a7 7 0 0 1 14 0C19 14.8 12 21 12 21zM12 12a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5z"></path></svg>
+              {{ g.meta }}
+            </div>
+          </div>
+        </div>
+      </sc-for>
+    </div>
+  </div>
+</section>
+
+<!-- USEFUL INFO -->
+<section data-screen-label="Useful info" style="background:#f5f7fa;padding:clamp(40px,4cqw,56px) 0;border-top:1px solid #e8edf3;border-bottom:1px solid #e8edf3">
+  <div data-reveal="" style="max-width:1408px;margin:0 auto;padding:0 clamp(20px,4.5cqw,64px)">
+    <div style="display:flex;align-items:baseline;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:20px">
+      <h2 style="margin:0;font-family:'Noto Serif Georgian',serif;font-weight:600;font-size:22px;color:#0a1a2f">სასარგებლო ინფორმაცია</h2>
+      <span style="font-size:13.5px;color:#3a4a5f">შაბათი, 24 ოქტომბერი · განახლდა 10:30-ზე</span>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,250px),1fr));gap:16px">
+      <div style="background:#fff;border:1px solid #e8edf3;border-radius:14px;padding:20px">
+        <div style="display:flex;align-items:center;gap:10px;font-size:13px;color:#3a4a5f;font-weight:500">
+          <span style="width:34px;height:34px;display:grid;place-items:center;border-radius:999px;background:#e8edf3;color:#0a1a2f"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M12 16a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"></path></svg></span>
+          ამინდი
+        </div>
+        <div style="display:flex;align-items:flex-end;gap:20px;margin-top:14px">
+          <div><div style="font-size:30px;font-weight:600;line-height:1;color:#0a1a2f">+17°</div><div style="font-size:13px;color:#3a4a5f;margin-top:6px">მზიანი, ქარი 3 მ/წმ</div></div>
+          <div style="padding-left:20px;border-left:1px solid #e8edf3"><div style="font-size:30px;font-weight:600;line-height:1;color:#2f6f9f">+19°</div><div style="font-size:13px;color:#3a4a5f;margin-top:6px">ზღვის წყალი</div></div>
+        </div>
+      </div>
+      <div style="background:#fff;border:1px solid #e8edf3;border-radius:14px;padding:20px">
+        <div style="display:flex;align-items:center;gap:10px;font-size:13px;color:#3a4a5f;font-weight:500">
+          <span style="width:34px;height:34px;display:grid;place-items:center;border-radius:999px;background:#e8edf3;color:#0a1a2f"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h13l-3-3M20 17H7l3 3"></path></svg></span>
+          ვალუტის კურსი, ₾
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:14px">
+          <div><div style="font-size:12px;color:#3a4a5f;font-weight:600">USD</div><div style="font-size:19px;font-weight:600;color:#0a1a2f;margin-top:4px">2.71</div></div>
+          <div><div style="font-size:12px;color:#3a4a5f;font-weight:600">EUR</div><div style="font-size:19px;font-weight:600;color:#0a1a2f;margin-top:4px">3.14</div></div>
+          <div><div style="font-size:12px;color:#3a4a5f;font-weight:600">TRY</div><div style="font-size:19px;font-weight:600;color:#0a1a2f;margin-top:4px">0.065</div></div>
+        </div>
+      </div>
+      <div style="background:#fff;border:1px solid #e8edf3;border-radius:14px;padding:20px">
+        <div style="display:flex;align-items:center;gap:10px;font-size:13px;color:#3a4a5f;font-weight:500">
+          <span style="width:34px;height:34px;display:grid;place-items:center;border-radius:999px;background:#e8edf3;color:#0a1a2f"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17.8 19.2L16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.1-1.1.5l-.3.5c-.2.5-.1 1 .3 1.3L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.5 5.3c.3.4.8.5 1.3.3l.5-.2c.4-.3.6-.7.5-1.2z"></path></svg></span>
+          ბათუმის აეროპორტი
+        </div>
+        <div style="font-size:26px;font-weight:600;line-height:1;color:#0a1a2f;margin-top:14px">30 კმ</div>
+        <div style="font-size:13px;color:#3a4a5f;margin-top:6px">მანქანით დაახლოებით 35 წუთი</div>
+      </div>
+      <div style="background:#fff;border:1px solid #e8edf3;border-radius:14px;padding:20px">
+        <div style="display:flex;align-items:center;gap:10px;font-size:13px;color:#3a4a5f;font-weight:500">
+          <span style="width:34px;height:34px;display:grid;place-items:center;border-radius:999px;background:#e8edf3;color:#0a1a2f"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M7 3h10a3 3 0 0 1 3 3v9a3 3 0 0 1-3 3H7a3 3 0 0 1-3-3V6a3 3 0 0 1 3-3zM4 11h16M8 14.5h.01M16 14.5h.01M8 18l-2 3M16 18l2 3"></path></svg></span>
+          რკინიგზის სადგური
+        </div>
+        <div style="font-size:26px;font-weight:600;line-height:1;color:#0a1a2f;margin-top:14px">თბილისი ~5 სთ</div>
+        <div style="font-size:13px;color:#3a4a5f;margin-top:6px">ყოველდღიური მატარებლები ბათუმი–თბილისი</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- NEWS -->
+<section id="news" data-screen-label="News and events" style="background:#fff;padding:clamp(56px,7cqw,104px) 0">
+  <div data-reveal="" style="max-width:1408px;margin:0 auto;padding:0 clamp(20px,4.5cqw,64px)">
+    <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:24px;flex-wrap:wrap;margin-bottom:36px">
+      <div>
+        <h2 style="margin:0;font-family:'Noto Serif Georgian',serif;font-weight:600;font-size:clamp(28px,2.6cqw,40px);line-height:1.2;color:#0a1a2f">სიახლეები და ღონისძიებები</h2>
+        <p style="margin:10px 0 0;color:#3a4a5f;font-size:16px;line-height:1.6">რა ხდება ქალაქში</p>
+      </div>
+      <a href="#" style="display:inline-flex;align-items:center;gap:8px;font-size:14.5px;font-weight:600;color:#0a1a2f;transition:gap .2s" style-hover="gap:12px;color:#d4602a">ყველა სიახლე
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"></path></svg>
+      </a>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,320px),1fr));gap:24px">
+      <sc-for list="{{ news }}" as="n" hint-placeholder-count="3">
+        <article style="background:#fff;border-radius:16px;overflow:hidden;border:{{ cardBorder }};box-shadow:{{ cardShadow }};cursor:pointer;transition:transform .35s cubic-bezier(.2,.7,.2,1), box-shadow .35s ease" style-hover="transform:translateY(-4px);box-shadow:0 20px 40px -16px rgba(10,26,47,0.22)">
+          <div style="position:relative;aspect-ratio:16/10;overflow:hidden;background:#e8edf3">
+            <div style="position:absolute;inset:0;transition:transform .7s cubic-bezier(.2,.7,.2,1)" style-hover="transform:scale(1.05)">
+              <image-slot id="{{ n.slot }}" shape="rect" placeholder="{{ n.ph }}"></image-slot>
+            </div>
+          </div>
+          <div style="padding:20px 22px 24px">
+            <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+              <span style="background:#e8edf3;color:#0a1a2f;font-size:12px;font-weight:600;padding:3px 10px;border-radius:999px">{{ n.tag }}</span>
+              <span style="font-size:13px;color:#3a4a5f">{{ n.date }}</span>
+            </div>
+            <h3 style="margin:14px 0 0;font-size:18px;font-weight:600;line-height:1.5;color:#0a1a2f;text-wrap:pretty">{{ n.title }}</h3>
+          </div>
+        </article>
+      </sc-for>
+    </div>
+  </div>
+</section>
+
+<!-- BUSINESS CTA -->
+<section id="post" data-screen-label="Business CTA" style="background:#0a1a2f;padding:clamp(64px,7cqw,104px) 0">
+  <div data-reveal="" style="max-width:1408px;margin:0 auto;padding:0 clamp(20px,4.5cqw,64px);display:flex;align-items:center;justify-content:space-between;gap:32px;flex-wrap:wrap">
+    <div style="max-width:720px">
+      <h2 style="margin:0;font-family:'Noto Serif Georgian',serif;font-weight:600;font-size:clamp(28px,3cqw,44px);line-height:1.25;color:#fff;text-wrap:balance">გაქვთ სასტუმრო, სააგენტო ან ბიზნესი ქობულეთში?</h2>
+      <p style="margin:16px 0 0;font-size:17px;line-height:1.65;color:rgba(255,255,255,0.75);text-wrap:pretty">განათავსეთ სასტუმრო, უძრავი ქონება ან ვაკანსია და მიაწოდეთ ინფორმაცია სტუმრებსა და ადგილობრივებს, რომლებიც ქობულეთში ეძებენ.</p>
+    </div>
+    <a href="#" style="display:inline-flex;align-items:center;gap:10px;background:#d4602a;color:#fff;font-size:16px;font-weight:600;padding:16px 28px;border-radius:12px;white-space:nowrap;transition:transform .2s, box-shadow .2s, background .2s" style-hover="background:#e06d36;color:#fff;transform:translateY(-2px);box-shadow:0 14px 30px -10px rgba(212,96,42,0.6)">
+      განცხადების განთავსება
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"></path></svg>
+    </a>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer data-screen-label="Footer" style="background:#0a1a2f;border-top:1px solid rgba(255,255,255,0.08);padding:clamp(56px,5cqw,72px) 0 32px;color:#c9d3df">
+  <div style="max-width:1408px;margin:0 auto;padding:0 clamp(20px,4.5cqw,64px)">
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,190px),1fr));gap:40px 32px">
+      <div style="grid-column:span 1;max-width:300px">
+        <a href="#" aria-label="infokobuleti" style="display:flex;align-items:center;color:#fff;flex-shrink:0;transition:opacity .2s" style-hover="opacity:0.85;color:#fff"><span style="font-family:'Outfit','Noto Sans Georgian',sans-serif;font-size:30px;line-height:1;letter-spacing:-0.025em;white-space:nowrap"><span style="font-weight:300;color:rgba(255,255,255,0.7)">info</span><span style="font-weight:700;color:#fff">kobulet</span><span style="position:relative;display:inline-block;font-weight:700;color:#fff">ı<span style="position:absolute;left:50%;top:0.14em;width:0.24em;height:0.24em;margin-left:-0.12em;border-radius:50%;background:#e8703a;box-shadow:0 0 0 0.07em rgba(232,112,58,0.25), 0 0 14px rgba(232,112,58,0.7)"></span></span></span></a>
+        <p style="margin:16px 0 0;font-size:14px;line-height:1.7;color:#c9d3df">ქობულეთის ადგილობრივი პორტალი: სასტუმროები, უძრავი ქონება, განცხადებები, ვაკანსიები და ქალაქის გზამკვლევი.</p>
+        <div style="display:flex;gap:10px;margin-top:20px">
+          <a href="#" aria-label="Facebook" style="width:40px;height:40px;display:grid;place-items:center;border:1px solid rgba(255,255,255,0.18);border-radius:999px;color:#fff;transition:background .2s, color .2s" style-hover="background:#d4602a;color:#fff;border-color:#d4602a"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"><path d="M15 3h-2.5A3.5 3.5 0 0 0 9 6.5V9H7v3.5h2V21h3.5v-8.5H15l.5-3.5h-3V7a1 1 0 0 1 1-1H15z"></path></svg></a>
+          <a href="#" aria-label="Instagram" style="width:40px;height:40px;display:grid;place-items:center;border:1px solid rgba(255,255,255,0.18);border-radius:999px;color:#fff;transition:background .2s, color .2s" style-hover="background:#d4602a;color:#fff;border-color:#d4602a"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M7 3h10a4 4 0 0 1 4 4v10a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4V7a4 4 0 0 1 4-4zM12 16a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM17.5 6.5h.01"></path></svg></a>
+          <a href="#" aria-label="YouTube" style="width:40px;height:40px;display:grid;place-items:center;border:1px solid rgba(255,255,255,0.18);border-radius:999px;color:#fff;transition:background .2s, color .2s" style-hover="background:#d4602a;color:#fff;border-color:#d4602a"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"><path d="M3 8a3 3 0 0 1 3-3h12a3 3 0 0 1 3 3v8a3 3 0 0 1-3 3H6a3 3 0 0 1-3-3zM10 9l5 3-5 3z"></path></svg></a>
+          <a href="#" aria-label="Telegram" style="width:40px;height:40px;display:grid;place-items:center;border:1px solid rgba(255,255,255,0.18);border-radius:999px;color:#fff;transition:background .2s, color .2s" style-hover="background:#d4602a;color:#fff;border-color:#d4602a"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"><path d="M21 4L3 11l6 2 2 6 3-4 5 4zM9 13l12-9"></path></svg></a>
+        </div>
+      </div>
+      <div>
+        <div style="font-size:13px;font-weight:600;color:#fff;letter-spacing:0.02em;margin-bottom:16px">პორტალი</div>
+        <div style="display:flex;flex-direction:column;gap:11px;font-size:14px">
+          <a href="#hotels" style="color:#c9d3df" style-hover="color:#fff">სასტუმროები</a>
+          <a href="#realestate" style="color:#c9d3df" style-hover="color:#fff">უძრავი ქონება</a>
+          <a href="#classifieds" style="color:#c9d3df" style-hover="color:#fff">განცხადებები</a>
+          <a href="#classifieds" style="color:#c9d3df" style-hover="color:#fff">ვაკანსიები</a>
+          <a href="#guide" style="color:#c9d3df" style-hover="color:#fff">გზამკვლევი</a>
+          <a href="#news" style="color:#c9d3df" style-hover="color:#fff">სიახლეები</a>
+        </div>
+      </div>
+      <div>
+        <div style="font-size:13px;font-weight:600;color:#fff;letter-spacing:0.02em;margin-bottom:16px">ინფორმაცია</div>
+        <div style="display:flex;flex-direction:column;gap:11px;font-size:14px">
+          <a href="#" style="color:#c9d3df" style-hover="color:#fff">ჩვენ შესახებ</a>
+          <a href="#" style="color:#c9d3df" style-hover="color:#fff">რეკლამა საიტზე</a>
+          <a href="#" style="color:#c9d3df" style-hover="color:#fff">წესები და პირობები</a>
+          <a href="#" style="color:#c9d3df" style-hover="color:#fff">კონფიდენციალურობა</a>
+          <a href="#" style="color:#c9d3df" style-hover="color:#fff">დახმარება</a>
+        </div>
+      </div>
+      <div>
+        <div style="font-size:13px;font-weight:600;color:#fff;letter-spacing:0.02em;margin-bottom:16px">კონტაქტი</div>
+        <div style="display:flex;flex-direction:column;gap:12px;font-size:14px;color:#c9d3df">
+          <div style="display:flex;gap:10px;align-items:flex-start"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;margin-top:3px"><path d="M12 21s-7-6.2-7-11.5a7 7 0 0 1 14 0C19 14.8 12 21 12 21zM12 12a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5z"></path></svg>ქობულეთი, დ. აღმაშენებლის გამზ. 108</div>
+          <div style="display:flex;gap:10px;align-items:center"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2"></path></svg>+995 422 29 00 00</div>
+          <div style="display:flex;gap:10px;align-items:center"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><path d="M3 6h18v12H3zM3 7l9 6 9-6"></path></svg>info@infokobuleti.com</div>
+        </div>
+      </div>
+      <div>
+        <div style="font-size:13px;font-weight:600;color:#fff;letter-spacing:0.02em;margin-bottom:16px">მობილური აპლიკაცია</div>
+        <div style="display:flex;flex-direction:column;gap:10px;align-items:flex-start">
+          <a href="#" style="display:flex;flex-direction:column;min-width:160px;padding:9px 16px;border:1px solid rgba(255,255,255,0.24);border-radius:10px;color:#fff;transition:background .2s" style-hover="background:rgba(255,255,255,0.08);color:#fff"><span style="font-size:11px;color:#c9d3df">ჩამოტვირთეთ</span><span style="font-size:15px;font-weight:600;margin-top:1px">App Store</span></a>
+          <a href="#" style="display:flex;flex-direction:column;min-width:160px;padding:9px 16px;border:1px solid rgba(255,255,255,0.24);border-radius:10px;color:#fff;transition:background .2s" style-hover="background:rgba(255,255,255,0.08);color:#fff"><span style="font-size:11px;color:#c9d3df">ჩამოტვირთეთ</span><span style="font-size:15px;font-weight:600;margin-top:1px">Google Play</span></a>
+        </div>
+      </div>
+    </div>
+    <div style="display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-top:56px;padding-top:24px;border-top:1px solid rgba(255,255,255,0.1);font-size:13px;color:#c9d3df">
+      <span>© 2026 infokobuleti.com. ყველა უფლება დაცულია.</span>
+      <span>შექმნილია ქობულეთში</span>
+    </div>
+  </div>
+</footer>
+
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;preview&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;Desktop&quot;,&quot;Mobile&quot;],&quot;default&quot;:&quot;Desktop&quot;,&quot;tsType&quot;:&quot;'Desktop' | 'Mobile'&quot;,&quot;section&quot;:&quot;Preview&quot;},&quot;cardStyle&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;Border&quot;,&quot;Shadow&quot;],&quot;default&quot;:&quot;Border&quot;,&quot;tsType&quot;:&quot;'Border' | 'Shadow'&quot;,&quot;section&quot;:&quot;Style&quot;},&quot;overlayStrength&quot;:{&quot;editor&quot;:&quot;range&quot;,&quot;min&quot;:0.4,&quot;max&quot;:0.95,&quot;step&quot;:0.05,&quot;default&quot;:0.7,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Style&quot;},&quot;animate&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Style&quot;}}">
+const P = {
+  pin: 'M12 21s-7-6.2-7-11.5a7 7 0 0 1 14 0C19 14.8 12 21 12 21zM12 12a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5z',
+  bed: 'M3 19V6M3 15h18M21 19v-6a2 2 0 0 0-2-2h-8v4M6.5 12.5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3z',
+  building: 'M5 21V4a1 1 0 0 1 1-1h8a1 1 0 0 1 1 1v17M15 9h3a1 1 0 0 1 1 1v11M3 21h18M8.5 7h3M8.5 11h3M8.5 15h3',
+  house: 'M3 11l9-7 9 7M5 9.5V20h14V9.5M10 20v-5h4v5',
+  car: 'M5 16h14M3.5 16v-3l2-5a1.5 1.5 0 0 1 1.4-1h10.2a1.5 1.5 0 0 1 1.4 1l2 5v3M3.5 16v2.5M20.5 16v2.5M7 13h.01M17 13h.01',
+  wrench: 'M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z',
+  briefcase: 'M3 8h18v12H3zM8 8V5a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v3M3 13h18',
+  fork: 'M6 3v8M4 3v5a2 2 0 0 0 4 0V3M6 11v10M17 21V3c-2 1.5-3 4-3 7v3h3',
+  cal: 'M4 6h16v15H4zM4 10h16M8 3v4M16 3v4',
+  users: 'M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM2 21v-1a6 6 0 0 1 12 0v1M16 3.5a4 4 0 0 1 0 7.5M22 21v-1a6 6 0 0 0-4-5.6',
+  tag: 'M3 12V4a1 1 0 0 1 1-1h8l9 9-9 9-9-9zM8 8h.01',
+  search: 'M11 18a7 7 0 1 0 0-14 7 7 0 0 0 0 14zM20 20l-4-4',
+  grid: 'M4 4h7v7H4zM13 4h7v7h-7zM4 13h7v7H4zM13 13h7v7h-7z',
+  clock: 'M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18zM12 7v5l3 2',
+  area: 'M3 9V3h6M21 9V3h-6M3 15v6h6M21 15v6h-6',
+  door: 'M6 21V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v17M3 21h18M14 12h.01',
+  layers: 'M12 3l9 5-9 5-9-5zM3 13l9 5 9-5',
+  sofa: 'M5 10V8a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v2M3 12a1.5 1.5 0 0 1 3 0v2h12v-2a1.5 1.5 0 0 1 3 0v5H3zM5 17v2M19 17v2',
+  bike: 'M6 18a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7zM18 18a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7zM6 14.5l4-7h5l3 7M10 7.5h-2M15 7.5l-3 7H6',
+  menu: 'M4 7h16M4 12h16M4 17h16',
+  close: 'M6 6l12 12M18 6L6 18'
+};
+
+const HOTELS = [
+  { id: 'h1', name: 'სასტუმრო „ოქროს ქვიშა“', loc: 'შ. რუსთაველის ქ. 214', sea: 'ზღვამდე 30 მ', rating: '9.4', reviews: '312 შეფასება', price: '₾220', ph: 'Beachfront hotel exterior' },
+  { id: 'h2', name: 'ქობულეთი პალასი', loc: 'დ. აღმაშენებლის გამზ. 58', sea: 'ზღვამდე 120 მ', rating: '9.1', reviews: '487 შეფასება', price: '₾185', ph: 'Hotel room with sea-view balcony' },
+  { id: 'h3', name: 'საოჯახო სასტუმრო „ნინო“', loc: 'ი. ჭავჭავაძის ქ. 12', sea: 'ზღვამდე 250 მ', rating: '9.6', reviews: '158 შეფასება', price: '₾95', ph: 'Guesthouse courtyard with garden' },
+  { id: 'h4', name: 'ბლუ ბულვარი ბუთიკ ჰოტელი', loc: 'შ. რუსთაველის ქ. 96', sea: 'ზღვამდე 50 მ', rating: '8.9', reviews: '226 შეფასება', price: '₾160', ph: 'Boutique hotel lobby' },
+  { id: 'h5', name: 'გესტჰაუსი „ფიჭვნარი“', loc: 'თამარ მეფის ქ. 41', sea: 'ზღვამდე 400 მ', rating: '9.0', reviews: '94 შეფასება', price: '₾70', ph: 'Guesthouse among pine trees' },
+  { id: 'h6', name: 'ციხისძირი ვილა რეზორტი', loc: 'ციხისძირი, სანაპირო ქ. 7', sea: 'ზღვამდე 80 მ', rating: '9.3', reviews: '141 შეფასება', price: '₾260', ph: 'Villa with pool above the sea' }
+];
+
+const ESTATES = [
+  { id: 'r1', deal: 'sale', price: '$58 000', alt: '≈ ₾157 000', title: '2-ოთახიანი ბინა ახალ კორპუსში', loc: 'დ. აღმაშენებლის გამზ., ცენტრი', feats: [[P.area, '64 მ²'], [P.door, '2 ოთახი'], [P.layers, '7/12 სართ.']], ph: 'New apartment building' },
+  { id: 'r2', deal: 'rent', price: '₾1 400 / თვე', alt: '≈ $520', title: 'სტუდიო ზღვის ხედით, ავეჯით', loc: 'შ. რუსთაველის ქ.', feats: [[P.area, '38 მ²'], [P.door, '1 ოთახი'], [P.layers, '4/9 სართ.']], ph: 'Bright studio interior' },
+  { id: 'r3', deal: 'sale', price: '$135 000', alt: '≈ ₾365 000', title: 'კერძო სახლი ბაღით', loc: 'ჩაქვის ქ., ჩრდილოეთ ქობულეთი', feats: [[P.area, '180 მ²'], [P.door, '5 ოთახი'], [P.house, '600 მ² ეზო']], ph: 'Two-storey house with garden' },
+  { id: 'r4', deal: 'rent', price: '₾180 / დღე', alt: '≈ $67', title: '3-ოთახიანი ბინა ბულვართან, სეზონური ქირა', loc: 'თამარ მეფის ქ.', feats: [[P.area, '92 მ²'], [P.door, '3 ოთახი'], [P.layers, '2/5 სართ.']], ph: 'Living room near the boulevard' },
+  { id: 'r5', deal: 'sale', price: '$42 000', alt: '≈ ₾113 000', title: 'სამშენებლო ნაკვეთი ზღვის ხედით', loc: 'ციხისძირი', feats: [[P.area, '1 200 მ²'], [P.tag, 'სამშენებლო'], [P.pin, 'გზასთან']], ph: 'Land plot with sea view' },
+  { id: 'r6', deal: 'sale', price: '$210 000', alt: '≈ ₾568 000', title: 'კომერციული ფართი ბულვარის პირველ ხაზზე', loc: 'შ. რუსთაველის ქ. 150', feats: [[P.area, '120 მ²'], [P.building, 'კომერციული'], [P.layers, '1/3 სართ.']], ph: 'Ground-floor commercial space' }
+];
+
+const ADS = [
+  { title: 'ველოსიპედი Trek Marlin 5, 2023 წ.', meta: 'სპორტი · ცენტრი', price: '₾950', time: '2 სთ წინ', icon: P.bike, isNew: true },
+  { title: 'Toyota Prius 2016, ჰიბრიდი, 148 000 კმ', meta: 'ავტომობილები · ჩაქვი', price: '$9 800', time: '5 სთ წინ', icon: P.car, isNew: true },
+  { title: 'კონდიციონერის მონტაჟი და შეკეთება', meta: 'მომსახურება · მთელი ქობულეთი', price: '₾60-დან', time: 'გუშინ', icon: P.wrench },
+  { title: 'სასადილო მაგიდა 6 სკამით, მუხა', meta: 'ავეჯი · თამარ მეფის ქ.', price: '₾450', time: 'გუშინ', icon: P.sofa },
+  { title: 'ბავშვის ეტლი Chicco, 2-ში-1', meta: 'საბავშვო ნივთები · ცენტრი', price: '₾320', time: '2 დღის წინ', icon: P.tag }
+];
+
+const JOBS = [
+  { title: 'მიმტანი', employer: 'რესტორანი „ბულვარი“ · რუსთაველის ქ.', salary: '₾1 500–2 000', type: 'სეზონური', date: 'დღეს' },
+  { title: 'რეცეფციის ადმინისტრატორი', employer: 'სასტუმრო „ოქროს ქვიშა“', salary: '₾1 800', type: 'სრული განაკვეთი', date: 'დღეს' },
+  { title: 'მზარეული', employer: 'ქობულეთი პალასი', salary: '₾2 200–2 800', type: 'სრული განაკვეთი', date: 'გუშინ' },
+  { title: 'მაშველი სანაპიროზე', employer: 'ქობულეთის მუნიციპალიტეტი', salary: '₾1 400', type: 'სეზონური', date: '2 დღის წინ' },
+  { title: 'უძრავი ქონების აგენტი', employer: 'სააგენტო „ზღვის სახლი“', salary: '₾1 200 + %', type: 'სრული განაკვეთი', date: '3 დღის წინ' }
+];
+
+const GUIDE = [
+  { tag: 'სანაპირო', title: 'ზღვისპირა ბულვარი და პლაჟი', desc: 'ათ კილომეტრზე მეტი სიგრძის კენჭოვანი სანაპირო და ფიჭვნარით მოჩრდილული ბულვარი, ქალაქის მთავარი სასეირნო ადგილი.', meta: 'ქალაქის ცენტრი', ph: 'Kobuleti beach and boulevard' },
+  { tag: 'ბუნება', title: 'კინტრიშის დაცული ტერიტორიები', meta: 'ქობულეთიდან ~25 კმ', ph: 'Kintrishi forest and river' },
+  { tag: 'ბუნება', title: 'ისპანის ჭაობები', meta: 'ქობულეთის დაცული ტერიტორიები', ph: 'Ispani wetlands boardwalk' },
+  { tag: 'ისტორია', title: 'პეტრას ციხე', meta: 'ციხისძირი, ~9 კმ', ph: 'Petra fortress ruins' },
+  { tag: 'დასვენება', title: 'ციხისძირი', meta: 'მყუდრო ყურეები სამხრეთით', ph: 'Tsikhisdziri cape and cove' }
+];
+
+const NEWS = [
+  { tag: 'ღონისძიება', date: '2 ნოემბერი, 2026', title: 'შემოდგომის ციტრუსის ფესტივალი ცენტრალურ პარკში', ph: 'Autumn festival in the park' },
+  { tag: 'ქალაქი', date: '22 ოქტომბერი, 2026', title: 'ბულვარზე ახალი ველობილიკის მშენებლობა დასრულდა', ph: 'New cycle path on the boulevard' },
+  { tag: 'ტურიზმი', date: '18 ოქტომბერი, 2026', title: 'სეზონის შეჯამება: სასტუმროები სექტემბრის ბოლომდე თითქმის სრულად იყო დაკავებული', ph: 'Late-season beach scene' }
+];
+
+const CATS = [
+  { name: 'სასტუმროები', count: '1 248 განცხადება', icon: P.bed },
+  { name: 'ბინები', count: '3 420 განცხადება', icon: P.building },
+  { name: 'სახლები', count: '865 განცხადება', icon: P.house },
+  { name: 'ავტომობილები', count: '1 102 განცხადება', icon: P.car },
+  { name: 'მომსახურება', count: '740 განცხადება', icon: P.wrench },
+  { name: 'ვაკანსიები', count: '312 ვაკანსია', icon: P.briefcase },
+  { name: 'რესტორნები', count: '186 ადგილი', icon: P.fork },
+  { name: 'ღონისძიებები', count: '48 ღონისძიება', icon: P.cal }
+];
+
+const TABS = [
+  { id: 'hotel', label: 'სასტუმრო', icon: P.bed, hue: '#2f6f9f' },
+  { id: 're', label: 'უძრავი ქონება', icon: P.house, hue: '#2e7d6b' },
+  { id: 'ads', label: 'განცხადებები', icon: P.tag, hue: '#b5622f' },
+  { id: 'jobs', label: 'ვაკანსიები', icon: P.briefcase, hue: '#6a4f9e' }
+];
+
+class Component extends DCLogic {
+  state = { w: 1440, scrolled: false, tab: 'hotel', shownTab: 'hotel', fade: false, deal: 'buy', reFilter: 'all', favs: { h3: true }, menu: false, lang: 'KA' };
+  railRef = React.createRef();
+  rootRef = (el) => {
+    if (!el || el === this._root) return;
+    this._root = el;
+    this.ro && this.ro.disconnect();
+    const measure = () => {
+      const w = Math.round(el.getBoundingClientRect().width);
+      if (w && w !== this.state.w) this.setState({ w });
+    };
+    measure();
+    if (window.ResizeObserver) { this.ro = new ResizeObserver(measure); this.ro.observe(el); }
+    requestAnimationFrame(() => this.setupReveal());
+  };
+
+  componentDidMount() {
+    if (!this._root) this.setState({ w: window.innerWidth });
+    window.addEventListener('resize', this.onResize = () => {
+      if (this._root) { const w = Math.round(this._root.getBoundingClientRect().width); if (w !== this.state.w) this.setState({ w }); }
+    });
+    this.onScroll = () => {
+      const s = window.scrollY > 40;
+      if (s !== this.state.scrolled) this.setState({ scrolled: s });
+    };
+    window.addEventListener('scroll', this.onScroll, { passive: true });
+  }
+  componentWillUnmount() {
+    this.ro && this.ro.disconnect();
+    this.io && this.io.disconnect();
+    window.removeEventListener('scroll', this.onScroll);
+    window.removeEventListener('resize', this.onResize);
+  }
+  setupReveal() {
+    if (this.props.animate === false || !window.IntersectionObserver || !this._root) return;
+    this.io && this.io.disconnect();
+    this.io = new IntersectionObserver(es => es.forEach(e => {
+      if (e.isIntersecting) { e.target.style.opacity = '1'; e.target.style.transform = 'none'; this.io.unobserve(e.target); }
+    }), { threshold: 0.06, rootMargin: '0px 0px -40px 0px' });
+    this._root.querySelectorAll('[data-reveal]').forEach(el => {
+      if (el.getBoundingClientRect().top < window.innerHeight) return;
+      el.style.opacity = '0';
+      el.style.transform = 'translateY(24px)';
+      el.style.transition = 'opacity .8s ease, transform .8s cubic-bezier(.2,.7,.2,1)';
+      this.io.observe(el);
+    });
+  }
+  switchTab(id) {
+    if (id === this.state.tab) return;
+    this.setState({ tab: id, fade: true });
+    clearTimeout(this.tabT);
+    this.tabT = setTimeout(() => this.setState({ shownTab: id, fade: false }), 170);
+  }
+  toggleFav(id) { this.setState(s => ({ favs: { ...s.favs, [id]: !s.favs[id] } })); }
+  scrollRail(dir) {
+    const r = this.railRef.current;
+    if (!r) return;
+    const card = r.firstElementChild;
+    const step = card ? card.getBoundingClientRect().width + 24 : 320;
+    r.scrollBy({ left: dir * step, behavior: 'smooth' });
+  }
+
+  renderVals() {
+    const s = this.state;
+    const mobilePreview = this.props.preview === 'Mobile';
+    const w = s.w;
+    const isMobile = w < 720;
+    const isTablet = w < 1100;
+    const showNav = w >= 1240;
+    const border = this.props.cardStyle === 'Shadow';
+    const k = Math.max(0.3, Math.min(1, this.props.overlayStrength ?? 0.7));
+    const navy = a => `rgba(10,26,47,${a.toFixed(2)})`;
+
+    const pill = (active) => ({ bg: active ? '#0a1a2f' : 'transparent', color: active ? '#fff' : '#3a4a5f' });
+
+    const fieldSets = {
+      hotel: [
+        { label: 'მიმართულება', value: 'ქობულეთი, ცენტრი', icon: P.pin },
+        { label: 'ჩასვლა', value: '12 ივლისი', icon: P.cal },
+        { label: 'გასვლა', value: '19 ივლისი', icon: P.cal },
+        { label: 'სტუმრები', value: '2 ზრდასრული · 1 ოთახი', icon: P.users }
+      ],
+      re: [
+        { label: 'გარიგება', icon: P.tag, toggle: true },
+        { label: 'ტიპი', value: 'ბინა', icon: P.building },
+        { label: 'ფასი', value: '$40 000 – $90 000', icon: P.tag },
+        { label: 'ოთახები', value: '2 და მეტი', icon: P.door }
+      ],
+      ads: [
+        { label: 'რას ეძებთ?', value: 'მაგ. ველოსიპედი, მაცივარი', icon: P.search, ph: true },
+        { label: 'კატეგორია', value: 'ყველა კატეგორია', icon: P.grid },
+        { label: 'მდებარეობა', value: 'ქობულეთი', icon: P.pin }
+      ],
+      jobs: [
+        { label: 'საკვანძო სიტყვა', value: 'მაგ. მიმტანი, ადმინისტრატორი', icon: P.search, ph: true },
+        { label: 'კატეგორია', value: 'ტურიზმი და სტუმართმოყვარეობა', icon: P.briefcase },
+        { label: 'დასაქმების ტიპი', value: 'ყველა ტიპი', icon: P.clock }
+      ]
+    };
+    const fields = fieldSets[s.shownTab].map(f => ({
+      ...f,
+      isText: !f.toggle,
+      isToggle: !!f.toggle,
+      color: f.ph ? '#3a4a5f' : '#0a1a2f',
+      pills: f.toggle ? [['buy', 'ყიდვა'], ['rent', 'ქირა']].map(([id, label]) => ({
+        label, ...pill(s.deal === id),
+        on: (e) => { e.stopPropagation(); this.setState({ deal: id }); }
+      })) : []
+    }));
+
+    const reFilter = s.reFilter;
+    const estates = ESTATES.filter(e => reFilter === 'all' || e.deal === reFilter).map(e => ({
+      ...e,
+      slot: 'estate-' + e.id,
+      badge: e.deal === 'sale' ? 'იყიდება' : 'ქირავდება',
+      feats: e.feats.map(([icon, text]) => ({ icon, text })),
+      heartFill: s.favs[e.id] ? 'currentColor' : 'none',
+      toggleFav: () => this.toggleFav(e.id)
+    }));
+
+    let guideCols, guide;
+    if (!isTablet) {
+      guideCols = '1.3fr 1fr 1fr';
+      guide = GUIDE.map((g, i) => ({ col: i === 0 ? '1' : 'auto', row: i === 0 ? '1 / span 2' : 'auto', minH: i === 0 ? '580px' : '280px' }));
+    } else if (!isMobile) {
+      guideCols = '1fr 1fr';
+      guide = GUIDE.map((g, i) => ({ col: i === 0 ? '1 / -1' : 'auto', row: 'auto', minH: i === 0 ? '440px' : '260px' }));
+    } else {
+      guideCols = '1fr';
+      guide = GUIDE.map((g, i) => ({ col: 'auto', row: 'auto', minH: i === 0 ? '420px' : '240px' }));
+    }
+    guide = guide.map((x, i) => ({
+      ...GUIDE[i], ...x,
+      slot: 'guide-' + i,
+      hasDesc: i === 0,
+      titleSize: i === 0 ? (isMobile ? '28px' : '36px') : '22px',
+      pad: i === 0 ? (isMobile ? '24px' : '36px') : '22px'
+    }));
+
+    const menuOpen = s.menu && !showNav;
+
+    return {
+      rootRef: this.rootRef,
+      railRef: this.railRef,
+      stageBg: mobilePreview ? '#e8edf3' : '#fff',
+      stagePad: mobilePreview ? '32px 16px' : '0',
+      frameW: mobilePreview ? '390px' : 'none',
+      frameShadow: mobilePreview ? '0 30px 80px -20px rgba(10,26,47,0.35)' : 'none',
+      frameRadius: mobilePreview ? '28px' : '0',
+      frameOverflow: mobilePreview ? 'clip' : 'visible',
+
+      headerBg: s.scrolled ? 'rgba(10,26,47,0.86)' : '#0a1a2f',
+      headerBlur: s.scrolled ? 'blur(14px) saturate(160%)' : 'none',
+      headerH: isMobile ? (s.scrolled ? '56px' : '64px') : (s.scrolled ? '62px' : '78px'),
+      showNav, hideNav: !showNav,
+      showHeaderExtras: !isMobile,
+      drawerOpen: menuOpen,
+      menuIcon: menuOpen ? P.close : P.menu,
+      toggleMenu: () => this.setState(st => ({ menu: !st.menu })),
+      closeMenu: () => this.setState({ menu: false }),
+      langs: ['KA', 'EN', 'RU'].map(code => ({
+        code,
+        bg: s.lang === code ? '#fff' : 'transparent',
+        color: s.lang === code ? '#0a1a2f' : 'rgba(255,255,255,0.75)',
+        on: () => this.setState({ lang: code })
+      })),
+
+      heroOverlay: `linear-gradient(to top, ${navy(k)} 0%, ${navy(k * 0.72)} 45%, ${navy(k * 0.43)} 100%)`,
+      fullSearch: !isMobile,
+      compactSearch: isMobile,
+      tabs: TABS.map(t => {
+        const a = s.tab === t.id;
+        return {
+          ...t,
+          bg: a ? t.hue : 'rgba(10,26,47,0.28)',
+          chip: a ? 'rgba(255,255,255,0.2)' : t.hue,
+          shadow: a ? `0 8px 20px -8px ${t.hue}` : 'none',
+          on: () => this.switchTab(t.id)
+        };
+      }),
+      searchBg: (TABS.find(t => t.id === s.tab) || TABS[0]).hue,
+      fields,
+      fieldCols: isTablet ? 'repeat(2, minmax(0,1fr))' : `repeat(${fields.length}, minmax(0,1fr))`,
+      panelDir: isTablet ? 'column' : 'row',
+      fieldsOpacity: s.fade ? 0 : 1,
+      fieldsTransform: s.fade ? 'translateY(6px)' : 'none',
+
+      cats: CATS,
+      catCols: w >= 1240 ? 'repeat(8, minmax(0,1fr))' : (w >= 560 ? 'repeat(4, minmax(0,1fr))' : 'repeat(2, minmax(0,1fr))'),
+
+      cardBorder: border ? '1px solid transparent' : '1px solid #e8edf3',
+      cardShadow: border ? '0 6px 24px -8px rgba(10,26,47,0.14)' : '0 1px 2px rgba(10,26,47,0.03)',
+      showArrows: !isMobile,
+      railPrev: () => this.scrollRail(-1),
+      railNext: () => this.scrollRail(1),
+      hotelBasis: !isTablet ? 'calc((100% - 72px) / 4)' : (!isMobile ? 'calc((100% - 48px) / 2.4)' : '82%'),
+      hotels: HOTELS.map(h => ({
+        ...h,
+        slot: 'hotel-' + h.id,
+        heartFill: s.favs[h.id] ? 'currentColor' : 'none',
+        toggleFav: () => this.toggleFav(h.id)
+      })),
+
+      reTabs: [['all', 'ყველა'], ['sale', 'იყიდება'], ['rent', 'ქირავდება']].map(([id, label]) => ({
+        label,
+        bg: reFilter === id ? '#0a1a2f' : 'transparent',
+        color: reFilter === id ? '#fff' : '#3a4a5f',
+        on: () => this.setState({ reFilter: id })
+      })),
+      estates,
+
+      ads: ADS.map((a, i) => ({ ...a, isNew: !!a.isNew, border: i ? '1px solid #e8edf3' : '0' })),
+      jobs: JOBS.map((j, i) => ({
+        ...j,
+        border: i ? '1px solid #e8edf3' : '0',
+        typeBg: j.type === 'სეზონური' ? '#fff' : '#e8edf3',
+        typeColor: '#0a1a2f'
+      })),
+
+      guideCols, guide,
+      news: NEWS.map((n, i) => ({ ...n, slot: 'news-' + i }))
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,70 @@
+---
+description: infokobuleti.com project rules
+alwaysApply: true
+---
+# infokobuleti.com — project rules
+
+## Product
+All-in-one portal for Kobuleti (Adjara, Georgia): hotels & guesthouses, real estate (sale / rent / daily rent),
+classifieds, job vacancies, city guide (beaches, sights, nature), news & events, useful info.
+Audience: tourists, locals, property buyers and investors, job seekers, local businesses.
+
+## Stack (do not change without asking me)
+Laravel 13, PHP 8.4, PostgreSQL 17 + pgvector, Redis, Horizon, Scout + Meilisearch,
+Blade + Livewire 4 + Alpine.js + Tailwind CSS v4 (Vite), Filament v5 admin at /admin,
+Socialite (Google), spatie: permission, medialibrary, translatable, activitylog, backup, sitemap.
+Laravel AI SDK (Anthropic provider), Reverb (real-time), Pest (tests), Laravel Boost (MCP).
+
+## Server
+Hostinger VPS, Ubuntu 24.04, Nginx, PHP-FPM. Project path: /var/www/infokobuleti.
+Staging: dev.infokobuleti.com (basic auth + noindex). Production: infokobuleti.com (from Phase 11).
+Never run destructive commands (migrate:fresh, db:wipe, DROP, rm -rf, force pushes) without asking me first.
+Never commit .env or secrets.
+
+## Design source of truth
+- design-reference/Homepage.dc.html: finished homepage. Reuse its markup, spacing, cards, buttons, hover effects.
+- design-reference/DESIGN-PROMPT.md: full style spec. design-reference/MEMORY.md: design decisions.
+- Every new page must look like the same product. Pages without a design are composed from existing
+  components; never invent new colors, fonts, radii or shadows.
+
+## Design tokens
+navy #0a1a2f (header, footer, headings, rating chips, sale/rent badges, active filters), navy-hover #1b304d,
+text-secondary #3a4a5f, line #e8edf3, line-strong #c9d3df, surface-alt #f5f7fa, white #ffffff.
+coral #d4602a = the ONLY action accent (primary buttons, CTA, search button, hover fills, hearts, "ახალი" badge),
+coral-hover #e06d36, coral-pressed #bf5323, price text #b44f1e, coral-tint #fcece2.
+sea #2f6f9f only for sea temperature. Hero search tab hues only: hotels #2f6f9f, real estate #2e7d6b,
+classifieds #b5622f, jobs #6a4f9e. No other bright colors; no gradients except the hero overlay.
+Fonts: Noto Sans Georgian (UI/body 400-700), Noto Serif Georgian (headings 600), Outfit (logo only, 300/700).
+Radius: cards 16px, buttons 12px, pills 999px.
+Card hover: translateY(-4px) + shadow 0 20px 40px -16px rgba(10,26,47,.22); image zoom 1.05 over .7s.
+Sections fade up 24px on scroll (0.8s). Respect prefers-reduced-motion.
+Icons: one line icon set only, 1.5px stroke, rounded caps. No emoji, no filled icons (except saved heart).
+Breakpoints: >=1240 full nav, <1100 tablet, <720 mobile. Touch targets >= 44px.
+
+## Language and locale
+- UI default Georgian (ka), plus en and ru. URLs: / (ka), /en/..., /ru/...
+- Every UI string goes through lang files (lang/ka, lang/en, lang/ru). Never hardcode Georgian text in Blade or PHP.
+- User content is translatable (jsonb columns).
+- Phone: +995 5XX XX XX XX. Currency: GEL (₾) default; USD/EUR via National Bank of Georgia rates.
+- Timezone Asia/Tbilisi. Georgian date formats.
+- Code, comments and commit messages in English.
+
+## Code conventions
+- Thin controllers. Business logic in app/Actions and app/Services. Form Requests for validation,
+  Policies for authorization, PHP backed Enums for statuses and types (labels from lang files).
+- Shared listing behavior via traits/interfaces: HasStatus, HasSlug, HasLocation, Favoritable, Reviewable,
+  Promotable, Reportable, InteractsWithMedia.
+- No N+1: Model::preventLazyLoading() outside production. Index all foreign keys and filter columns.
+- Every external service (SMS, payments, AI, weather, currency, maps) sits behind an interface
+  with a fake driver for local and tests.
+- Queue anything slow: images, SMS, email, AI, search indexing.
+- Pest tests for every feature. Before finishing a task run: php artisan test, ./vendor/bin/pint,
+  ./vendor/bin/phpstan analyse.
+
+## Workflow
+- Use Laravel Boost MCP tools to check docs and package versions before writing code.
+- If a requirement is unclear or risky, ask me before implementing.
+- At the end of each phase: run all checks, commit "Phase N: <summary>", push, then report:
+  what was built, how I verify it in the browser, what I must do manually (keys, DNS, accounts),
+  known gaps.
+

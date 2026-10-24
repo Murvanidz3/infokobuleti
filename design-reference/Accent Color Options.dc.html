@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Georgian:wght@400;500;600;700&amp;family=Noto+Serif+Georgian:wght@600&amp;display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box}
+body{margin:0;font-family:'Noto Sans Georgian',system-ui,sans-serif;color:#0a1a2f;background:#f5f7fa;-webkit-font-smoothing:antialiased}
+a{color:#0a1a2f;text-decoration:none}
+a:hover{color:#2f6f9f}
+</style>
+</helmet>
+<section data-screen-label="Turn 1" style="padding:56px;display:flex;flex-direction:column;gap:32px">
+  <div style="max-width:760px">
+    <h1 style="margin:0;font-family:'Noto Serif Georgian',serif;font-weight:600;font-size:34px;line-height:1.25">მეორე ძირითადი ფერი</h1>
+    <p style="margin:12px 0 0;font-size:16px;line-height:1.7;color:#3a4a5f">სამი ვარიანტი მუქ ლურჯთან (#0a1a2f) ერთად, ღილაკებსა და ქარდებზე. რეკომენდაცია: <a href="#1a" style="font-weight:600">1a</a>, მარჯნისფერი. ლურჯის საპირისპირო თბილი ფერია, ქობულეთის მზის ჩასვლას ეხმიანება და ღილაკებს ყველაზე მკაფიოდ გამოყოფს.</p>
+  </div>
+  <div style="display:flex;gap:32px;flex-wrap:wrap;align-items:flex-start">
+    <sc-for list="{{ options }}" as="o" hint-placeholder-count="3">
+      <div id="{{ o.id }}" style="width:420px;background:#fff;border:{{ o.frame }};border-radius:20px;overflow:hidden;box-shadow:0 10px 40px -20px rgba(10,26,47,0.25)">
+        <div style="padding:24px 24px 20px;display:flex;flex-direction:column;gap:14px">
+          <div style="display:flex;align-items:center;gap:10px">
+            <span style="background:#0a1a2f;color:#fff;font-size:13px;font-weight:700;padding:4px 10px;border-radius:8px">{{ o.id }}</span>
+            <span style="font-size:18px;font-weight:600">{{ o.name }}</span>
+            <sc-if value="{{ o.rec }}" hint-placeholder-val="{{ false }}">
+              <span style="margin-left:auto;font-size:12px;font-weight:600;color:{{ o.ink }};background:{{ o.tint }};padding:4px 10px;border-radius:999px">რეკომენდებული</span>
+            </sc-if>
+          </div>
+          <p style="margin:0;font-size:14px;line-height:1.65;color:#3a4a5f">{{ o.why }}</p>
+          <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px">
+            <sc-for list="{{ o.swatches }}" as="s" hint-placeholder-count="4">
+              <div>
+                <div style="height:48px;border-radius:10px;background:{{ s.c }};border:1px solid #e8edf3"></div>
+                <div style="font-size:11.5px;color:#3a4a5f;margin-top:6px;font-weight:500">{{ s.n }}</div>
+                <div style="font-size:11.5px;color:#0a1a2f;font-weight:600">{{ s.c }}</div>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+
+        <div style="background:#0a1a2f;padding:14px 20px;display:flex;align-items:center;justify-content:space-between">
+          <span style="color:#fff;font-size:18px;line-height:1"><span style="color:rgba(255,255,255,0.62)">info</span><span style="font-weight:700">kobuleti</span></span>
+          <span style="display:inline-flex;align-items:center;gap:8px;background:{{ o.c }};color:{{ o.on }};font-size:13px;font-weight:600;padding:5px 14px 5px 5px;border-radius:999px;box-shadow:0 6px 18px -6px {{ o.c }}">
+            <span style="width:24px;height:24px;display:grid;place-items:center;border-radius:999px;background:{{ o.on }};color:{{ o.c }}"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"></path></svg></span>
+            განცხადების დამატება
+          </span>
+        </div>
+
+        <div style="background:#f5f7fa;padding:24px;display:flex;flex-direction:column;gap:20px">
+          <div style="background:#fff;border:1px solid #e8edf3;border-radius:16px;overflow:hidden">
+            <div style="position:relative;height:150px;background:#c9d3df;display:grid;place-items:center;color:#3a4a5f;font-size:13px">
+              ფოტო
+              <span style="position:absolute;top:12px;left:12px;background:{{ o.c }};color:{{ o.on }};font-size:12px;font-weight:600;padding:4px 10px;border-radius:999px">ახალი</span>
+              <span style="position:absolute;top:10px;right:10px;width:34px;height:34px;display:grid;place-items:center;border-radius:999px;background:#fff;color:{{ o.ink }}"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"><path d="M12 20s-7-4.5-9-9a4.5 4.5 0 0 1 9-3 4.5 4.5 0 0 1 9 3c-2 4.5-9 9-9 9z"></path></svg></span>
+            </div>
+            <div style="padding:16px 18px 18px">
+              <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px">
+                <span style="font-size:16px;font-weight:600">სასტუმრო „ოქროს ქვიშა“</span>
+                <span style="background:#0a1a2f;color:#fff;font-size:12px;font-weight:700;padding:3px 7px;border-radius:7px">9.4</span>
+              </div>
+              <div style="font-size:13px;color:#3a4a5f;margin-top:6px">შ. რუსთაველის ქ. 214 · ზღვამდე 30 მ</div>
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-top:14px;padding-top:12px;border-top:1px solid #e8edf3">
+                <div><span style="font-size:20px;font-weight:700;color:{{ o.ink }}">₾220</span><span style="font-size:12.5px;color:#3a4a5f"> / ღამე</span></div>
+                <span style="background:{{ o.c }};color:{{ o.on }};font-size:13px;font-weight:600;padding:8px 14px;border-radius:10px">დაჯავშნა</span>
+              </div>
+            </div>
+          </div>
+
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+            <div style="background:#fff;border:1px solid #e8edf3;border-radius:14px;padding:16px 10px;display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center">
+              <span style="width:44px;height:44px;display:grid;place-items:center;border-radius:999px;background:{{ o.tint }};color:{{ o.ink }}"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 19V6M3 15h18M21 19v-6a2 2 0 0 0-2-2h-8v4M6.5 12.5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3z"></path></svg></span>
+              <span style="font-size:13px;font-weight:600">სასტუმროები</span>
+              <span style="font-size:11.5px;color:#3a4a5f;margin-top:-6px">ჩვეულებრივი</span>
+            </div>
+            <div style="background:{{ o.c }};border:1px solid {{ o.c }};border-radius:14px;padding:16px 10px;display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center;color:{{ o.on }};transform:translateY(-3px);box-shadow:0 14px 28px -12px {{ o.c }}">
+              <span style="width:44px;height:44px;display:grid;place-items:center;border-radius:999px;border:1px solid currentColor"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 19V6M3 15h18M21 19v-6a2 2 0 0 0-2-2h-8v4M6.5 12.5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3z"></path></svg></span>
+              <span style="font-size:13px;font-weight:600">სასტუმროები</span>
+              <span style="font-size:11.5px;margin-top:-6px;opacity:0.85">hover</span>
+            </div>
+          </div>
+
+          <div style="display:flex;gap:10px;flex-wrap:wrap">
+            <span style="background:{{ o.c }};color:{{ o.on }};font-size:14px;font-weight:600;padding:12px 20px;border-radius:12px">ძიება</span>
+            <span style="background:#fff;color:{{ o.ink }};border:1px solid {{ o.c }};font-size:14px;font-weight:600;padding:11px 20px;border-radius:12px">ყველა სასტუმრო</span>
+            <span style="background:#0a1a2f;color:#fff;font-size:14px;font-weight:600;padding:12px 20px;border-radius:12px">მეტის ნახვა</span>
+          </div>
+        </div>
+      </div>
+    </sc-for>
+  </div>
+</section>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+const OPTIONS = [
+  { id: '1a', name: 'მარჯნისფერი', rec: true, c: '#d4602a', ink: '#b44f1e', on: '#ffffff', tint: '#fcece2',
+    why: 'თბილი, ლურჯის საპირისპირო ფერი. ყველაზე კონტრასტული და ენერგიული; კარგად ერგება ზღვისა და მზის ჩასვლის ფოტოებს.' },
+  { id: '1b', name: 'ოქროსფერი ქვიშა', c: '#e2b04a', ink: '#8a6414', on: '#0a1a2f', tint: '#fbf3df',
+    why: 'პლაჟის ქვიშის ტონი. უფრო ელეგანტური და რბილი; ღილაკზე ტექსტი მუქი ლურჯია, რაც კურორტულ, პრემიუმ შეგრძნებას ქმნის.' },
+  { id: '1c', name: 'ზღვის ფირუზი', c: '#1b7d6f', ink: '#16695d', on: '#ffffff', tint: '#e2f2ef',
+    why: 'მშვიდი, ბუნებრივი ფერი, ზღვასა და ფიჭვნარს ეხმიანება. ლურჯთან ჰარმონიულია, მაგრამ ნაკლებად გამოიყოფა.' }
+];
+class Component extends DCLogic {
+  renderVals() {
+    return {
+      options: OPTIONS.map(o => ({
+        ...o,
+        rec: !!o.rec,
+        frame: o.rec ? `2px solid ${o.c}` : '1px solid #e8edf3',
+        swatches: [{ n: 'ძირითადი', c: '#0a1a2f' }, { n: 'აქცენტი', c: o.c }, { n: 'ტექსტი', c: o.ink }, { n: 'ფონი', c: o.tint }]
+      }))
+    };
+  }
+}
+</script>
+</body>
+</html>
