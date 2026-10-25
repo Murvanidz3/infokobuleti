@@ -541,7 +541,8 @@ Content lives in `database/seeders/data/*.php`.
   classifieds categories with attribute schemas (cars: make, model, year, mileage, fuel, transmission,
   steering, customs cleared; motorcycles, bicycles, phones), vacancy, news and event categories;
   hotel, room and property amenities.
-- Demo content (fixed Faker seed, so runs are reproducible): staff accounts
+- Demo content (fixed Faker seed, so names, prices and texts repeat between runs; which listings get
+  promotions, conversations and reports is picked at random each time): staff accounts
   `superadmin@`, `admin@`, `moderator@infokobuleti.com`; 15 businesses (agencies, restaurants,
   employers, services) plus one verified profile per business hotel; 42 individual users (some
   phone-only, Google, unverified, one blocked).
