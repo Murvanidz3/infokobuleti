@@ -28,7 +28,12 @@ class SyncSearch extends Command
 
         foreach (SiteSearch::MODULES as [$class]) {
             $index = (new $class)->searchableAs();
-            $client->index($index)->updateSynonyms($map === [] ? new \stdClass : $map);
+            // Meilisearch rejects an empty synonyms list: no groups means resetting them.
+            if ($map === []) {
+                $client->index($index)->resetSynonyms();
+            } else {
+                $client->index($index)->updateSynonyms($map);
+            }
             $this->line("Synonyms → {$index} (".count($map).')');
 
             if ($this->option('import')) {
