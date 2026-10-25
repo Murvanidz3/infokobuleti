@@ -30,6 +30,12 @@
         <env name="QUEUE_CONNECTION" value="sync"/>
         <env name="SESSION_DRIVER" value="array"/>
         <env name="SCOUT_DRIVER" value="collection"/>
+        <env name="SMS_DRIVER" value="array"/>
+        <env name="SMS_REVEAL_CODES" value="false"/>
+        <env name="TURNSTILE_SITE_KEY" value=""/>
+        <env name="TURNSTILE_SECRET_KEY" value=""/>
+        <env name="GOOGLE_CLIENT_ID" value="test-client-id"/>
+        <env name="GOOGLE_CLIENT_SECRET" value="test-client-secret"/>
         <env name="PULSE_ENABLED" value="false"/>
         <env name="TELESCOPE_ENABLED" value="false"/>
         <env name="NIGHTWATCH_ENABLED" value="false"/>

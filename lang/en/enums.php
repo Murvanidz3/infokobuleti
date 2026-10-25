@@ -240,4 +240,30 @@ return [
         'uniform' => 'Uniform',
         'training' => 'Training',
     ],
+    'otp_purpose' => [
+        'login' => 'Sign-in',
+        'change_phone' => 'Phone change',
+    ],
+    'sms_status' => [
+        'queued' => 'Queued',
+        'sent' => 'Sent',
+        'delivered' => 'Delivered',
+        'failed' => 'Failed',
+    ],
+    'permission' => [
+        'access_admin' => 'Admin panel access',
+        'moderate_content' => 'Moderation',
+        'manage_content' => 'Manage content',
+        'manage_users' => 'Manage users',
+        'manage_payments' => 'Manage payments',
+        'manage_settings' => 'System settings',
+    ],
+    'otp_error' => [
+        'cooldown' => 'You can request a new code in :seconds seconds.',
+        'phone_limit' => 'Too many codes were sent to this number. Try again in :minutes minutes.',
+        'ip_limit' => 'Too many attempts. Try again in :minutes minutes.',
+        'expired' => 'This code has expired or was replaced. Request a new one.',
+        'invalid' => 'Wrong code. :count attempt left.|Wrong code. :count attempts left.',
+        'too_many_attempts' => 'Too many wrong attempts. Request a new code.',
+    ],
 ];

@@ -1,5 +1,11 @@
 <?php
 
+use App\Enums\Role;
+use App\Models\User;
+use App\Services\Auth\TwoFactorAuthenticator;
+use App\Services\Sms\ArraySmsGateway;
+use App\Services\Sms\SmsManager;
+use Database\Seeders\RoleSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -44,7 +50,43 @@ expect()->extend('toBeOne', function () {
 |
 */
 
-function something()
+/**
+ * The in-memory SMS gateway used by the tests (SMS_DRIVER=array in phpunit.xml).
+ */
+function smsGateway(): ArraySmsGateway
 {
-    // ..
+    /** @var ArraySmsGateway */
+    return app(SmsManager::class)->driver('array');
+}
+
+/**
+ * The 6-digit code from the last SMS that was sent.
+ */
+function lastSmsCode(): string
+{
+    preg_match('/\b(\d{6})\b/', smsGateway()->last()['text'] ?? '', $matches);
+
+    return $matches[1] ?? '';
+}
+
+/**
+ * A staff member with the given role and (optionally) two-factor auth already turned on.
+ *
+ * @return array{0: User, 1: string|null}
+ */
+function staffMember(Role $role = Role::Admin, bool $withTwoFactor = true): array
+{
+    test()->seed(RoleSeeder::class);
+
+    $user = User::factory()->staff('secret-password')->create(['email' => 'staff@example.com']);
+    $user->assignRole($role->value);
+
+    $secret = null;
+
+    if ($withTwoFactor) {
+        $secret = app(TwoFactorAuthenticator::class)->generateSecret();
+        app(TwoFactorAuthenticator::class)->enable($user, $secret);
+    }
+
+    return [$user->fresh(), $secret];
 }

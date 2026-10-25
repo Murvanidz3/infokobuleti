@@ -19,7 +19,7 @@ use Spatie\MediaLibrary\InteractsWithMedia;
 use Spatie\Permission\Traits\HasRoles;
 
 #[Fillable(['name', 'email', 'phone', 'password', 'avatar', 'locale', 'account_type'])]
-#[Hidden(['password', 'remember_token', 'google_id'])]
+#[Hidden(['password', 'remember_token', 'google_id', 'two_factor_secret', 'two_factor_recovery_codes'])]
 class User extends Authenticatable implements HasMedia
 {
     /** @use HasFactory<UserFactory> */
@@ -39,6 +39,10 @@ class User extends Authenticatable implements HasMedia
             'password' => 'hashed',
             'account_type' => AccountType::class,
             'is_blocked' => 'boolean',
+            'onboarded_at' => 'datetime',
+            'two_factor_secret' => 'encrypted',
+            'two_factor_recovery_codes' => 'encrypted:array',
+            'two_factor_confirmed_at' => 'datetime',
         ];
     }
 
@@ -60,7 +64,67 @@ class User extends Authenticatable implements HasMedia
 
     public function hasVerifiedPhone(): bool
     {
-        return $this->phone_verified_at !== null;
+        return $this->phone !== null && $this->phone_verified_at !== null;
+    }
+
+    public function hasGoogle(): bool
+    {
+        return $this->google_id !== null;
+    }
+
+    public function isOnboarded(): bool
+    {
+        return $this->onboarded_at !== null;
+    }
+
+    public function hasTwoFactorEnabled(): bool
+    {
+        return $this->two_factor_secret !== null && $this->two_factor_confirmed_at !== null;
+    }
+
+    /**
+     * Ways this account can sign in: Google, a verified phone, and email + password for staff.
+     *
+     * @return list<string>
+     */
+    public function signInMethods(): array
+    {
+        return array_keys(array_filter([
+            'google' => $this->hasGoogle(),
+            'phone' => $this->hasVerifiedPhone(),
+            'password' => $this->password !== null && $this->isStaff(),
+        ]));
+    }
+
+    /**
+     * A sign-in method can be removed only while another one remains.
+     */
+    public function canRemoveSignInMethod(string $method): bool
+    {
+        $methods = $this->signInMethods();
+
+        return in_array($method, $methods, true) && count($methods) > 1;
+    }
+
+    /**
+     * Initials for the avatar placeholder in the header.
+     */
+    public function initials(): string
+    {
+        $name = trim((string) $this->name);
+
+        if ($name === '') {
+            return '';
+        }
+
+        $words = preg_split('/\s+/u', $name) ?: [];
+        $initials = mb_substr($words[0], 0, 1);
+
+        if (count($words) > 1) {
+            $initials .= mb_substr((string) end($words), 0, 1);
+        }
+
+        return mb_strtoupper($initials);
     }
 
     public function registerMediaCollections(): void
@@ -156,6 +220,14 @@ class User extends Authenticatable implements HasMedia
         return $this->belongsToMany(Conversation::class, 'conversation_participants')
             ->withPivot(['last_read_at', 'archived_at'])
             ->withTimestamps();
+    }
+
+    /**
+     * @return HasMany<UserSession, $this>
+     */
+    public function userSessions(): HasMany
+    {
+        return $this->hasMany(UserSession::class);
     }
 
     /**

@@ -17,6 +17,7 @@
     <title>{{ $pageTitle }}</title>
     <meta name="description" content="{{ $description ?? __('meta.description') }}">
     <meta name="theme-color" content="#0a1a2f">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <meta property="og:title" content="{{ $pageTitle }}">
     <meta property="og:description" content="{{ $description ?? __('meta.description') }}">
     <meta property="og:locale" content="{{ $localeRouter->supported()[$locale]['og_locale'] ?? $locale }}">
@@ -39,6 +40,12 @@
 
     <x-footer />
     <x-toast-stack />
+
+    @guest
+        @unless (request()->routeIs('login', '*.login', 'staff.*', '*.staff.*'))
+            <x-auth.login-dialog />
+        @endunless
+    @endguest
 
     @php($bundle = app(\App\Services\FrontendBundle::class))
     @vite($bundle->script())

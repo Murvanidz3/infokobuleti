@@ -17,6 +17,7 @@
 
         <div class="flex shrink-0 items-center gap-3.5">
             <x-language-switcher class="max-md:hidden" />
+            <x-user-menu class="max-md:hidden" />
             <x-add-listing-button class="max-md:hidden" />
 
             <button type="button"
@@ -35,6 +36,7 @@
         @foreach (config('site.nav') as $key => $anchor)
             <a href="{{ $home }}#{{ $anchor }}" class="border-b border-white/8 py-3.5 text-[17px] font-medium text-white">{{ __('nav.'.$key) }}</a>
         @endforeach
+        <x-user-menu drawer />
         <div class="mt-[18px] flex flex-wrap items-center justify-between gap-3">
             <x-language-switcher size="lg" />
             <x-add-listing-button size="lg" />

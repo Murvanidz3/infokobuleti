@@ -1,3 +1,4 @@
+import { registerAuth } from './auth';
 import { registerComponents } from './components';
 import { initFavorites } from './favorites';
 import { initReveal } from './reveal';
@@ -17,6 +18,7 @@ import.meta.glob([
  */
 export function setupUi(Alpine) {
     registerComponents(Alpine);
+    registerAuth(Alpine);
     initFavorites();
     initReveal();
 }
