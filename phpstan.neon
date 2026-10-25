@@ -8,3 +8,4 @@ parameters:
         - database/
         - routes/
     level: 6
+    parseModelCastsMethod: true

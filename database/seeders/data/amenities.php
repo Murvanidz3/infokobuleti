@@ -1,0 +1,60 @@
+<?php
+
+/**
+ * Amenities per scope: [slug, group, icon, ka, en, ru]. Icons use names from the site icon set.
+ *
+ * @return array<string, list<array{0: string, 1: string|null, 2: string|null, 3: string, 4: string, 5: string}>>
+ */
+return [
+    'hotel' => [
+        ['wifi', 'general', null, 'უფასო Wi-Fi', 'Free Wi-Fi', 'Бесплатный Wi-Fi'],
+        ['parking', 'general', 'car', 'პარკინგი', 'Parking', 'Парковка'],
+        ['reception-24h', 'general', 'clock', '24-საათიანი მიღება', '24-hour reception', 'Круглосуточная стойка регистрации'],
+        ['elevator', 'general', 'layers', 'ლიფტი', 'Lift', 'Лифт'],
+        ['accessible', 'general', null, 'ადაპტირებულია შშმ პირებისთვის', 'Wheelchair accessible', 'Доступно для людей с инвалидностью'],
+        ['pets-allowed', 'general', 'heart', 'შინაური ცხოველები დაშვებულია', 'Pets allowed', 'Можно с животными'],
+        ['breakfast', 'food', 'fork', 'საუზმე', 'Breakfast', 'Завтрак'],
+        ['restaurant', 'food', 'fork', 'რესტორანი', 'Restaurant', 'Ресторан'],
+        ['bar', 'food', null, 'ბარი', 'Bar', 'Бар'],
+        ['bbq', 'food', null, 'მაყალი ეზოში', 'Barbecue area', 'Мангал во дворе'],
+        ['pool', 'leisure', 'waves', 'აუზი', 'Swimming pool', 'Бассейн'],
+        ['beach-area', 'leisure', 'sun', 'საკუთარი პლაჟის ზონა', 'Private beach area', 'Собственная пляжная зона'],
+        ['garden', 'leisure', null, 'ეზო და ბაღი', 'Garden', 'Сад и двор'],
+        ['spa', 'leisure', null, 'სპა', 'Spa', 'Спа'],
+        ['gym', 'leisure', null, 'სპორტული დარბაზი', 'Gym', 'Тренажёрный зал'],
+        ['playground', 'family', 'users', 'საბავშვო მოედანი', 'Playground', 'Детская площадка'],
+        ['airport-transfer', 'services', 'plane', 'ტრანსფერი აეროპორტიდან', 'Airport transfer', 'Трансфер из аэропорта'],
+        ['laundry', 'services', null, 'სამრეცხაო', 'Laundry', 'Прачечная'],
+    ],
+    'room' => [
+        ['air-conditioning', null, null, 'კონდიციონერი', 'Air conditioning', 'Кондиционер'],
+        ['private-bathroom', null, null, 'პირადი სააბაზანო', 'Private bathroom', 'Собственная ванная'],
+        ['balcony', null, null, 'აივანი', 'Balcony', 'Балкон'],
+        ['sea-view', null, 'waves', 'ზღვის ხედი', 'Sea view', 'Вид на море'],
+        ['tv', null, null, 'ტელევიზორი', 'TV', 'Телевизор'],
+        ['fridge', null, null, 'მაცივარი', 'Fridge', 'Холодильник'],
+        ['kitchenette', null, null, 'სამზარეულოს კუთხე', 'Kitchenette', 'Мини-кухня'],
+        ['kettle', null, null, 'ელექტროჩაიდანი', 'Kettle', 'Электрочайник'],
+        ['hairdryer', null, null, 'ფენი', 'Hair dryer', 'Фен'],
+        ['safe', null, null, 'სეიფი', 'Safe', 'Сейф'],
+        ['desk', null, null, 'სამუშაო მაგიდა', 'Desk', 'Рабочий стол'],
+    ],
+    'property' => [
+        ['furnished', 'interior', 'sofa', 'ავეჯით', 'Furnished', 'С мебелью'],
+        ['appliances', 'interior', null, 'ტექნიკით', 'Appliances', 'С техникой'],
+        ['air-conditioning', 'interior', null, 'კონდიციონერი', 'Air conditioning', 'Кондиционер'],
+        ['balcony', 'interior', null, 'აივანი', 'Balcony', 'Балкон'],
+        ['sea-view', 'interior', 'waves', 'ზღვის ხედი', 'Sea view', 'Вид на море'],
+        ['central-heating', 'utilities', null, 'ცენტრალური გათბობა', 'Central heating', 'Центральное отопление'],
+        ['natural-gas', 'utilities', null, 'ბუნებრივი აირი', 'Natural gas', 'Природный газ'],
+        ['hot-water', 'utilities', null, 'ცხელი წყალი', 'Hot water', 'Горячая вода'],
+        ['internet', 'utilities', null, 'ინტერნეტი', 'Internet', 'Интернет'],
+        ['elevator', 'building', 'layers', 'ლიფტი', 'Lift', 'Лифт'],
+        ['parking', 'building', 'car', 'პარკინგი', 'Parking', 'Парковка'],
+        ['garage', 'building', null, 'ავტოფარეხი', 'Garage', 'Гараж'],
+        ['security', 'building', null, 'დაცვა', 'Security', 'Охрана'],
+        ['storage', 'building', null, 'სათავსო', 'Storage room', 'Кладовая'],
+        ['yard', 'outdoor', null, 'ეზო', 'Yard', 'Двор'],
+        ['pool', 'outdoor', 'waves', 'აუზი', 'Swimming pool', 'Бассейн'],
+    ],
+];
