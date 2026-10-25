@@ -68,6 +68,28 @@ class Icon extends Component
         'monitor' => 'M4 4h16a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1zM8 20h8M12 16v4',
         'key' => 'M14.5 13a4.5 4.5 0 1 0-4.24-3L3.5 16.76V20.5h3.74V18.5h2v-2h2l1.02-1.02A4.5 4.5 0 0 0 14.5 13zM16 8h.01',
         'copy' => 'M9 9h10a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H9a1 1 0 0 1-1-1V10a1 1 0 0 1 1-1zM5 15H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v1',
+        'star' => 'M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1-4.4-4.3 6.1-.9z',
+        'share' => 'M18 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM6 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM18 22a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM8.6 13.5l6.8 4M15.4 6.5l-6.8 4',
+        'flag' => 'M5 21V4M5 4h11l-2 4 2 4H5',
+        'message' => 'M4 5h16v11H8l-4 4z',
+        'map' => 'M9 4L3 6v14l6-2 6 2 6-2V4l-6 2zM9 4v14M15 6v14',
+        'list' => 'M8 6h13M8 12h13M8 18h13M3.5 6h.01M3.5 12h.01M3.5 18h.01',
+        'globe' => 'M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18zM3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18',
+        'external' => 'M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5',
+        'expand' => 'M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5M9 9l-5-5M15 9l5-5M9 15l-5 5M15 15l5 5',
+        'minus' => 'M5 12h14',
+        'whatsapp' => 'M4 20l1.3-4A8.5 8.5 0 1 1 8 18.7zM9 8.5c0 3.5 3 6.5 6.5 6.5l1-1.6-2-1-1 1a4 4 0 0 1-2.4-2.4l1-1-1-2z',
+        'viber' => 'M12 3c5 0 8 2.5 8 7.5S17 18 12 18l-3 3v-3.3C5.5 16.6 4 14 4 10.5 4 5.5 7 3 12 3zM10 7.5c0 3 2.5 5.5 5.5 5.5',
+        'file' => 'M6 3h8l5 5v13H6zM14 3v5h5',
+        'send' => 'M21 3L10 14M21 3l-7 18-4-7-7-4z',
+        'eye' => 'M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12zM12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z',
+        'wind' => 'M3 8h11a3 3 0 1 0-3-3M3 12h16a3 3 0 1 1-3 3M3 16h8',
+        'navigation' => 'M3 11l18-8-8 18-2-8z',
+        'wifi' => 'M2 9a15 15 0 0 1 20 0M5 12.5a10 10 0 0 1 14 0M8.5 16a5 5 0 0 1 7 0M12 19.5h.01',
+        'ticket' => 'M3 7h18v3a2 2 0 0 0 0 4v3H3v-3a2 2 0 0 0 0-4zM14 7v10',
+        'newspaper' => 'M4 5h13v14H6a2 2 0 0 1-2-2zM17 9h3v8a2 2 0 0 1-2 2M8 9h5M8 13h5M8 16h3',
+        'compass' => 'M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18zM15.5 8.5l-2 5-5 2 2-5z',
+        'refresh' => 'M20 11a8 8 0 0 0-14.5-4.5L4 8M4 4v4h4M4 13a8 8 0 0 0 14.5 4.5L20 16M20 20v-4h-4',
     ];
 
     public function __construct(
@@ -78,6 +100,14 @@ class Icon extends Component
         if (! array_key_exists($name, self::PATHS)) {
             throw new InvalidArgumentException("Unknown icon [{$name}].");
         }
+    }
+
+    /**
+     * Whether an icon exists (names stored in the database, such as category icons, may not).
+     */
+    public static function has(?string $name): bool
+    {
+        return $name !== null && array_key_exists($name, self::PATHS);
     }
 
     public function path(): string

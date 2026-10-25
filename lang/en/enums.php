@@ -281,4 +281,11 @@ return [
         'featured_hotel' => 'Featured hotel',
         'banner' => 'Banner',
     ],
+    'contact_topic' => [
+        'general' => 'General question',
+        'listing' => 'About a listing',
+        'advertising' => 'Advertising',
+        'partnership' => 'Partnership',
+        'bug' => 'Technical problem',
+    ],
 ];

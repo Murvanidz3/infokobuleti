@@ -12,7 +12,12 @@ use App\Services\Auth\CloudflareTurnstile;
 use App\Services\Auth\FakeHumanVerifier;
 use App\Services\Auth\Impersonation;
 use App\Services\Auth\SessionTracker;
+use App\Search\PostgresSearchEngine;
+use App\Search\SearchSynonyms;
 use App\Services\Currency\FixedExchangeRates;
+use App\Services\Currency\NationalBankExchangeRates;
+use App\Services\Favorites;
+use App\Support\Listings\PublicCache;
 use App\Services\LocaleRouter;
 use App\Services\Settings;
 use App\Services\Sms\SmsManager;
@@ -25,6 +30,7 @@ use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
+use Laravel\Scout\EngineManager;
 use Livewire\Livewire;
 
 class AppServiceProvider extends ServiceProvider
@@ -59,6 +65,17 @@ class AppServiceProvider extends ServiceProvider
         'page' => Models\Page::class,
         'banner' => Models\Banner::class,
         'price_plan' => Models\PricePlan::class,
+        'contact_message' => Models\ContactMessage::class,
+    ];
+
+    /**
+     * Models shown on public pages whose changes invalidate PublicCache.
+     *
+     * @var list<class-string<Model>>
+     */
+    private const array PUBLIC_MODELS = [
+        Models\Hotel::class, Models\RoomType::class, Models\Property::class, Models\Classified::class, Models\Vacancy::class,
+        Models\Place::class, Models\Article::class, Models\Event::class, Models\Category::class, Models\Setting::class,
     ];
 
     /**
@@ -68,7 +85,9 @@ class AppServiceProvider extends ServiceProvider
     {
         $this->app->singleton(LocaleRouter::class);
 
-        $this->app->singleton(ExchangeRates::class, fn () => new FixedExchangeRates(config('currency.fallback_rates')));
+        $this->app->singleton(FixedExchangeRates::class, fn () => new FixedExchangeRates(config('currency.fallback_rates')));
+        $this->app->singleton(ExchangeRates::class, NationalBankExchangeRates::class);
+        $this->app->scoped(Favorites::class);
 
         $this->app->singleton(SmsManager::class);
         $this->app->singleton(Settings::class);
@@ -104,5 +123,24 @@ class AppServiceProvider extends ServiceProvider
 
         // Livewire update requests keep the language of the page they came from.
         Livewire::addPersistentMiddleware([SetLocale::class]);
+
+        $this->app->make(EngineManager::class)->extend('pgsql', fn ($app) => new PostgresSearchEngine($app->make(SearchSynonyms::class)));
+
+        // Public pages cache listing blocks for a few minutes; any change makes them stale at once.
+        foreach (self::PUBLIC_MODELS as $model) {
+            $model::saved(fn () => PublicCache::bump());
+            $model::deleted(fn () => PublicCache::bump());
+        }
+
+        RateLimiter::for('phone-reveal', fn (Request $request) => [
+            Limit::perMinute(10)->by('reveal:'.($request->user()?->getAuthIdentifier() ?? $request->ip())),
+            Limit::perDay(80)->by('reveal-day:'.($request->user()?->getAuthIdentifier() ?? $request->ip())),
+        ]);
+        RateLimiter::for('contact', fn (Request $request) => [
+            Limit::perMinute(3)->by('contact:'.$request->ip()),
+            Limit::perDay(20)->by('contact-day:'.$request->ip()),
+        ]);
+        RateLimiter::for('interactions', fn (Request $request) => Limit::perMinute(20)->by('interact:'.($request->user()?->getAuthIdentifier() ?? $request->ip())));
+        RateLimiter::for('search', fn (Request $request) => Limit::perMinute(90)->by('search:'.$request->ip()));
     }
 }

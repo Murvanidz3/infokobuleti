@@ -281,4 +281,11 @@ return [
         'featured_hotel' => 'Избранный отель',
         'banner' => 'Баннер',
     ],
+    'contact_topic' => [
+        'general' => 'Общий вопрос',
+        'listing' => 'По объявлению',
+        'advertising' => 'Реклама',
+        'partnership' => 'Сотрудничество',
+        'bug' => 'Техническая проблема',
+    ],
 ];

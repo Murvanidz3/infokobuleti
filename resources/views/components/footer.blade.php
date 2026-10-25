@@ -1,7 +1,5 @@
 @php
-    $home = localized_route('home');
     $socials = ['facebook' => 'Facebook', 'instagram' => 'Instagram', 'youtube' => 'YouTube', 'telegram' => 'Telegram'];
-    $infoLinks = ['about', 'advertising', 'terms', 'privacy', 'help'];
 @endphp
 
 <footer class="border-t border-white/8 bg-navy pt-[clamp(56px,5vw,72px)] pb-8 text-line-strong">
@@ -24,8 +22,8 @@
             <nav aria-labelledby="footer-portal">
                 <h2 id="footer-portal" class="mb-4 text-[13px] font-semibold tracking-[0.02em] text-white">{{ __('footer.portal') }}</h2>
                 <ul class="flex flex-col gap-[11px] text-sm">
-                    @foreach (config('site.nav') as $key => $anchor)
-                        <li><a href="{{ $home }}#{{ $anchor }}" class="text-line-strong transition-colors hover:text-white">{{ __('nav.'.$key) }}</a></li>
+                    @foreach (config('site.nav') as $key => $route)
+                        <li><a href="{{ localized_route($route) }}" class="text-line-strong transition-colors hover:text-white">{{ __('nav.'.$key) }}</a></li>
                     @endforeach
                 </ul>
             </nav>
@@ -33,8 +31,8 @@
             <nav aria-labelledby="footer-information">
                 <h2 id="footer-information" class="mb-4 text-[13px] font-semibold tracking-[0.02em] text-white">{{ __('footer.information') }}</h2>
                 <ul class="flex flex-col gap-[11px] text-sm">
-                    @foreach ($infoLinks as $link)
-                        <li><a href="#" class="text-line-strong transition-colors hover:text-white">{{ __('footer.links.'.$link) }}</a></li>
+                    @foreach (config('site.info_links') as $link => [$route, $parameters])
+                        <li><a href="{{ localized_route($route, $parameters) }}" class="text-line-strong transition-colors hover:text-white">{{ __('footer.links.'.$link) }}</a></li>
                     @endforeach
                 </ul>
             </nav>

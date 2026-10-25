@@ -9,6 +9,23 @@ use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\LogoutController;
 use App\Http\Controllers\Auth\PhoneLoginController;
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\Site\BookingRequestController;
+use App\Http\Controllers\Site\BusinessProfileController;
+use App\Http\Controllers\Site\ClassifiedController;
+use App\Http\Controllers\Site\ContactController;
+use App\Http\Controllers\Site\EventController;
+use App\Http\Controllers\Site\FavoriteController;
+use App\Http\Controllers\Site\GuideController;
+use App\Http\Controllers\Site\HotelController;
+use App\Http\Controllers\Site\MessageController;
+use App\Http\Controllers\Site\NewsController;
+use App\Http\Controllers\Site\PageController;
+use App\Http\Controllers\Site\PhoneRevealController;
+use App\Http\Controllers\Site\PropertyController;
+use App\Http\Controllers\Site\ReportController;
+use App\Http\Controllers\Site\SearchController;
+use App\Http\Controllers\Site\VacancyApplicationController;
+use App\Http\Controllers\Site\VacancyController;
 use App\Http\Controllers\Staff\RecoveryCodesController;
 use App\Http\Controllers\Staff\StaffLoginController;
 use App\Http\Controllers\Staff\TwoFactorChallengeController;
@@ -16,6 +33,7 @@ use App\Http\Controllers\Staff\TwoFactorSetupController;
 use App\Http\Controllers\StyleguideController;
 use App\Http\Controllers\Webhooks\TwilioStatusController;
 use App\Services\LocaleRouter;
+use App\Support\Listings\ListingTypes;
 use Illuminate\Support\Facades\Route;
 
 // Not localized: the OAuth callback must match the URI registered with Google; webhooks are machine-to-machine.
@@ -31,6 +49,44 @@ Route::middleware('auth')->group(function (): void {
 app(LocaleRouter::class)->group(function (): void {
     Route::get('/', HomeController::class)->name('home');
     Route::get('/_styleguide', StyleguideController::class)->name('styleguide');
+
+    // Module list pages (Livewire filters inside) and detail pages.
+    Route::view('/hotels', 'pages.hotels.index')->name('hotels.index');
+    Route::get('/hotels/{hotel}', [HotelController::class, 'show'])->name('hotels.show');
+    Route::post('/hotels/{hotel}/booking', BookingRequestController::class)->middleware('throttle:interactions')->name('hotels.booking');
+
+    Route::view('/real-estate', 'pages.real-estate.index')->name('real-estate.index');
+    Route::get('/real-estate/{property}', [PropertyController::class, 'show'])->name('real-estate.show');
+
+    Route::view('/classifieds', 'pages.classifieds.index')->name('classifieds.index');
+    Route::get('/classifieds/{classified}', [ClassifiedController::class, 'show'])->name('classifieds.show');
+
+    Route::view('/jobs', 'pages.jobs.index')->name('jobs.index');
+    Route::get('/jobs/{vacancy}', [VacancyController::class, 'show'])->name('jobs.show');
+    Route::post('/jobs/{vacancy}/apply', VacancyApplicationController::class)->middleware(['auth', 'onboarded', 'throttle:interactions'])->name('jobs.apply');
+
+    Route::get('/business/{businessProfile}', BusinessProfileController::class)->name('business.show');
+
+    Route::get('/guide', [GuideController::class, 'index'])->name('guide.index');
+    Route::get('/guide/{place}', [GuideController::class, 'show'])->name('guide.show');
+    Route::get('/events', [EventController::class, 'index'])->name('events.index');
+    Route::get('/events/{event}', [EventController::class, 'show'])->name('events.show');
+    Route::get('/news', [NewsController::class, 'index'])->name('news.index');
+    Route::get('/news/{article}', [NewsController::class, 'show'])->name('news.show');
+
+    Route::get('/search', [SearchController::class, 'index'])->middleware('throttle:search')->name('search');
+    Route::get('/search/suggest', [SearchController::class, 'suggest'])->middleware('throttle:search')->name('search.suggest');
+
+    Route::get('/info/{page:slug}', PageController::class)->name('pages.show');
+    Route::get('/contact', [ContactController::class, 'create'])->name('contact');
+    Route::post('/contact', [ContactController::class, 'store'])->middleware('throttle:contact')->name('contact.store');
+
+    // Interactions with any public item ({type} is its morph alias).
+    $types = ListingTypes::INTERACTIVE;
+    Route::post('/favorites/{type}/{id}', FavoriteController::class)->whereIn('type', $types)->whereNumber('id')->middleware('throttle:interactions')->name('favorites.toggle');
+    Route::post('/phone/{type}/{id}', PhoneRevealController::class)->whereIn('type', $types)->whereNumber('id')->middleware('throttle:phone-reveal')->name('phone.reveal');
+    Route::post('/report/{type}/{id}', ReportController::class)->whereIn('type', $types)->whereNumber('id')->middleware(['auth', 'throttle:interactions'])->name('report.store');
+    Route::post('/message/{type}/{id}', MessageController::class)->whereIn('type', $types)->whereNumber('id')->middleware(['auth', 'onboarded', 'throttle:interactions'])->name('message.store');
 
     Route::middleware('guest')->group(function (): void {
         Route::get('/login', LoginController::class)->name('login');

@@ -107,6 +107,10 @@ return [
         'applications' => [
             'plural' => 'Applications',
         ],
+        'contact_messages' => [
+            'singular' => 'contact message',
+            'plural' => 'Contact messages',
+        ],
     ],
     'sections' => [
         'owner' => 'Owner',
@@ -263,6 +267,7 @@ return [
         'booking_request' => 'Booking',
         'vacancy_application' => 'Application',
         'user_session' => 'Device',
+        'contact_message' => 'Contact message',
     ],
     'settings' => [
         'title' => 'Settings',
@@ -272,6 +277,7 @@ return [
             'listings' => 'Listings',
             'integrations' => 'Integrations',
             'maintenance' => 'Maintenance',
+            'info' => 'Useful info & search',
         ],
         'expiry_days' => 'Listing lifetime',
         'expiry_help' => 'How many days a published listing stays live.',
@@ -290,6 +296,13 @@ return [
             'search' => 'Search',
             'queue' => 'Queue',
         ],
+        'transport' => 'Transport',
+        'transport_help' => 'Shown in the homepage “useful info” strip. Empty fields use the default text.',
+        'airport_km' => 'Distance to the airport',
+        'search' => 'Search',
+        'synonyms' => 'Synonyms',
+        'synonyms_help' => 'One group per line, comma separated: “ზღვა, sea, море”. Search matches any word of the group.',
+        'synonyms_placeholder' => 'sea, ზღვა, море',
     ],
     'fields' => [
         'title' => 'Title',
@@ -455,5 +468,13 @@ return [
         'message' => 'Message',
         'owner_note' => 'Owner note',
         'submitted' => 'Submitted',
+        'info_airport_note' => 'Airport: note',
+        'info_railway_value' => 'Railway: station',
+        'info_railway_note' => 'Railway: note',
+        'topic' => 'Topic',
+    ],
+    'contact' => [
+        'handled' => 'Handled',
+        'mark_handled' => 'Mark as handled',
     ],
 ];

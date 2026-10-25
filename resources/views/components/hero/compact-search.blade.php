@@ -1,4 +1,4 @@
-<form action="#" method="get" role="search" {{ $attributes->class(['flex items-center gap-2 rounded-card border border-white/50 bg-white/94 py-1.5 pr-1.5 pl-4 shadow-overlay-compact backdrop-blur-[18px]']) }}>
+<form action="{{ localized_route('search') }}" method="get" role="search" {{ $attributes->class(['flex items-center gap-2 rounded-card border border-white/50 bg-white/94 py-1.5 pr-1.5 pl-4 shadow-overlay-compact backdrop-blur-[18px]']) }}>
     <x-icon name="search" :size="20" class="text-secondary" />
     <input type="search"
            name="q"

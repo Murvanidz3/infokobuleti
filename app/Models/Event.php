@@ -3,11 +3,13 @@
 namespace App\Models;
 
 use App\Contracts\Listing;
+use App\Search\SearchableListing;
 use App\Models\Concerns\Favoritable;
 use App\Models\Concerns\HasLocation;
 use App\Models\Concerns\HasMediaGallery;
 use App\Models\Concerns\HasSlug;
 use App\Models\Concerns\HasStatus;
+use App\Models\Concerns\IndexedForSearch;
 use App\Models\Concerns\LogsStaffActivity;
 use App\Models\Concerns\Reportable;
 use Database\Factories\EventFactory;
@@ -19,11 +21,19 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Spatie\Translatable\HasTranslations;
 
+/**
+ * Translatable attributes read in the current locale (spatie/laravel-translatable).
+ *
+ * @property string $title
+ * @property string|null $description
+ * @property string|null $address
+ * @property string|null $venue
+ */
 #[Guarded(Listing::SYSTEM_COLUMNS)]
-class Event extends Model implements Listing
+class Event extends Model implements Listing, SearchableListing
 {
     /** @use HasFactory<EventFactory> */
-    use Favoritable, HasFactory, HasLocation, HasMediaGallery, HasSlug, HasStatus, HasTranslations, LogsStaffActivity, Reportable, SoftDeletes;
+    use Favoritable, HasFactory, HasLocation, HasMediaGallery, HasSlug, HasStatus, IndexedForSearch, HasTranslations, LogsStaffActivity, Reportable, SoftDeletes;
 
     /** @var list<string> */
     public array $translatable = ['title', 'description', 'address', 'venue'];
@@ -82,5 +92,13 @@ class Event extends Model implements Listing
     public function place(): BelongsTo
     {
         return $this->belongsTo(Place::class);
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    protected function searchableFilters(): array
+    {
+        return ['starts_at' => $this->starts_at->getTimestamp(), 'category_id' => $this->category_id];
     }
 }

@@ -26,6 +26,7 @@ use Filament\Schemas\Components\Tabs\Tab;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\Artisan;
 use UnitEnum;
 
 /**
@@ -124,6 +125,19 @@ class SiteSettings extends Page
                             ]),
                         ]),
                     ]),
+                    Tab::make(__('admin.settings.tabs.info'))->icon(Heroicon::OutlinedInformationCircle)->schema([
+                        Section::make(__('admin.settings.transport'))->description(__('admin.settings.transport_help'))->schema([
+                            TextInput::make('info.airport_km')->label(__('admin.settings.airport_km'))->numeric()->minValue(0)->maxValue(500)->suffix('km'),
+                            Translatable::tabs([
+                                'info.airport_note' => fn (string $name) => TextInput::make($name)->maxLength(120),
+                                'info.railway_value' => fn (string $name) => TextInput::make($name)->maxLength(60),
+                                'info.railway_note' => fn (string $name) => TextInput::make($name)->maxLength(120),
+                            ]),
+                        ]),
+                        Section::make(__('admin.settings.search'))->description(__('admin.settings.synonyms_help'))->schema([
+                            Textarea::make('search.synonyms')->label(__('admin.settings.synonyms'))->rows(8)->placeholder(__('admin.settings.synonyms_placeholder')),
+                        ]),
+                    ]),
                     Tab::make(__('admin.settings.tabs.integrations'))->icon(Heroicon::OutlinedPuzzlePiece)->schema([
                         Grid::make(2)->schema(self::integrationEntries()),
                     ]),
@@ -156,6 +170,10 @@ class SiteSettings extends Page
         $flat = Arr::dot($state);
 
         $settings->put($flat);
+
+        if (array_key_exists('search.synonyms', $flat) && config('scout.driver') === 'meilisearch') {
+            dispatch(fn () => Artisan::call('search:sync'))->afterResponse();
+        }
 
         activity('admin')->causedBy(auth()->user())->event('settings_updated')->withProperties(['keys' => array_keys($flat)])->log('settings updated');
 

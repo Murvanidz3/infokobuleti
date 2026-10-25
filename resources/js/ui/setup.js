@@ -1,6 +1,8 @@
 import { registerAuth } from './auth';
 import { registerComponents } from './components';
 import { initFavorites } from './favorites';
+import { registerListing } from './listing';
+import { registerMap } from './map';
 import { initReveal } from './reveal';
 
 // Registers the main font files in the Vite manifest so the layout can preload them.
@@ -19,6 +21,8 @@ import.meta.glob([
 export function setupUi(Alpine) {
     registerComponents(Alpine);
     registerAuth(Alpine);
+    registerListing(Alpine);
+    registerMap(Alpine);
     initFavorites();
     initReveal();
 }

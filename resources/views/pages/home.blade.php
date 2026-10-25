@@ -1,5 +1,5 @@
 <x-layout.app>
-    <x-hero />
+    <x-hero :image="$heroImage" :search-options="$searchOptions" />
 
     <x-section spacing="compact" aria-labelledby="categories-title">
         <h2 id="categories-title" class="sr-only">{{ __('home.categories.title') }}</h2>
@@ -12,7 +12,7 @@
 
     <x-section id="hotels" background="alt" aria-labelledby="hotels-title">
         <div x-data="carousel">
-            <x-section-header id="hotels-title" :title="__('home.hotels.title')" :subtitle="__('home.hotels.subtitle')" href="#" :link-label="__('home.hotels.all')">
+            <x-section-header id="hotels-title" :title="__('home.hotels.title')" :subtitle="__('home.hotels.subtitle')" :href="localized_route('hotels.index')" :link-label="__('home.hotels.all')">
                 <x-slot:actions>
                     <x-carousel.arrows />
                 </x-slot:actions>
@@ -20,7 +20,7 @@
             <x-carousel :label="__('home.hotels.title')" x-ignore>
                 @foreach ($hotels as $hotel)
                     <x-carousel.item>
-                        <x-card.hotel class="h-full" :name="$hotel['name']" :address="$hotel['address']" :sea="$hotel['sea']" :rating="$hotel['rating']" :reviews="$hotel['reviews']" :price="$hotel['price']" :url="$hotel['url']" :image="$hotel['image']" :saved="$hotel['saved']" />
+                        <x-card.hotel class="h-full" :name="$hotel['name']" :address="$hotel['address']" :sea="$hotel['sea']" :rating="$hotel['rating']" :reviews="$hotel['reviews']" :price="$hotel['price']" :url="$hotel['url']" :image="$hotel['image']" :saved="$hotel['saved']" :favorite="$hotel['favorite']" :eager="$loop->first" />
                     </x-carousel.item>
                 @endforeach
             </x-carousel>
@@ -36,7 +36,7 @@
             </x-section-header>
             <div class="grid grid-cols-[repeat(auto-fill,minmax(min(100%,340px),1fr))] gap-6">
                 @foreach ($properties as $property)
-                    <x-card.property :data-segment="$property['deal']" x-ignore :badge="$property['badge']" :price="$property['price']" :converted="$property['converted']" :title="$property['title']" :location="$property['location']" :features="$property['features']" :url="$property['url']" :image="$property['image']" :saved="$property['saved']" />
+                    <x-card.property :data-segment="$property['deal']" x-ignore :badge="$property['badge']" :price="$property['price']" :converted="$property['converted']" :title="$property['title']" :location="$property['location']" :features="$property['features']" :url="$property['url']" :image="$property['image']" :saved="$property['saved']" :favorite="$property['favorite']" />
                 @endforeach
             </div>
         </div>
@@ -45,7 +45,7 @@
     <x-section id="classifieds" background="alt">
         <div class="grid grid-cols-[repeat(auto-fit,minmax(min(100%,460px),1fr))] gap-x-8 gap-y-[clamp(40px,3vw,48px)]">
             <div aria-labelledby="classifieds-title" role="region">
-                <x-section-header size="sm" id="classifieds-title" :title="__('home.classifieds.title')" href="#" />
+                <x-section-header size="sm" id="classifieds-title" :title="__('home.classifieds.title')" :href="localized_route('classifieds.index')" />
                 <x-list-panel>
                     @foreach ($classifieds as $classified)
                         <x-card.classified :title="$classified['title']" :meta="$classified['meta']" :price="$classified['price']" :time="$classified['time']" :icon="$classified['icon']" :is-new="$classified['isNew']" :url="$classified['url']" />
@@ -53,7 +53,7 @@
                 </x-list-panel>
             </div>
             <div id="jobs" aria-labelledby="jobs-title" role="region">
-                <x-section-header size="sm" id="jobs-title" :title="__('home.jobs.title')" href="#" />
+                <x-section-header size="sm" id="jobs-title" :title="__('home.jobs.title')" :href="localized_route('jobs.index')" />
                 <x-list-panel>
                     @foreach ($jobs as $job)
                         <x-card.job :title="$job['title']" :employer="$job['employer']" :salary="$job['salary']" :period="$job['period']" :type="$job['type']" :seasonal="$job['seasonal']" :posted="$job['posted']" :url="$job['url']" />
@@ -64,7 +64,7 @@
     </x-section>
 
     <x-section id="guide" aria-labelledby="guide-title">
-        <x-section-header id="guide-title" :title="__('home.guide.title')" :subtitle="__('home.guide.subtitle')" href="#" :link-label="__('home.guide.all')" />
+        <x-section-header id="guide-title" :title="__('home.guide.title')" :subtitle="__('home.guide.subtitle')" :href="localized_route('guide.index')" :link-label="__('home.guide.all')" />
         <div class="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-[1.3fr_1fr_1fr]">
             @foreach ($guide as $place)
                 <x-card.guide
@@ -80,13 +80,15 @@
     <x-section background="alt" spacing="tight" class="border-y border-line" aria-labelledby="info-title">
         <div class="mb-5 flex flex-wrap items-baseline justify-between gap-4">
             <h2 id="info-title" class="font-serif text-[22px] font-semibold text-navy">{{ __('home.info.title') }}</h2>
-            <span class="text-[13.5px] text-secondary">{{ $info['updated'] }}</span>
+            @if ($info['updated'])
+                <span class="text-[13.5px] text-secondary">{{ $info['updated'] }}</span>
+            @endif
         </div>
         <div class="grid grid-cols-[repeat(auto-fit,minmax(min(100%,250px),1fr))] gap-4">
             <x-info-widget icon="sun" :label="__('home.info.weather')">
                 <div class="flex items-end gap-5">
-                    <x-info-widget.stat size="xl" :value="$info['weather']['air']" :caption="$info['weather']['condition']" />
-                    <x-info-widget.stat size="xl" tone="sea" class="border-l border-line pl-5" :value="$info['weather']['sea']" :caption="__('home.info.sea_water')" />
+                    <x-info-widget.stat size="xl" :value="$info['weather']['air'] ?? '—'" :caption="$info['weather']['condition'] ?? __('site.weather.unavailable')" />
+                    <x-info-widget.stat size="xl" tone="sea" class="border-l border-line pl-5" :value="$info['weather']['sea'] ?? '—'" :caption="__('home.info.sea_water')" />
                 </div>
             </x-info-widget>
             <x-info-widget icon="exchange" :label="__('home.info.rates')">
@@ -109,7 +111,7 @@
     </x-section>
 
     <x-section id="news" aria-labelledby="news-title">
-        <x-section-header id="news-title" :title="__('home.news.title')" :subtitle="__('home.news.subtitle')" href="#" :link-label="__('home.news.all')" />
+        <x-section-header id="news-title" :title="__('home.news.title')" :subtitle="__('home.news.subtitle')" :href="localized_route('news.index')" :link-label="__('home.news.all')" />
         <div class="grid grid-cols-[repeat(auto-fit,minmax(min(100%,320px),1fr))] gap-6">
             @foreach ($news as $item)
                 <x-card.news :tag="$item['tag']" :date="$item['date']" :title="$item['title']" :url="$item['url']" :image="$item['image']" />

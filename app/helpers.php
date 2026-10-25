@@ -7,7 +7,7 @@ if (! function_exists('localized_route')) {
     /**
      * URL of a named localized route in the given (or current) locale.
      *
-     * @param  array<string, mixed>  $parameters
+     * @param  array<array-key, mixed>  $parameters  named values, or models in route-parameter order
      */
     function localized_route(string $name, array $parameters = [], ?string $locale = null, bool $absolute = true): string
     {

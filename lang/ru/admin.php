@@ -107,6 +107,10 @@ return [
         'applications' => [
             'plural' => 'Отклики',
         ],
+        'contact_messages' => [
+            'singular' => 'сообщение',
+            'plural' => 'Сообщения с сайта',
+        ],
     ],
     'sections' => [
         'owner' => 'Владелец',
@@ -263,6 +267,7 @@ return [
         'booking_request' => 'Бронь',
         'vacancy_application' => 'Отклик',
         'user_session' => 'Устройство',
+        'contact_message' => 'Сообщение с сайта',
     ],
     'settings' => [
         'title' => 'Настройки',
@@ -272,6 +277,7 @@ return [
             'listings' => 'Объявления',
             'integrations' => 'Интеграции',
             'maintenance' => 'Техработы',
+            'info' => 'Полезное и поиск',
         ],
         'expiry_days' => 'Срок размещения',
         'expiry_help' => 'Сколько дней опубликованное объявление остаётся активным.',
@@ -290,6 +296,13 @@ return [
             'search' => 'Поиск',
             'queue' => 'Очередь',
         ],
+        'transport' => 'Транспорт',
+        'transport_help' => 'Показывается в блоке «Полезное» на главной. Пустые поля — текст по умолчанию.',
+        'airport_km' => 'Расстояние до аэропорта',
+        'search' => 'Поиск',
+        'synonyms' => 'Синонимы',
+        'synonyms_help' => 'Одна группа на строку через запятую: «ზღვა, sea, море». Поиск найдёт любое слово группы.',
+        'synonyms_placeholder' => 'море, ზღვა, sea',
     ],
     'fields' => [
         'title' => 'Заголовок',
@@ -455,5 +468,13 @@ return [
         'message' => 'Сообщение',
         'owner_note' => 'Заметка владельца',
         'submitted' => 'Отправлено',
+        'info_airport_note' => 'Аэропорт: примечание',
+        'info_railway_value' => 'Ж/д: станция',
+        'info_railway_note' => 'Ж/д: примечание',
+        'topic' => 'Тема',
+    ],
+    'contact' => [
+        'handled' => 'Обработано',
+        'mark_handled' => 'Отметить обработанным',
     ],
 ];

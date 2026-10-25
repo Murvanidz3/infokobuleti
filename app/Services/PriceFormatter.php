@@ -29,6 +29,20 @@ class PriceFormatter
         return $this->format($from, $currency, $locale).'–'.$this->number($to, $locale);
     }
 
+    /**
+     * Short form for map pins: "₾95", "$58K", "₾1.2M".
+     */
+    public function compact(int|float $amount, string $currency = 'GEL'): string
+    {
+        $value = match (true) {
+            $amount >= 1_000_000 => $this->number(round($amount / 1_000_000, 1), 'en').'M',
+            $amount >= 10_000 => $this->number(round($amount / 1_000), 'en').'K',
+            default => $this->number(round($amount), 'en'),
+        };
+
+        return $this->symbol($currency).$value;
+    }
+
     public function symbol(string $currency): string
     {
         return self::SYMBOLS[$currency] ?? $currency.' ';

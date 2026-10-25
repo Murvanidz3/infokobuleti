@@ -16,7 +16,8 @@ return [
     |
     */
 
-    'driver' => env('SCOUT_DRIVER', 'collection'),
+    // "pgsql" (App\Search\PostgresSearchEngine) needs nothing but the database; staging uses Meilisearch.
+    'driver' => env('SCOUT_DRIVER', 'pgsql'),
 
     /*
     |--------------------------------------------------------------------------
@@ -115,40 +116,44 @@ return [
     'algolia' => [
         'id' => env('ALGOLIA_APP_ID', ''),
         'secret' => env('ALGOLIA_SECRET', ''),
+        // Titles first (ranked higher), then descriptions; Georgian, English and Russian side by side.
+        // Synonyms are pushed separately from the admin settings (php artisan search:sync).
         'index-settings' => [
-            // 'users' => [
-            //     'searchableAttributes' => ['id', 'name', 'email'],
-            //     'attributesForFaceting'=> ['filterOnly(email)'],
-            // ],
-        ],
-    ],
-
-    /*
-    |--------------------------------------------------------------------------
-    | Meilisearch Configuration
-    |--------------------------------------------------------------------------
-    |
-    | Here you may configure your Meilisearch settings. Meilisearch is an open
-    | source search engine with minimal configuration. Below, you can state
-    | the host and key information for your own Meilisearch installation.
-    |
-    | See: https://www.meilisearch.com/docs/learn/configuration/instance_options#all-instance-options
-    |
-    */
-
-    'meilisearch' => [
-        'host' => env('MEILISEARCH_HOST', 'http://localhost:7700'),
-        'key' => env('MEILISEARCH_KEY'),
-        'index-settings' => [
-            // 'users' => [
-            //     'filterableAttributes' => ['id', 'name', 'email'],
-            //     'embedders' => [
-            //         'default' => [
-            //             'source' => 'userProvided',
-            //             'dimensions' => 1536,
-            //         ],
-            //     ],
-            // ],
+            App\Models\Hotel::class => [
+                'searchableAttributes' => ['title_ka', 'title_en', 'title_ru', 'description_ka', 'description_en', 'description_ru'],
+                'filterableAttributes' => ['status', 'type', 'stars', 'price', 'distance_to_sea_m', 'rating', '_geo'],
+                'sortableAttributes' => ['published_at', 'promotion_level'],
+            ],
+            App\Models\Property::class => [
+                'searchableAttributes' => ['title_ka', 'title_en', 'title_ru', 'description_ka', 'description_en', 'description_ru'],
+                'filterableAttributes' => ['status', 'deal', 'type', 'price', 'area_m2', 'rooms', '_geo'],
+                'sortableAttributes' => ['published_at', 'promotion_level'],
+            ],
+            App\Models\Classified::class => [
+                'searchableAttributes' => ['title_ka', 'title_en', 'title_ru', 'description_ka', 'description_en', 'description_ru'],
+                'filterableAttributes' => ['status', 'category_id', 'price', '_geo'],
+                'sortableAttributes' => ['published_at', 'promotion_level'],
+            ],
+            App\Models\Vacancy::class => [
+                'searchableAttributes' => ['title_ka', 'title_en', 'title_ru', 'description_ka', 'description_en', 'description_ru'],
+                'filterableAttributes' => ['status', 'category_id', 'employment_type', 'salary_min', '_geo'],
+                'sortableAttributes' => ['published_at', 'promotion_level'],
+            ],
+            App\Models\Place::class => [
+                'searchableAttributes' => ['title_ka', 'title_en', 'title_ru', 'description_ka', 'description_en', 'description_ru'],
+                'filterableAttributes' => ['status', 'type', '_geo'],
+                'sortableAttributes' => ['published_at', 'promotion_level'],
+            ],
+            App\Models\Article::class => [
+                'searchableAttributes' => ['title_ka', 'title_en', 'title_ru', 'excerpt_ka', 'excerpt_en', 'excerpt_ru'],
+                'filterableAttributes' => ['status'],
+                'sortableAttributes' => ['published_at', 'promotion_level'],
+            ],
+            App\Models\Event::class => [
+                'searchableAttributes' => ['title_ka', 'title_en', 'title_ru', 'description_ka', 'description_en', 'description_ru'],
+                'filterableAttributes' => ['status', 'category_id', 'starts_at', '_geo'],
+                'sortableAttributes' => ['published_at', 'promotion_level'],
+            ],
         ],
         'model-settings' => [
             // User::class => [
