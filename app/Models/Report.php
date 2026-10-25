@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Enums\ReportReason;
 use App\Enums\ReportStatus;
+use App\Models\Concerns\LogsStaffActivity;
 use Database\Factories\ReportFactory;
 use Illuminate\Database\Eloquent\Attributes\Guarded;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -15,7 +16,7 @@ use Illuminate\Database\Eloquent\Relations\MorphTo;
 class Report extends Model
 {
     /** @use HasFactory<ReportFactory> */
-    use HasFactory;
+    use HasFactory, LogsStaffActivity;
 
     /** @var array<string, mixed> */
     protected $attributes = ['status' => 'open'];

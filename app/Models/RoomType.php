@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Enums\AmenityScope;
 use App\Models\Concerns\HasMediaGallery;
+use App\Models\Concerns\LogsStaffActivity;
 use Carbon\CarbonInterface;
 use Database\Factories\RoomTypeFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
@@ -19,7 +20,7 @@ use Spatie\Translatable\HasTranslations;
 class RoomType extends Model implements HasMedia
 {
     /** @use HasFactory<RoomTypeFactory> */
-    use HasFactory, HasMediaGallery, HasTranslations;
+    use HasFactory, HasMediaGallery, HasTranslations, LogsStaffActivity;
 
     /** @var list<string> */
     public array $translatable = ['name', 'description'];

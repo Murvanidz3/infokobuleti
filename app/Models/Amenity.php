@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\AmenityScope;
+use App\Models\Concerns\LogsStaffActivity;
 use Database\Factories\AmenityFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Builder;
@@ -18,7 +19,7 @@ use Spatie\Translatable\HasTranslations;
 class Amenity extends Model
 {
     /** @use HasFactory<AmenityFactory> */
-    use HasFactory, HasTranslations;
+    use HasFactory, HasTranslations, LogsStaffActivity;
 
     /** @var list<string> */
     public array $translatable = ['name'];

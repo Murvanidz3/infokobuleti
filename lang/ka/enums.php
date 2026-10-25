@@ -268,4 +268,19 @@ return [
         'invalid' => 'კოდი არასწორია. დარჩა :count მცდელობა.',
         'too_many_attempts' => 'მცდელობების ლიმიტი ამოიწურა. მოითხოვეთ ახალი კოდი.',
     ],
+    'banner_slot' => [
+        'home_top' => 'მთავარი, ზედა',
+        'home_middle' => 'მთავარი, შუა',
+        'listing_sidebar' => 'განცხადება, გვერდითი',
+        'listing_results' => 'ძიების შედეგებში',
+    ],
+    'price_plan_product' => [
+        'vip' => 'VIP',
+        'super_vip' => 'Super VIP',
+        'bump' => 'ამოწევა',
+        'auto_bump' => 'ავტო-ამოწევა',
+        'business_package' => 'ბიზნეს პაკეტი',
+        'featured_hotel' => 'რჩეული სასტუმრო',
+        'banner' => 'ბანერი',
+    ],
 ];

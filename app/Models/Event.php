@@ -8,6 +8,7 @@ use App\Models\Concerns\HasLocation;
 use App\Models\Concerns\HasMediaGallery;
 use App\Models\Concerns\HasSlug;
 use App\Models\Concerns\HasStatus;
+use App\Models\Concerns\LogsStaffActivity;
 use App\Models\Concerns\Reportable;
 use Database\Factories\EventFactory;
 use Illuminate\Database\Eloquent\Attributes\Guarded;
@@ -22,7 +23,7 @@ use Spatie\Translatable\HasTranslations;
 class Event extends Model implements Listing
 {
     /** @use HasFactory<EventFactory> */
-    use Favoritable, HasFactory, HasLocation, HasMediaGallery, HasSlug, HasStatus, HasTranslations, Reportable, SoftDeletes;
+    use Favoritable, HasFactory, HasLocation, HasMediaGallery, HasSlug, HasStatus, HasTranslations, LogsStaffActivity, Reportable, SoftDeletes;
 
     /** @var list<string> */
     public array $translatable = ['title', 'description', 'address', 'venue'];
@@ -57,6 +58,14 @@ class Event extends Model implements Listing
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    /**
+     * @return BelongsTo<BusinessProfile, $this>
+     */
+    public function businessProfile(): BelongsTo
+    {
+        return $this->belongsTo(BusinessProfile::class);
     }
 
     /**

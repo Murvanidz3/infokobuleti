@@ -3,8 +3,9 @@
 namespace App\Enums;
 
 use App\Enums\Concerns\HasLabel;
+use Filament\Support\Contracts\HasLabel as FilamentLabel;
 
-enum EmploymentType: string
+enum EmploymentType: string implements FilamentLabel
 {
     use HasLabel;
 

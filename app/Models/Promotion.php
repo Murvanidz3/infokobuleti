@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\PromotionType;
+use App\Models\Concerns\LogsStaffActivity;
 use Database\Factories\PromotionFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Builder;
@@ -19,7 +20,7 @@ use Illuminate\Database\Eloquent\Relations\MorphTo;
 class Promotion extends Model
 {
     /** @use HasFactory<PromotionFactory> */
-    use HasFactory;
+    use HasFactory, LogsStaffActivity;
 
     protected static function booted(): void
     {

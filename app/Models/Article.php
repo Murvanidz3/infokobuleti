@@ -6,6 +6,7 @@ use App\Contracts\Listing;
 use App\Models\Concerns\HasMediaGallery;
 use App\Models\Concerns\HasSlug;
 use App\Models\Concerns\HasStatus;
+use App\Models\Concerns\LogsStaffActivity;
 use Database\Factories\ArticleFactory;
 use Illuminate\Database\Eloquent\Attributes\Guarded;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -21,7 +22,7 @@ use Spatie\Translatable\HasTranslations;
 class Article extends Model implements Listing
 {
     /** @use HasFactory<ArticleFactory> */
-    use HasFactory, HasMediaGallery, HasSlug, HasStatus, HasTranslations, SoftDeletes;
+    use HasFactory, HasMediaGallery, HasSlug, HasStatus, HasTranslations, LogsStaffActivity, SoftDeletes;
 
     /** @var list<string> */
     public array $translatable = ['title', 'excerpt', 'body'];
@@ -31,6 +32,16 @@ class Article extends Model implements Listing
         return [
             'is_featured' => 'boolean',
         ];
+    }
+
+    /**
+     * Same as author(); every listing module exposes its owner as user().
+     *
+     * @return BelongsTo<User, $this>
+     */
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'user_id');
     }
 
     /**

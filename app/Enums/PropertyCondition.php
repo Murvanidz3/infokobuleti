@@ -3,8 +3,9 @@
 namespace App\Enums;
 
 use App\Enums\Concerns\HasLabel;
+use Filament\Support\Contracts\HasLabel as FilamentLabel;
 
-enum PropertyCondition: string
+enum PropertyCondition: string implements FilamentLabel
 {
     use HasLabel;
 

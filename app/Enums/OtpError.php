@@ -3,11 +3,12 @@
 namespace App\Enums;
 
 use App\Enums\Concerns\HasLabel;
+use Filament\Support\Contracts\HasLabel as FilamentLabel;
 
 /**
  * Why a code could not be sent or accepted. Labels are the messages shown to the user.
  */
-enum OtpError: string
+enum OtpError: string implements FilamentLabel
 {
     use HasLabel;
 

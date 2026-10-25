@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Services\Auth\Impersonation;
 use App\Services\Auth\SessionTracker;
 use Closure;
 use Illuminate\Http\Request;
@@ -20,6 +21,11 @@ class TrackUserSessions
      */
     public function handle(Request $request, Closure $next): Response
     {
+        // While staff browse as another user, the device list of neither account is touched.
+        if ($request->hasSession() && $request->session()->has(Impersonation::SESSION_KEY)) {
+            return $next($request);
+        }
+
         if (Auth::check() && $this->tracker->isRevoked($request)) {
             Auth::guard('web')->logout();
             $request->session()->invalidate();

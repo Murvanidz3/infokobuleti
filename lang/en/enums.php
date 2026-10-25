@@ -266,4 +266,19 @@ return [
         'invalid' => 'Wrong code. :count attempt left.|Wrong code. :count attempts left.',
         'too_many_attempts' => 'Too many wrong attempts. Request a new code.',
     ],
+    'banner_slot' => [
+        'home_top' => 'Homepage, top',
+        'home_middle' => 'Homepage, middle',
+        'listing_sidebar' => 'Listing page, sidebar',
+        'listing_results' => 'In search results',
+    ],
+    'price_plan_product' => [
+        'vip' => 'VIP',
+        'super_vip' => 'Super VIP',
+        'bump' => 'Bump',
+        'auto_bump' => 'Auto-bump',
+        'business_package' => 'Business package',
+        'featured_hotel' => 'Featured hotel',
+        'banner' => 'Banner',
+    ],
 ];

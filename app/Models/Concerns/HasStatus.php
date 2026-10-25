@@ -5,6 +5,7 @@ namespace App\Models\Concerns;
 use App\Enums\ListingStatus;
 use App\Exceptions\InvalidStatusTransition;
 use App\Models\User;
+use App\Services\Settings;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Carbon;
 
@@ -96,9 +97,7 @@ trait HasStatus
      */
     public function expiryDays(): ?int
     {
-        $days = config('listings.expiry_days.'.$this->getMorphClass());
-
-        return is_numeric($days) ? (int) $days : null;
+        return app(Settings::class)->expiryDays($this->getMorphClass());
     }
 
     /**

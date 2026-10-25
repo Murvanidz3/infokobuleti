@@ -3,11 +3,12 @@
 namespace App\Enums;
 
 use App\Enums\Concerns\HasLabel;
+use Filament\Support\Contracts\HasLabel as FilamentLabel;
 
 /**
  * Modules a visitor can search and save searches for.
  */
-enum ListingModule: string
+enum ListingModule: string implements FilamentLabel
 {
     use HasLabel;
 

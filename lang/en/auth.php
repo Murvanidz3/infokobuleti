@@ -149,4 +149,8 @@ return [
         'revoked' => 'The device was signed out.',
         'revoked_others' => 'Signed out :count other device.|Signed out :count other devices.',
     ],
+    'impersonation' => [
+        'notice' => 'You are viewing the site as :name',
+        'leave' => 'Return to admin',
+    ],
 ];

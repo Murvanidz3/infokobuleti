@@ -4,6 +4,7 @@ use App\Http\Middleware\EnsurePhoneIsVerified;
 use App\Http\Middleware\EnsureUserIsOnboarded;
 use App\Http\Middleware\EnsureUserIsStaff;
 use App\Http\Middleware\LogoutBlockedUsers;
+use App\Http\Middleware\MaintenanceForVisitors;
 use App\Http\Middleware\SetLocale;
 use App\Http\Middleware\TrackUserSessions;
 use Illuminate\Cookie\Middleware\EncryptCookies;
@@ -22,6 +23,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->web(append: [
             LogoutBlockedUsers::class,
             TrackUserSessions::class,
+            MaintenanceForVisitors::class,
         ]);
 
         $middleware->alias([

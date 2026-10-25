@@ -6,6 +6,7 @@ use App\Enums\BusinessType;
 use App\Models\Concerns\HasDailyStats;
 use App\Models\Concerns\HasLocation;
 use App\Models\Concerns\HasSlug;
+use App\Models\Concerns\LogsStaffActivity;
 use App\Models\Concerns\Reportable;
 use App\Models\Concerns\Reviewable;
 use Database\Factories\BusinessProfileFactory;
@@ -23,7 +24,7 @@ use Spatie\Translatable\HasTranslations;
 class BusinessProfile extends Model implements HasMedia
 {
     /** @use HasFactory<BusinessProfileFactory> */
-    use HasDailyStats, HasFactory, HasLocation, HasSlug, HasTranslations, InteractsWithMedia, Reportable, Reviewable, SoftDeletes;
+    use HasDailyStats, HasFactory, HasLocation, HasSlug, HasTranslations, InteractsWithMedia, LogsStaffActivity, Reportable, Reviewable, SoftDeletes;
 
     /** @var list<string> */
     public array $translatable = ['description', 'address'];

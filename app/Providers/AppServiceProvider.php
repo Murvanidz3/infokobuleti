@@ -10,9 +10,11 @@ use App\Http\Middleware\SetLocale;
 use App\Models;
 use App\Services\Auth\CloudflareTurnstile;
 use App\Services\Auth\FakeHumanVerifier;
+use App\Services\Auth\Impersonation;
 use App\Services\Auth\SessionTracker;
 use App\Services\Currency\FixedExchangeRates;
 use App\Services\LocaleRouter;
+use App\Services\Settings;
 use App\Services\Sms\SmsManager;
 use Illuminate\Auth\Events\Login;
 use Illuminate\Cache\RateLimiting\Limit;
@@ -54,6 +56,9 @@ class AppServiceProvider extends ServiceProvider
         'promotion' => Models\Promotion::class,
         'payment' => Models\Payment::class,
         'user_session' => Models\UserSession::class,
+        'page' => Models\Page::class,
+        'banner' => Models\Banner::class,
+        'price_plan' => Models\PricePlan::class,
     ];
 
     /**
@@ -66,6 +71,7 @@ class AppServiceProvider extends ServiceProvider
         $this->app->singleton(ExchangeRates::class, fn () => new FixedExchangeRates(config('currency.fallback_rates')));
 
         $this->app->singleton(SmsManager::class);
+        $this->app->singleton(Settings::class);
         $this->app->bind(SmsGateway::class, fn ($app) => $app->make(SmsManager::class)->driver());
 
         $this->app->singleton(HumanVerifier::class, function (): HumanVerifier {
@@ -89,7 +95,7 @@ class AppServiceProvider extends ServiceProvider
         Gate::before(fn (Models\User $user) => $user->hasRole(Role::SuperAdmin->value) ? true : null);
 
         Event::listen(Login::class, function (Login $event): void {
-            if ($event->guard === 'web' && $event->user instanceof Models\User && app()->bound('request') && request()->hasSession()) {
+            if ($event->guard === 'web' && $event->user instanceof Models\User && app()->bound('request') && request()->hasSession() && ! request()->session()->has(Impersonation::SESSION_KEY)) {
                 app(SessionTracker::class)->start(request(), $event->user, $event->remember);
             }
         });

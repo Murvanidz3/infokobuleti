@@ -11,6 +11,7 @@ use App\Models\Concerns\HasLocation;
 use App\Models\Concerns\HasMediaGallery;
 use App\Models\Concerns\HasSlug;
 use App\Models\Concerns\HasStatus;
+use App\Models\Concerns\LogsStaffActivity;
 use App\Models\Concerns\Promotable;
 use App\Models\Concerns\Reportable;
 use App\Models\Concerns\Reviewable;
@@ -28,7 +29,7 @@ use Spatie\Translatable\HasTranslations;
 class Hotel extends Model implements Listing
 {
     /** @use HasFactory<HotelFactory> */
-    use Favoritable, HasDailyStats, HasFactory, HasLocation, HasMediaGallery, HasSlug, HasStatus, HasTranslations, Promotable, Reportable, Reviewable, SoftDeletes;
+    use Favoritable, HasDailyStats, HasFactory, HasLocation, HasMediaGallery, HasSlug, HasStatus, HasTranslations, LogsStaffActivity, Promotable, Reportable, Reviewable, SoftDeletes;
 
     /** @var list<string> */
     public array $translatable = ['title', 'description', 'address'];

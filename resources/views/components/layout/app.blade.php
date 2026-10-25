@@ -32,6 +32,7 @@
 <body class="min-h-screen bg-white">
     <a href="#main" class="sr-only z-[60] rounded-button bg-coral-pressed px-4 py-3 text-sm font-semibold text-white focus:not-sr-only focus:fixed focus:top-3 focus:left-3">{{ __('nav.skip_to_content') }}</a>
 
+    <x-impersonation-bar />
     <x-header />
 
     <main id="main">

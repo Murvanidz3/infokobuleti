@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Enums\Currency;
 use App\Enums\PaymentGateway;
 use App\Enums\PaymentStatus;
+use App\Models\Concerns\LogsStaffActivity;
 use Database\Factories\PaymentFactory;
 use Illuminate\Database\Eloquent\Attributes\Guarded;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -18,7 +19,7 @@ use Illuminate\Support\Str;
 class Payment extends Model
 {
     /** @use HasFactory<PaymentFactory> */
-    use HasFactory;
+    use HasFactory, LogsStaffActivity;
 
     /** @var array<string, mixed> */
     protected $attributes = ['status' => 'pending'];

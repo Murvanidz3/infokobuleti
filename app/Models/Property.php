@@ -15,6 +15,7 @@ use App\Models\Concerns\HasLocation;
 use App\Models\Concerns\HasMediaGallery;
 use App\Models\Concerns\HasSlug;
 use App\Models\Concerns\HasStatus;
+use App\Models\Concerns\LogsStaffActivity;
 use App\Models\Concerns\NormalizesPrice;
 use App\Models\Concerns\Promotable;
 use App\Models\Concerns\Reportable;
@@ -36,7 +37,7 @@ use Spatie\Translatable\HasTranslations;
 class Property extends Model implements Listing
 {
     /** @use HasFactory<PropertyFactory> */
-    use Favoritable, HasDailyStats, HasFactory, HasLocation, HasMediaGallery, HasSlug, HasStatus, HasTranslations, NormalizesPrice, Promotable, Reportable, SoftDeletes;
+    use Favoritable, HasDailyStats, HasFactory, HasLocation, HasMediaGallery, HasSlug, HasStatus, HasTranslations, LogsStaffActivity, NormalizesPrice, Promotable, Reportable, SoftDeletes;
 
     /** @var list<string> */
     public array $translatable = ['title', 'description', 'address'];

@@ -3,8 +3,14 @@
 namespace App\Models;
 
 use App\Enums\AccountType;
+use App\Enums\Permission;
 use App\Enums\Role;
+use App\Models\Concerns\LogsStaffActivity;
 use Database\Factories\UserFactory;
+use Filament\Models\Contracts\FilamentUser;
+use Filament\Models\Contracts\HasName;
+use Filament\Panel;
+use Illuminate\Contracts\Translation\HasLocalePreference;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Casts\Attribute;
@@ -20,10 +26,10 @@ use Spatie\Permission\Traits\HasRoles;
 
 #[Fillable(['name', 'email', 'phone', 'password', 'avatar', 'locale', 'account_type'])]
 #[Hidden(['password', 'remember_token', 'google_id', 'two_factor_secret', 'two_factor_recovery_codes'])]
-class User extends Authenticatable implements HasMedia
+class User extends Authenticatable implements FilamentUser, HasLocalePreference, HasMedia, HasName
 {
     /** @use HasFactory<UserFactory> */
-    use HasFactory, HasRoles, InteractsWithMedia, Notifiable, SoftDeletes;
+    use HasFactory, HasRoles, InteractsWithMedia, LogsStaffActivity, Notifiable, SoftDeletes;
 
     /**
      * Get the attributes that should be cast.
@@ -60,6 +66,30 @@ class User extends Authenticatable implements HasMedia
             fn (Role $role): string => $role->value,
             array_filter(Role::cases(), fn (Role $role): bool => $role->isStaff()),
         ));
+    }
+
+    /**
+     * The admin panel is for staff who passed the staff sign-in with two-factor authentication.
+     */
+    public function canAccessPanel(Panel $panel): bool
+    {
+        return ! $this->is_blocked
+            && $this->isStaff()
+            && $this->hasTwoFactorEnabled()
+            && $this->can(Permission::AccessAdmin->value);
+    }
+
+    public function getFilamentName(): string
+    {
+        return $this->name ?? $this->email ?? (string) $this->phone;
+    }
+
+    /**
+     * Notifications (moderation results and the like) go out in the user's language.
+     */
+    public function preferredLocale(): string
+    {
+        return $this->locale ?: config('locales.default');
     }
 
     public function hasVerifiedPhone(): bool

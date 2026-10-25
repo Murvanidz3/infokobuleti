@@ -3,11 +3,12 @@
 namespace App\Enums;
 
 use App\Enums\Concerns\HasLabel;
+use Filament\Support\Contracts\HasLabel as FilamentLabel;
 
 /**
  * Staff permissions (spatie/laravel-permission). super_admin passes every check through Gate::before.
  */
-enum Permission: string
+enum Permission: string implements FilamentLabel
 {
     use HasLabel;
 

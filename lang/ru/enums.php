@@ -266,4 +266,19 @@ return [
         'invalid' => 'Неверный код. Осталась :count попытка.|Неверный код. Осталось :count попытки.|Неверный код. Осталось :count попыток.',
         'too_many_attempts' => 'Превышен лимит попыток. Запросите новый код.',
     ],
+    'banner_slot' => [
+        'home_top' => 'Главная, верх',
+        'home_middle' => 'Главная, середина',
+        'listing_sidebar' => 'Страница объявления, сбоку',
+        'listing_results' => 'В результатах поиска',
+    ],
+    'price_plan_product' => [
+        'vip' => 'VIP',
+        'super_vip' => 'Super VIP',
+        'bump' => 'Поднятие',
+        'auto_bump' => 'Автоподнятие',
+        'business_package' => 'Бизнес-пакет',
+        'featured_hotel' => 'Избранный отель',
+        'banner' => 'Баннер',
+    ],
 ];

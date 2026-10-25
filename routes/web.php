@@ -3,6 +3,7 @@
 use App\Http\Controllers\Account\AccountSecurityController;
 use App\Http\Controllers\Account\OnboardingController;
 use App\Http\Controllers\Account\VerifyPhoneController;
+use App\Http\Controllers\Admin\ImpersonationController;
 use App\Http\Controllers\Auth\GoogleController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\LogoutController;
@@ -20,6 +21,12 @@ use Illuminate\Support\Facades\Route;
 // Not localized: the OAuth callback must match the URI registered with Google; webhooks are machine-to-machine.
 Route::get('/auth/google/callback', [GoogleController::class, 'callback'])->name('auth.google.callback');
 Route::post('/webhooks/sms/twilio', TwilioStatusController::class)->name('webhooks.sms.twilio');
+
+// Staff support: browse the site as a user (started from the admin), and come back.
+Route::middleware('auth')->group(function (): void {
+    Route::post('/admin/impersonate/{user}', [ImpersonationController::class, 'start'])->middleware('staff')->name('impersonation.start');
+    Route::post('/impersonation/leave', [ImpersonationController::class, 'leave'])->name('impersonation.leave');
+});
 
 app(LocaleRouter::class)->group(function (): void {
     Route::get('/', HomeController::class)->name('home');
