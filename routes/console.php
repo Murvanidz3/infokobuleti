@@ -33,3 +33,6 @@ Schedule::command('sitemap:generate')->dailyAt('03:40')->withoutOverlapping()->o
 
 // Expired account-data exports are removed after their download link stops working.
 Schedule::command('privacy:prune-exports')->dailyAt('04:40')->onOneServer();
+
+// Server and application health every five minutes; problems go to the alert channels.
+Schedule::command('monitor:check')->everyFiveMinutes()->withoutOverlapping()->onOneServer()->runInBackground();

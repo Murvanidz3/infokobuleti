@@ -182,6 +182,6 @@ return [
         'amount' => 'Amount',
         'refunded' => 'Refunded',
         'total' => 'Total paid',
-        'footer' => 'This invoice was created automatically and needs no signature. Questions: info@infokobuleti.com',
+        'footer' => 'This invoice was created automatically and needs no signature. Questions: contact@infokobuleti.com',
     ],
 ];

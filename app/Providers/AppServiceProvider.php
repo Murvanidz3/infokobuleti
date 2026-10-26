@@ -25,6 +25,9 @@ use App\Services\Favorites;
 use App\Services\Geo\FakeGeocoder;
 use App\Services\Geo\NominatimGeocoder;
 use App\Services\LocaleRouter;
+use App\Services\Monitoring\Alerts;
+use App\Services\Monitoring\LogAlertChannel;
+use App\Services\Monitoring\TelegramAlertChannel;
 use App\Services\Payments\PaymentGatewayManager;
 use App\Services\Push\FakePushSender;
 use App\Services\Push\WebPushSender;
@@ -104,6 +107,12 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
+        // System alerts: always the log file, Telegram once a bot and a chat id are configured.
+        $this->app->singleton(Alerts::class, fn ($app): Alerts => new Alerts($app->make('cache.store'), [
+            $app->make(LogAlertChannel::class),
+            $app->make(TelegramAlertChannel::class),
+        ]));
+
         $this->app->singleton(LocaleRouter::class);
 
         $this->app->singleton(FixedExchangeRates::class, fn () => new FixedExchangeRates(config('currency.fallback_rates')));

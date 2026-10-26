@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Site;
 
 use App\Http\Controllers\Controller;
+use App\Services\Settings;
 use Illuminate\Http\Response;
 
 /**
@@ -14,9 +15,10 @@ class RobotsController extends Controller
     /** Private or endless areas, in every language prefix. */
     public const array PRIVATE_PATHS = ['/account', '/admin', '/staff', '/login', '/onboarding', '/payments', '/livewire', '/search', '/offline', '/auth'];
 
-    public function __invoke(): Response
+    public function __invoke(Settings $settings): Response
     {
-        if (! app()->isProduction() || ! config('seo.indexable')) {
+        // Closed while the site is in maintenance (e.g. production before the launch).
+        if (! app()->isProduction() || ! config('seo.indexable') || $settings->maintenanceMode()) {
             return $this->text("User-agent: *\nDisallow: /\n");
         }
 

@@ -40,7 +40,7 @@ return [
             'name' => env('INVOICE_SELLER_NAME', 'infokobuleti.com'),
             'tax_id' => env('INVOICE_SELLER_TAX_ID'),
             'address' => env('INVOICE_SELLER_ADDRESS'),
-            'email' => env('INVOICE_SELLER_EMAIL', 'info@infokobuleti.com'),
+            'email' => env('INVOICE_SELLER_EMAIL', 'contact@infokobuleti.com'),
             'iban' => env('INVOICE_SELLER_IBAN'),
         ],
         /* Noto Sans + Noto Sans Georgian merged into one TrueType file (SIL OFL) for the PDF renderer. */

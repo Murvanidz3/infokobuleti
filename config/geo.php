@@ -8,7 +8,7 @@ return [
     'geocoder' => [
         'driver' => env('GEOCODER_DRIVER', 'nominatim'),
         'url' => env('NOMINATIM_URL', 'https://nominatim.openstreetmap.org/search'),
-        'user_agent' => env('NOMINATIM_USER_AGENT', 'infokobuleti.com (info@infokobuleti.com)'),
+        'user_agent' => env('NOMINATIM_USER_AGENT', 'infokobuleti.com (contact@infokobuleti.com)'),
         // west, north, east, south: Kobuleti municipality.
         'viewbox' => [41.62, 41.95, 42.15, 41.62],
     ],

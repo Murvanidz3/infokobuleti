@@ -27,7 +27,7 @@ return [
 
     'contact' => [
         'phone' => '+995 422 29 00 00',
-        'email' => 'info@infokobuleti.com',
+        'email' => 'contact@infokobuleti.com',
     ],
 
     'social' => [

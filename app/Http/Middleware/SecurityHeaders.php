@@ -22,6 +22,11 @@ class SecurityHeaders
      */
     public function handle(Request $request, Closure $next, ?string $area = null): Response
     {
+        // Horizon and Pulse dashboards ship their own inline scripts: no CSP there either.
+        if ($area === null && $request->is('horizon', 'horizon/*', 'pulse', 'pulse/*')) {
+            $area = 'admin';
+        }
+
         $nonce = $area === 'admin' ? '' : Vite::useCspNonce();
 
         $response = $next($request);

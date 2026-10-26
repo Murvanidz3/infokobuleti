@@ -13,7 +13,7 @@ use Symfony\Component\HttpFoundation\Response;
  */
 class MaintenanceForVisitors
 {
-    private const array ALWAYS_OPEN = ['admin', 'admin/*', 'livewire/*', '*staff/*', 'logout', 'webhooks/*', 'up'];
+    private const array ALWAYS_OPEN = ['admin', 'admin/*', 'livewire/*', 'livewire-*/*', '*staff/*', 'logout', 'webhooks/*', 'up', 'robots.txt'];
 
     public function __construct(private Settings $settings) {}
 

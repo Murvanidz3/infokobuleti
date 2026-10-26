@@ -1,0 +1,134 @@
+# Tests every push and pull request. After green tests, a push to "develop" deploys to staging and a
+# push to "main" deploys to production (zero downtime, see deploy/ and docs/RUNBOOK.md).
+#
+# Repository secrets for deploys (Settings > Secrets and variables > Actions):
+#   DEPLOY_HOST         VPS address
+#   DEPLOY_PORT         SSH port (optional, default 22)
+#   DEPLOY_SSH_KEY      private key whose public half is the forced-command key of the "deploy" user
+#   DEPLOY_KNOWN_HOSTS  output of: ssh-keyscan -p <port> <host>
+# Without DEPLOY_SSH_KEY the deploy job only builds the package and skips the upload.
+name: CI
+
+on:
+  push:
+    branches: [develop, main]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  PHP_VERSION: '8.4'
+  PHP_EXTENSIONS: pdo_pgsql, pgsql, redis, gd, intl, bcmath, gmp, exif, zip, pcntl, posix
+
+jobs:
+  tests:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    services:
+      postgres:
+        image: pgvector/pgvector:pg17
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: infokobuleti_test
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 20
+      redis:
+        image: redis:7
+        ports: ['6379:6379']
+    env:
+      DB_HOST: 127.0.0.1
+      DB_PORT: 5432
+      DB_USERNAME: postgres
+      DB_PASSWORD: postgres
+      REDIS_HOST: 127.0.0.1
+      REDIS_PASSWORD: ''
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ env.PHP_VERSION }}
+          extensions: ${{ env.PHP_EXTENSIONS }}
+          coverage: none
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Composer cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/composer
+          key: composer-${{ hashFiles('composer.lock') }}
+
+      - run: composer install --no-interaction --prefer-dist --no-progress
+      - run: npm ci --no-audit --no-fund
+      - run: npm run build
+
+      - name: Environment
+        run: cp .env.example .env && php artisan key:generate --no-interaction
+
+      - run: vendor/bin/pint --test
+      - run: vendor/bin/phpstan analyse --no-progress --memory-limit=2G
+      - run: php artisan test --parallel --processes=4
+
+  deploy:
+    needs: tests
+    if: github.event_name == 'push'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    env:
+      TARGET: ${{ github.ref_name == 'main' && 'production' || 'staging' }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ env.PHP_VERSION }}
+          extensions: ${{ env.PHP_EXTENSIONS }}
+          coverage: none
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Production packages and assets
+        run: |
+          composer install --no-dev --no-interaction --prefer-dist --no-progress --optimize-autoloader
+          npm ci --no-audit --no-fund
+          npm run build
+
+      - name: Package the release
+        run: |
+          tar -czf "$RUNNER_TEMP/release.tgz" \
+            --exclude=./.git --exclude=./.github --exclude=./node_modules --exclude=./tests \
+            --exclude=./storage --exclude=./.env --exclude=./design-reference --exclude=./.cursor \
+            --exclude=./public/hot --exclude=./public/storage .
+          ls -lh "$RUNNER_TEMP/release.tgz"
+
+      - name: Upload and activate on the server
+        env:
+          SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+          KNOWN_HOSTS: ${{ secrets.DEPLOY_KNOWN_HOSTS }}
+          HOST: ${{ secrets.DEPLOY_HOST }}
+          PORT: ${{ secrets.DEPLOY_PORT }}
+        run: |
+          if [ -z "$SSH_KEY" ] || [ -z "$HOST" ]; then
+            echo "::warning::Deploy secrets are not set: the package was built but not uploaded."
+            exit 0
+          fi
+          install -d -m 700 ~/.ssh
+          printf '%s\n' "$SSH_KEY" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          printf '%s\n' "$KNOWN_HOSTS" > ~/.ssh/known_hosts
+          ssh -i ~/.ssh/deploy_key -p "${PORT:-22}" -o BatchMode=yes "deploy@$HOST" "$TARGET" < "$RUNNER_TEMP/release.tgz"

@@ -81,6 +81,14 @@ return [
             'replace_placeholders' => true,
         ],
 
+        'alerts' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/alerts.log'),
+            'level' => 'warning',
+            'days' => 60,
+            'replace_placeholders' => true,
+        ],
+
         // Failed sign-ins with the client address; fail2ban reads this file on the server.
         'auth' => [
             'driver' => 'single',
