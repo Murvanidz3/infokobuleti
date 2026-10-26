@@ -130,6 +130,16 @@
 
                 <x-detail.section :title="__('site.reviews.title')" id="reviews">
                     <x-detail.reviews :reviews="$reviews" :rating="$hotel->rating_avg ? number_format((float) $hotel->rating_avg, 1) : null" :count="$hotel->reviews_count" />
+                    @unless ($preview)
+                        @auth
+                            <livewire:site.review-form :hotel-id="$hotel->id" />
+                        @else
+                            {{-- Guests get plain text (no Livewire bundle on public hotel pages). --}}
+                            <p class="mt-6 rounded-card border border-line bg-surface-alt p-5 text-[14.5px] text-secondary">{{ __('site.reviews.form.guest') }}
+                                <a href="{{ localized_route('login') }}" class="font-semibold text-navy underline" x-data x-on:click.prevent="$dispatch('require-login')">{{ __('site.reviews.form.sign_in') }}</a>
+                            </p>
+                        @endauth
+                    @endunless
                 </x-detail.section>
             </div>
 

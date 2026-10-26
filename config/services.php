@@ -43,6 +43,19 @@ return [
         'secret_key' => env('TURNSTILE_SECRET_KEY'),
     ],
 
+    /*
+    | Telegram bot (Phase 9): moderation messages to staff with approve / reject buttons and
+    | saved-search alerts to users who linked their account. The webhook URL is
+    | /webhooks/telegram/{webhook_secret} (registered with: php artisan telegram:webhook).
+    | "moderation_chat_id" optionally adds a staff group chat.
+    */
+    'telegram' => [
+        'bot_token' => env('TELEGRAM_BOT_TOKEN'),
+        'bot_username' => env('TELEGRAM_BOT_USERNAME'),
+        'webhook_secret' => env('TELEGRAM_WEBHOOK_SECRET'),
+        'moderation_chat_id' => env('TELEGRAM_MODERATION_CHAT_ID'),
+    ],
+
     'slack' => [
         'notifications' => [
             'bot_user_oauth_token' => env('SLACK_BOT_USER_OAUTH_TOKEN'),

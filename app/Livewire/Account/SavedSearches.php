@@ -2,12 +2,13 @@
 
 namespace App\Livewire\Account;
 
-use App\Enums\ListingModule;
 use App\Enums\NotificationChannel;
 use App\Enums\SearchFrequency;
+use App\Enums\SiteFeature;
 use App\Models\SavedSearch;
 use App\Models\User;
 use App\Services\DateFormatter;
+use App\Support\Features;
 use Illuminate\Contracts\View\View;
 use Illuminate\Validation\Rule;
 use Livewire\Component;
@@ -17,9 +18,6 @@ use Livewire\Component;
  */
 class SavedSearches extends Component
 {
-    /** Channels that already deliver alerts; push and Telegram arrive with Phase 9. */
-    public const array AVAILABLE_CHANNELS = ['email'];
-
     public ?int $editing = null;
 
     public string $name = '';
@@ -114,25 +112,23 @@ class SavedSearches extends Component
         return view('livewire.account.saved-searches', [
             'searches' => $searches,
             'channelOptions' => NotificationChannel::options(),
+            'availableChannels' => array_values(array_filter([
+                NotificationChannel::Email->value,
+                Features::active(SiteFeature::WebPush) ? NotificationChannel::Push->value : null,
+                Features::active(SiteFeature::TelegramBot) ? NotificationChannel::Telegram->value : null,
+            ])),
+            'channelHints' => array_filter([
+                NotificationChannel::Email->value => blank($this->user()->email) ? __('alerts.hints.no_email') : null,
+                NotificationChannel::Push->value => ! $this->user()->pushSubscriptions()->exists() ? __('alerts.hints.no_push') : null,
+                NotificationChannel::Telegram->value => blank($this->user()->telegram_chat_id) ? __('alerts.hints.no_telegram') : null,
+            ]),
             'frequencyOptions' => SearchFrequency::options(),
         ]);
     }
 
-    /**
-     * The module's list page with the saved filters; with $edit, "save" there updates this search.
-     */
     private function resultsUrl(SavedSearch $search, bool $edit = false): string
     {
-        $route = match ($search->module) {
-            ListingModule::Hotels => 'hotels.index',
-            ListingModule::Properties => 'real-estate.index',
-            ListingModule::Classifieds => 'classifieds.index',
-            ListingModule::Vacancies => 'jobs.index',
-        };
-
-        $query = http_build_query(array_filter([...($search->filters ?? []), 'saved' => $edit ? $search->id : null], fn (mixed $value): bool => $value !== null));
-
-        return localized_route($route).($query !== '' ? '?'.$query : '');
+        return $search->resultsUrl($edit);
     }
 
     private function find(int $id): SavedSearch

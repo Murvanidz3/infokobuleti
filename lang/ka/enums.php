@@ -336,4 +336,14 @@ return [
         'refund' => 'დაბრუნება',
         'error' => 'შეცდომა',
     ],
+    'site_feature' => [
+        'search-alerts' => 'შენახული ძებნის შეტყობინებები',
+        'web-push' => 'ბრაუზერის push შეტყობინებები',
+        'telegram-bot' => 'Telegram ბოტი',
+        'price-insight' => 'ფასის ანალიზი',
+        'pwa' => 'აპლიკაცია (PWA)',
+        'seasonal-home' => 'სეზონური მთავარი გვერდი',
+        'trust-layer' => 'ნდობის ფენა',
+        'business-insights' => 'ბიზნეს ანალიტიკის დამატებები',
+    ],
 ];

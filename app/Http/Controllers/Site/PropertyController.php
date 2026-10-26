@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Controllers\Site\Concerns\ShowsListing;
 use App\Models\Property;
 use App\Services\Favorites;
+use App\Services\Insights\PriceInsight;
 use App\Services\PriceFormatter;
 use App\Support\Listings\CardPresenter;
 use App\Support\Listings\Contact;
@@ -53,6 +54,7 @@ class PropertyController extends Controller
         return view('pages.real-estate.show', [
             'property' => $property,
             'card' => $cards->property($property),
+            'insight' => app(PriceInsight::class)->forProperty($property),
             'preview' => $preview,
             'gallery' => $detail->gallery($property),
             'facts' => $facts,

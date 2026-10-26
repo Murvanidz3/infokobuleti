@@ -27,6 +27,7 @@ use App\Models\Location;
 use App\Models\User;
 use App\Services\Account\OwnerListings;
 use App\Services\DateFormatter;
+use App\Services\Insights\PriceInsight;
 use App\Services\Listings\ListingLimits;
 use App\Services\Media\ImageSanitizer;
 use App\Services\PriceFormatter;
@@ -361,6 +362,9 @@ class ListingWizard extends Component
             'schemaFields' => $this->type === 'classified' ? $this->schemaFields() : [],
             'sea' => SeaDistance::meters(is_numeric($this->form['lat'] ?? null) ? (float) $this->form['lat'] : null, is_numeric($this->form['lng'] ?? null) ? (float) $this->form['lng'] : null),
             'summary' => ListingForm::STEPS[$this->step - 1] === 'preview' ? $this->summary($price) : [],
+            'priceInsight' => $this->type === 'property' && ListingForm::STEPS[$this->step - 1] === 'price'
+                ? app(PriceInsight::class)->estimate($this->form['deal'] ?? null, $this->form['property_type'] ?? null, $this->form['price'] ?? null, $this->form['currency'] ?? null, $this->form['area_m2'] ?? null, $this->form['location_id'] ?? null)
+                : null,
             'editing' => $this->editType !== null,
             'cancelUrl' => $this->editType !== null ? localized_route('account.listings', ['type' => $this->editType]) : localized_route('account'),
         ]);

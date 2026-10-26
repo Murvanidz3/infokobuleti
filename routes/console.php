@@ -24,3 +24,6 @@ Schedule::command('promotions:run')->everyTenMinutes()->withoutOverlapping()->on
 
 // Card payments whose callback never came are re-checked with the bank; abandoned orders close.
 Schedule::command('payments:reconcile')->everyFifteenMinutes()->withoutOverlapping()->onOneServer();
+
+// Saved-search alerts: instant ones every run, daily and weekly ones from 09:00.
+Schedule::command('alerts:run')->everyTenMinutes()->withoutOverlapping()->onOneServer();

@@ -54,6 +54,7 @@ class Property extends Model implements Listing, SearchableListing
             'type' => PropertyType::class,
             'condition' => PropertyCondition::class,
             'building_status' => BuildingStatus::class,
+            'owner_verified_at' => 'datetime',
             'listed_by' => ListedBy::class,
             'area_m2' => 'float',
             'land_area_m2' => 'float',

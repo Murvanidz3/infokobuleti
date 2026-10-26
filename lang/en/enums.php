@@ -334,4 +334,14 @@ return [
         'refund' => 'Refund',
         'error' => 'Error',
     ],
+    'site_feature' => [
+        'search-alerts' => 'Saved-search alerts',
+        'web-push' => 'Browser push notifications',
+        'telegram-bot' => 'Telegram bot',
+        'price-insight' => 'Price check',
+        'pwa' => 'Installable app (PWA)',
+        'seasonal-home' => 'Seasonal homepage',
+        'trust-layer' => 'Trust layer',
+        'business-insights' => 'Business analytics extras',
+    ],
 ];

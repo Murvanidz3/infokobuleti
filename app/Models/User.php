@@ -340,4 +340,19 @@ class User extends Authenticatable implements FilamentUser, HasLocalePreference,
     {
         return $this->businessSubscriptions()->active()->latest('ends_at')->first();
     }
+
+    /**
+     * Browsers that accept web push notifications for this user.
+     *
+     * @return HasMany<PushSubscription, $this>
+     */
+    public function pushSubscriptions(): HasMany
+    {
+        return $this->hasMany(PushSubscription::class);
+    }
+
+    public function hasTelegram(): bool
+    {
+        return filled($this->telegram_chat_id);
+    }
 }

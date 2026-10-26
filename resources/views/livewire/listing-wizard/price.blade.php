@@ -59,6 +59,9 @@
                 </label>
             @endif
         </section>
+        @if ($priceInsight ?? null)
+            <x-insights.price :insight="$priceInsight" owner />
+        @endif
         @php
             $fields = [
             $input('contact_name', __('account.wizard.fields.contact_name'), 'text', ['autocomplete' => 'name', 'maxlength' => 120], true),

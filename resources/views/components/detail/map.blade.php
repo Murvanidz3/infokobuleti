@@ -22,9 +22,9 @@
             </a>
         </div>
         @if ($nearby)
-            <ul class="mt-5 grid gap-2 xs:grid-cols-2">
+            <ul class="mt-5 grid grid-cols-1 gap-2 xs:grid-cols-2">
                 @foreach ($nearby as $place)
-                    <li>
+                    <li class="min-w-0">
                         <a href="{{ $place['url'] }}" class="flex items-center gap-3 rounded-tile border border-line p-2.5 hover:border-line-strong">
                             <span class="size-12 shrink-0 overflow-hidden rounded-chip bg-line"><x-image :src="$place['image']" alt="" /></span>
                             <span class="min-w-0">

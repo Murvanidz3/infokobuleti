@@ -195,6 +195,8 @@ return [
         'verified_phone' => 'Phone verified',
         'show_phone' => 'Show phone',
         'write' => 'Send a message',
+        'owner_verified' => 'Owner verified',
+        'owner_verified_help' => 'Our team checked the ownership documents.',
     ],
     'message' => [
         'title' => 'Message the owner',
@@ -238,6 +240,23 @@ return [
         'title' => 'Reviews',
         'none' => 'No reviews yet.',
         'reply' => 'Reply from the owner',
+        'form' => [
+            'title' => 'Write a review',
+            'rating' => 'Rating from 1 to 10',
+            'body' => 'Your impressions',
+            'submit' => 'Send',
+            'moderated' => 'Reviews appear after moderation.',
+            'sent' => 'Thank you! Your review appears after moderation.',
+            'not_allowed' => 'You cannot review this now.',
+            'guest' => 'To write a review,',
+            'sign_in' => 'sign in',
+            'blocked' => [
+                'own' => 'You cannot review your own hotel.',
+                'blocked' => 'Your account is restricted.',
+                'already' => 'You already reviewed this hotel.',
+                'no_contact' => 'Reviews come from guests who sent the hotel a booking request or exchanged messages with it, so every review is genuine.',
+            ],
+        ],
     ],
     'business' => [
         'about' => 'About the business',

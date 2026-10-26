@@ -142,4 +142,9 @@ return [
         'text' => 'List your hotel, property or vacancy and reach the guests and locals who are searching in Kobuleti.',
         'button' => 'Post a listing',
     ],
+    'events' => [
+        'title' => 'Upcoming events',
+        'subtitle' => 'What is on in Kobuleti in the coming days',
+        'all' => 'All events',
+    ],
 ];

@@ -2,9 +2,13 @@
 
 namespace App\Livewire\Billing;
 
+use App\Enums\SiteFeature;
+use App\Models\Property;
 use App\Models\User;
 use App\Services\Account\OwnerListings;
 use App\Services\DateFormatter;
+use App\Services\Insights\PriceInsight;
+use App\Support\Features;
 use App\Support\Listings\PublicUrl;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Model;
@@ -68,8 +72,13 @@ class Analytics extends Component
             }
         }
 
+        $insights = Features::active(SiteFeature::BusinessInsights);
+
         return view('livewire.billing.analytics', [
             'locked' => false,
+            'insights' => $insights,
+            'conversion' => $totals['views'] > 0 ? round(($totals['phone_reveals'] + $totals['messages']) / $totals['views'] * 100, 1) : null,
+            'bestDay' => $insights ? $this->findBestDay($user) : null,
             'until' => $dates->date($subscription->ends_at),
             'series' => $series,
             'max' => max(1, ...array_column($series, 'views')),
@@ -77,6 +86,26 @@ class Analytics extends Component
             'top' => $this->top($user, $from),
             'periods' => collect(self::PERIODS)->mapWithKeys(fn (int $days): array => [$days => trans_choice('billing.days', $days, ['count' => $days])])->all(),
         ]);
+    }
+
+    /**
+     * The weekday on which the user's listings get the most views (last 90 days): the best day to
+     * bump. Null without enough data.
+     */
+    private function findBestDay(User $user): ?string
+    {
+        $rows = $this->stats($user, Carbon::today()->subDays(89))
+            ->selectRaw('extract(isodow from date) as weekday, avg(views) as views, count(*) as days')
+            ->groupByRaw('extract(isodow from date)')
+            ->get();
+
+        if ($rows->sum('days') < 14) {
+            return null;
+        }
+
+        $best = $rows->sortByDesc('views')->first();
+
+        return $best !== null ? Carbon::now()->startOfWeek()->addDays((int) $best->weekday - 1)->locale(app()->getLocale())->translatedFormat('l') : null;
     }
 
     private function stats(User $user, Carbon $from): QueryBuilder
@@ -94,7 +123,7 @@ class Analytics extends Component
     }
 
     /**
-     * @return list<array{title: string, module: string, url: ?string, views: int, phone_reveals: int, favorites: int, messages: int}>
+     * @return list<array{conversion: ?float, price: ?array<string, mixed>, title: string, module: string, url: ?string, views: int, phone_reveals: int, favorites: int, messages: int}>
      */
     private function top(User $user, Carbon $from): array
     {
@@ -122,6 +151,8 @@ class Analytics extends Component
             $model = $models[$row->statable_type.':'.$row->statable_id] ?? null;
 
             return $model === null ? null : [
+                'conversion' => (int) $row->views > 0 ? round(((int) $row->phone_reveals + (int) $row->messages) / (int) $row->views * 100, 1) : null,
+                'price' => $model instanceof Property ? app(PriceInsight::class)->forProperty($model) : null,
                 'title' => (string) $model->getAttribute('title'),
                 'module' => __('account.types.'.$row->statable_type),
                 'url' => method_exists($model, 'isPublished') && $model->isPublished() ? PublicUrl::for($model) : null,

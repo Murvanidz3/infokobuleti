@@ -6,6 +6,7 @@ use App\Enums\Currency;
 use App\Enums\PropertyDeal;
 use App\Enums\PropertyType;
 use App\Enums\SalaryPeriod;
+use App\Enums\SiteFeature;
 use App\Models\Article;
 use App\Models\BusinessProfile;
 use App\Models\Classified;
@@ -17,6 +18,7 @@ use App\Models\Vacancy;
 use App\Services\DateFormatter;
 use App\Services\Favorites;
 use App\Services\PriceFormatter;
+use App\Support\Features;
 use App\View\Components\Icon;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Carbon;
@@ -60,7 +62,7 @@ class CardPresenter
     }
 
     /**
-     * @return array{favorite: string, deal: string, badge: string, price: string, converted: ?string, title: string, location: string, features: list<array{icon: string, text: string}>, url: string, image: ?string, saved: bool, lat: ?float, lng: ?float, pin: string, promotion: ?string, logo: ?string}
+     * @return array{favorite: string, deal: string, badge: string, price: string, converted: ?string, title: string, location: string, features: list<array{icon: string, text: string}>, url: string, image: ?string, saved: bool, lat: ?float, lng: ?float, pin: string, promotion: ?string, logo: ?string, ownerVerified: bool}
      */
     public function property(Property $property): array
     {
@@ -94,6 +96,7 @@ class CardPresenter
             'pin' => $this->price->compact($amount, $currency),
             'promotion' => $this->promotion($property),
             'logo' => $this->packageLogo($property),
+            'ownerVerified' => $property->owner_verified_at !== null && Features::active(SiteFeature::TrustLayer),
         ];
     }
 

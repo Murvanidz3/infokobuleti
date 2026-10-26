@@ -112,10 +112,11 @@ it('counts listings per category tile and caches the blocks until a listing chan
     Hotel::factory()->count(2)->create();
     Hotel::factory()->pending()->create();
 
-    $first = app(HomepageData::class)->categories();
-    expect($first[0]['count'])->toContain('2');
+    // The tile order follows the season, so the hotels tile is found by its icon.
+    $hotels = fn (): array => collect(app(HomepageData::class)->categories())->firstWhere('icon', 'bed');
+    expect($hotels()['count'])->toContain('2');
 
     Hotel::factory()->create();
 
-    expect(app(HomepageData::class)->categories()[0]['count'])->toContain('3');
+    expect($hotels()['count'])->toContain('3');
 });

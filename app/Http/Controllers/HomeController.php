@@ -18,6 +18,8 @@ class HomeController extends Controller
             'guide' => $data->guide(),
             'info' => $data->usefulInfo(),
             'news' => $data->news(),
+            'events' => $data->events(),
+            'sections' => $data->sections(),
             'heroImage' => $data->heroImage(),
             'searchOptions' => $data->searchOptions(),
         ]);

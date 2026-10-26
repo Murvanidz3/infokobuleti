@@ -50,6 +50,7 @@
         <x-pagination :paginator="$paginator" class="mt-8" />
     </section>
 
+    <div class="flex flex-col gap-4">
     <aside aria-labelledby="preferences-title" class="rounded-panel border border-line bg-white p-5 shadow-card">
         <h2 id="preferences-title" class="font-serif text-[19px] font-semibold text-navy">{{ __('account.notifications.preferences') }}</h2>
         <p class="mt-1.5 text-[13.5px] leading-normal text-secondary">
@@ -69,4 +70,6 @@
             @endif
         </form>
     </aside>
+    <livewire:account.notification-channels />
+    </div>
 </div>

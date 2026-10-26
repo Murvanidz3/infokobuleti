@@ -535,4 +535,30 @@ return [
             'year' => 'This year',
         ],
     ],
+    'features' => [
+        'title' => 'Features',
+        'on' => 'On',
+        'off' => 'Off',
+        'turned_on' => ':name is on',
+        'turned_off' => ':name is off',
+        'help' => [
+            'search-alerts' => 'New listings for saved searches by email, push and Telegram.',
+            'web-push' => 'Browser notifications (needs VAPID keys).',
+            'telegram-bot' => 'Moderation from Telegram and user alerts.',
+            'price-insight' => 'Price per m² against similar listings, on property pages and in the form.',
+            'pwa' => 'Add to home screen, offline page.',
+            'seasonal-home' => 'May–Sep: hotels and the sea first; Oct–Apr: real estate and jobs first.',
+            'trust-layer' => '"Owner verified" badge; reviews only after a booking request or a message thread.',
+            'business-insights' => 'Conversion, best day to bump, price vs market in package analytics.',
+        ],
+        'needs' => [
+            'telegram' => 'Needs TELEGRAM_BOT_TOKEN in .env.',
+            'vapid' => 'Needs VAPID keys (php artisan webpush:keys).',
+        ],
+    ],
+    'properties' => [
+        'owner_verify' => 'Verify owner',
+        'owner_unverify' => 'Remove owner verification',
+        'owner_verify_help' => 'Only after checking the ownership documents (public registry extract, owner ID).',
+    ],
 ];

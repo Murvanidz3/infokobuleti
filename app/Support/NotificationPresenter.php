@@ -36,6 +36,7 @@ class NotificationPresenter
                 ? ['check-circle', __('account.notifications.types.booking_accepted', ['title' => $title]), $data['note'] ?? null, $data['url'] ?? null, false]
                 : ['info', __('account.notifications.types.booking_declined', ['title' => $title]), $data['note'] ?? null, $data['url'] ?? null, false],
             'application_status' => ['briefcase', __('account.notifications.types.application_status', ['title' => $title, 'status' => __('enums.application_status.'.($data['status'] ?? 'viewed'))]), null, $data['url'] ?? null, false],
+            'saved_search_alert' => ['search', trans_choice('alerts.center', (int) ($data['count'] ?? 1), ['count' => (int) ($data['count'] ?? 1), 'name' => $title]), null, $data['url'] ?? localized_route('account.searches'), false],
             'payment_receipt' => ['check-circle', __('billing.notifications.receipt', ['number' => (string) ($data['number'] ?? '')]), $this->orderText($data), localized_route('account.billing'), false],
             'order_refunded' => ['wallet', __('billing.notifications.refunded', ['amount' => (string) ($data['amount'] ?? '')]), ($data['to_balance'] ?? false) ? __('billing.notifications.refunded_balance') : __('billing.notifications.refunded_card'), localized_route('account.billing'), false],
             'invoice_issued' => ['file', __('billing.notifications.invoice', ['amount' => (string) ($data['amount'] ?? '')]), $this->translated($data['title'] ?? null), localized_route('account.billing'), true],

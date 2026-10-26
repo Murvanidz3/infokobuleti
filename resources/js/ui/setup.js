@@ -3,6 +3,8 @@ import { registerComponents } from './components';
 import { initFavorites } from './favorites';
 import { registerListing } from './listing';
 import { registerMap } from './map';
+import { registerPush } from './push';
+import { registerPwa } from './pwa';
 import { initReveal } from './reveal';
 import { registerRangeCalendar, registerWizard } from './wizard';
 
@@ -26,6 +28,8 @@ export function setupUi(Alpine) {
     registerMap(Alpine);
     registerWizard(Alpine);
     registerRangeCalendar(Alpine);
+    registerPush(Alpine);
+    registerPwa(Alpine);
     initFavorites();
     initReveal();
 }

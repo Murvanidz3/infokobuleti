@@ -2,6 +2,7 @@
 
 use App\Enums\CategoryModule;
 use App\Enums\ListingStatus;
+use App\Jobs\AnnounceToModerators;
 use App\Livewire\ListingWizard;
 use App\Models\Amenity;
 use App\Models\Category;
@@ -15,6 +16,7 @@ use App\Models\Vacancy;
 use App\Services\Settings;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Bus;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Features\SupportTesting\Testable;
 use Livewire\Livewire;
@@ -70,7 +72,9 @@ it('needs a verified phone to open the wizard', function () {
 it('creates a property listing through all steps and sends it to moderation', function () {
     $wizard = propertyWizard($this->user, $this->location)->assertSet('step', 6)->assertHasNoErrors();
 
+    Bus::fake([AnnounceToModerators::class]);
     $wizard->call('submit')->assertRedirect(localized_route('account.listings', ['type' => 'property', 'group' => 'pending']));
+    Bus::assertDispatched(AnnounceToModerators::class, fn ($job) => $job->type === 'property');
 
     $property = Property::query()->where('user_id', $this->user->id)->sole();
 

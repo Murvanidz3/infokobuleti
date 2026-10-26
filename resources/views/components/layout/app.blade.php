@@ -17,6 +17,14 @@
     <title>{{ $pageTitle }}</title>
     <meta name="description" content="{{ $description ?? __('meta.description') }}">
     <meta name="theme-color" content="#0a1a2f">
+    @php($pwa = \App\Support\Features::active(\App\Enums\SiteFeature::Pwa))
+    @if ($pwa)
+        <meta name="pwa" content="1">
+        <link rel="manifest" href="/manifest.webmanifest">
+        <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
+        <meta name="apple-mobile-web-app-capable" content="yes">
+        <meta name="apple-mobile-web-app-title" content="infokobuleti">
+    @endif
     <meta name="csrf-token" content="{{ csrf_token() }}">
     @php($localeRoot = rtrim(localized_route('home'), '/'))
     {{-- Bases of the JSON endpoints; scripts append "/{type}/{id}". --}}
@@ -47,6 +55,9 @@
 
     <x-footer />
     <x-toast-stack />
+    @if ($pwa)
+        <x-install-prompt />
+    @endif
     @if (is_array($toast = session('toast')))
         <div x-data x-init="setTimeout(() => window.dispatchEvent(new CustomEvent('toast', { detail: @js($toast) })), 150)"></div>
     @endif

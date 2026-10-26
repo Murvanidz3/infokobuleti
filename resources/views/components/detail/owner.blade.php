@@ -26,10 +26,13 @@
         </div>
     </div>
 
-    @if ($owner['phoneVerified'] || $owner['verified'])
+    @if ($owner['phoneVerified'] || $owner['verified'] || ($owner['ownerVerified'] ?? false))
         <ul class="mt-4 flex flex-wrap gap-2">
             @if ($owner['verified'])
                 <li><x-badge variant="tint" class="gap-1"><x-icon name="shield" :size="14" />{{ __('site.owner.verified_business') }}</x-badge></li>
+            @endif
+            @if ($owner['ownerVerified'] ?? false)
+                <li><x-badge variant="tint" class="gap-1" title="{{ __('site.owner.owner_verified_help') }}"><x-icon name="check-circle" :size="14" />{{ __('site.owner.owner_verified') }}</x-badge></li>
             @endif
             @if ($owner['phoneVerified'])
                 <li><x-badge variant="tint" class="gap-1"><x-icon name="smartphone" :size="14" />{{ __('site.owner.verified_phone') }}</x-badge></li>

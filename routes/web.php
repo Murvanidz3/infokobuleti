@@ -6,6 +6,7 @@ use App\Http\Controllers\Account\ConversationController;
 use App\Http\Controllers\Account\HotelRoomsController;
 use App\Http\Controllers\Account\ListingWizardController;
 use App\Http\Controllers\Account\OnboardingController;
+use App\Http\Controllers\Account\PushSubscriptionController;
 use App\Http\Controllers\Account\VerifyPhoneController;
 use App\Http\Controllers\Admin\ImpersonationController;
 use App\Http\Controllers\Auth\GoogleController;
@@ -40,6 +41,7 @@ use App\Http\Controllers\Staff\TwoFactorChallengeController;
 use App\Http\Controllers\Staff\TwoFactorSetupController;
 use App\Http\Controllers\StyleguideController;
 use App\Http\Controllers\Webhooks\PaymentWebhookController;
+use App\Http\Controllers\Webhooks\TelegramWebhookController;
 use App\Http\Controllers\Webhooks\TwilioStatusController;
 use App\Services\Account\OwnerListings;
 use App\Services\LocaleRouter;
@@ -49,6 +51,7 @@ use Illuminate\Support\Facades\Route;
 // Not localized: the OAuth callback must match the URI registered with Google; webhooks are machine-to-machine.
 Route::get('/auth/google/callback', [GoogleController::class, 'callback'])->name('auth.google.callback');
 Route::post('/webhooks/sms/twilio', TwilioStatusController::class)->name('webhooks.sms.twilio');
+Route::post('/webhooks/telegram/{secret}', TelegramWebhookController::class)->middleware('throttle:240,1')->name('webhooks.telegram');
 Route::post('/webhooks/payments/{gateway}', PaymentWebhookController::class)->whereAlpha('gateway')->middleware('throttle:120,1')->name('webhooks.payments');
 
 // Staff support: browse the site as a user (started from the admin), and come back.
@@ -88,6 +91,8 @@ app(LocaleRouter::class)->group(function (): void {
     // The fake test bank (staging): signed links, refused when the fake gateway is switched off.
     Route::get('/payments/fake/{order}', [FakeBankController::class, 'show'])->middleware('signed')->name('payments.fake.show');
     Route::post('/payments/fake/{order}', [FakeBankController::class, 'decide'])->middleware(['signed', 'throttle:interactions'])->name('payments.fake.decide');
+
+    Route::view('/offline', 'pages.offline')->name('offline');
 
     Route::get('/search', [SearchController::class, 'index'])->middleware('throttle:search')->name('search');
     Route::get('/search/suggest', [SearchController::class, 'suggest'])->middleware('throttle:search')->name('search.suggest');
@@ -135,6 +140,8 @@ app(LocaleRouter::class)->group(function (): void {
             Route::view('/account/billing', 'pages.account.billing')->name('account.billing');
             Route::get('/account/billing/invoices/{order}', InvoiceController::class)->whereNumber('order')->name('account.invoice');
             Route::view('/account/analytics', 'pages.account.analytics')->name('account.analytics');
+            Route::post('/account/push', [PushSubscriptionController::class, 'store'])->middleware('throttle:interactions')->name('account.push.store');
+            Route::delete('/account/push', [PushSubscriptionController::class, 'destroy'])->name('account.push.destroy');
             Route::get('/account/promote/{type}/{id}', PromoteListingController::class)
                 ->whereIn('type', array_keys(OwnerListings::TYPES))->whereNumber('id')->name('account.promote');
             Route::get('/payments/{payment}/return', PaymentReturnController::class)->whereNumber('payment')->name('payments.return');

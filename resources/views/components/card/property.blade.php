@@ -13,6 +13,7 @@
     'eager' => false,
     'promotion' => null,
     'logo' => null,
+    'ownerVerified' => false,
 ])
 
 <article {{ $attributes->class([
@@ -43,6 +44,9 @@
             <a href="{{ $url }}" class="after:absolute after:inset-0">{{ $title }}</a>
         </h3>
         <div class="mt-1.5 flex items-center gap-2 text-[13.5px] text-secondary"><x-icon name="pin" :size="16" class="shrink-0 text-navy" /><span class="truncate">{{ $location }}</span></div>
+        @if ($ownerVerified)
+            <x-badge variant="tint" class="mt-2.5 gap-1"><x-icon name="check-circle" :size="13" />{{ __('site.owner.owner_verified') }}</x-badge>
+        @endif
         @if ($features)
             <ul class="mt-4 flex flex-wrap gap-[18px] border-t border-line pt-3.5">
                 @foreach ($features as $feature)

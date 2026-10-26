@@ -63,6 +63,7 @@
                     @endif
                     <p class="mt-3 text-[13px] text-secondary">{{ __('site.detail.published', ['date' => $property->published_at?->format('d.m.Y') ?? '—']) }} · {{ __('site.detail.views', ['count' => $property->views_count]) }}</p>
                 </div>
+                <x-insights.price :insight="$insight" />
                 <x-detail.owner :owner="$owner" type="property" :id="$property->id" :has-phone="$hasPhone" :title="$property->title" />
                 <p class="flex gap-2.5 rounded-tile bg-surface-alt p-4 text-[13px] leading-[1.55] text-secondary"><x-icon name="shield" :size="18" class="shrink-0 text-navy" />{{ __('site.detail.safety') }}</p>
             </aside>

@@ -1,16 +1,22 @@
 <?php
 
 use App\Actions\Billing\StartCardPayment;
+use App\Contracts\PushSender;
+use App\Contracts\TelegramBot;
 use App\Enums\PaymentGateway;
 use App\Enums\Role;
+use App\Enums\SiteFeature;
 use App\Models\Order;
 use App\Models\Payment;
 use App\Models\User;
 use App\Services\Auth\TwoFactorAuthenticator;
 use App\Services\Payments\FakeGateway;
 use App\Services\Payments\PaymentGatewayManager;
+use App\Services\Push\FakePushSender;
 use App\Services\Sms\ArraySmsGateway;
 use App\Services\Sms\SmsManager;
+use App\Services\Telegram\FakeTelegramBot;
+use App\Support\Features;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Testing\TestResponse;
@@ -123,4 +129,34 @@ function postFakeCallback(string $orderId, bool $approve = true, ?string $signat
         'CONTENT_TYPE' => 'application/json',
         'HTTP_X_FAKE_SIGNATURE' => $signature ?? $result['signature'],
     ], $result['body']);
+}
+
+/**
+ * The recording Telegram bot, bound for this test, with the bot switched on.
+ */
+function fakeTelegram(): FakeTelegramBot
+{
+    config(['services.telegram.webhook_secret' => 'test-secret']);
+    app()->instance(TelegramBot::class, $bot = new FakeTelegramBot('infokobuleti_test_bot'));
+    Features::set(SiteFeature::TelegramBot, true);
+
+    return $bot;
+}
+
+/**
+ * Posts a Telegram update to the webhook the way Telegram does.
+ *
+ * @param  array<string, mixed>  $update
+ */
+function telegramUpdate(array $update): TestResponse
+{
+    return test()->withHeaders(['X-Telegram-Bot-Api-Secret-Token' => 'test-secret'])->postJson('/webhooks/telegram/test-secret', $update);
+}
+
+function fakePush(): FakePushSender
+{
+    app()->instance(PushSender::class, $sender = new FakePushSender);
+    Features::set(SiteFeature::WebPush, true);
+
+    return $sender;
 }

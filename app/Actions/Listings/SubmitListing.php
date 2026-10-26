@@ -5,6 +5,7 @@ namespace App\Actions\Listings;
 use App\Contracts\Listing;
 use App\Enums\ListingStatus;
 use App\Exceptions\ListingLimitReached;
+use App\Jobs\AnnounceToModerators;
 use App\Models\Hotel;
 use App\Models\ListingDraft;
 use App\Models\Property;
@@ -73,6 +74,8 @@ class SubmitListing
             }
 
             $draft->delete();
+
+            AnnounceToModerators::dispatch($listing->getMorphClass(), (int) $listing->getKey());
 
             return $listing;
         });

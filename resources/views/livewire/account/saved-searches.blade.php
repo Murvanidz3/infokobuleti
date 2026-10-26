@@ -35,11 +35,12 @@
                         <legend class="mb-2 text-[14px] font-semibold text-navy">{{ __('account.searches.channels') }}</legend>
                         <div class="flex flex-wrap gap-x-6 gap-y-2">
                             @foreach ($channelOptions as $value => $label)
-                                @php($available = in_array($value, \App\Livewire\Account\SavedSearches::AVAILABLE_CHANNELS, true))
+                                @php($available = in_array($value, $availableChannels, true))
                                 <label @class(['inline-flex min-h-11 items-center gap-2.5 text-[14.5px] text-navy', 'opacity-60' => ! $available])>
                                     <input type="checkbox" value="{{ $value }}" wire:model="channels" @disabled(! $available) class="size-5 shrink-0 cursor-pointer rounded-[5px] accent-coral">
                                     {{ $label }}
                                     @unless ($available)<span class="text-[12.5px] text-secondary">({{ __('account.searches.soon') }})</span>@endunless
+                                    @if ($available && ($channelHints[$value] ?? null))<span class="text-[12.5px] text-secondary">({{ $channelHints[$value] }})</span>@endif
                                 </label>
                             @endforeach
                         </div>

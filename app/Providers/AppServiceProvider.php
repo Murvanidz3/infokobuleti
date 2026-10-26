@@ -6,7 +6,9 @@ use App\Contracts\ExchangeRates;
 use App\Contracts\Geocoder;
 use App\Contracts\HumanVerifier;
 use App\Contracts\PaymentGateway;
+use App\Contracts\PushSender;
 use App\Contracts\SmsGateway;
+use App\Contracts\TelegramBot;
 use App\Enums\Role;
 use App\Http\Middleware\SetLocale;
 use App\Models;
@@ -24,8 +26,13 @@ use App\Services\Geo\FakeGeocoder;
 use App\Services\Geo\NominatimGeocoder;
 use App\Services\LocaleRouter;
 use App\Services\Payments\PaymentGatewayManager;
+use App\Services\Push\FakePushSender;
+use App\Services\Push\WebPushSender;
 use App\Services\Settings;
 use App\Services\Sms\SmsManager;
+use App\Services\Telegram\FakeTelegramBot;
+use App\Services\Telegram\HttpTelegramBot;
+use App\Support\Features;
 use App\Support\Listings\PublicCache;
 use Illuminate\Auth\Events\Login;
 use Illuminate\Cache\RateLimiting\Limit;
@@ -38,6 +45,7 @@ use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
 use Laravel\Scout\EngineManager;
 use Livewire\Livewire;
+use Minishlink\WebPush\WebPush;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -100,6 +108,12 @@ class AppServiceProvider extends ServiceProvider
 
         $this->app->singleton(SmsManager::class);
         $this->app->singleton(PaymentGatewayManager::class);
+        $this->app->singleton(TelegramBot::class, fn (): TelegramBot => filled(config('services.telegram.bot_token'))
+            ? new HttpTelegramBot((string) config('services.telegram.bot_token'), config('services.telegram.bot_username'))
+            : new FakeTelegramBot);
+        $this->app->singleton(PushSender::class, fn (): PushSender => filled(config('webpush.vapid.public_key')) && filled(config('webpush.vapid.private_key')) && class_exists(WebPush::class)
+            ? new WebPushSender((array) config('webpush.vapid'))
+            : new FakePushSender);
         $this->app->bind(PaymentGateway::class, fn ($app) => $app->make(PaymentGatewayManager::class)->driver());
         $this->app->singleton(Settings::class);
         $this->app->bind(SmsGateway::class, fn ($app) => $app->make(SmsManager::class)->driver());
@@ -122,6 +136,8 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         Model::preventLazyLoading(! $this->app->isProduction());
+
+        Features::define();
 
         Relation::enforceMorphMap(self::MORPH_MAP);
 

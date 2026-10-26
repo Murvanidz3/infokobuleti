@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Enums\CategoryModule;
 use App\Enums\PlaceType;
 use App\Enums\PropertyType;
+use App\Enums\SiteFeature;
 use App\Models\Article;
 use App\Models\Category;
 use App\Models\Classified;
@@ -14,6 +15,7 @@ use App\Models\Place;
 use App\Models\Property;
 use App\Models\Vacancy;
 use App\Services\Info\UsefulInfo;
+use App\Support\Features;
 use App\Support\Listings\CardPresenter;
 use App\Support\Listings\ListingQuery;
 use App\Support\Listings\PublicCache;
@@ -63,6 +65,10 @@ class HomepageData
             'restaurants' => ['places', 'fork', localized_route('guide.index', ['type' => 'restaurant'])],
             'events' => ['events', 'calendar', localized_route('events.index')],
         ];
+
+        if (Features::active(SiteFeature::SeasonalHome) && $this->season() === 'winter') {
+            $tiles = array_merge(array_intersect_key($tiles, array_flip(['apartments', 'houses', 'jobs', 'services', 'cars'])), $tiles);
+        }
 
         return array_map(fn (string $key, array $tile): array => [
             'name' => __('site.home.categories.'.$key),
@@ -171,13 +177,51 @@ class HomepageData
         ]);
     }
 
-    public function heroImage(): ?string
+    /**
+     * "summer" (May-September) or "winter", unless the admin fixed one in Homepage settings.
+     */
+    public function season(): string
     {
         $season = $this->settings->get('homepage.season', 'auto');
 
-        if ($season === 'auto') {
-            $season = in_array(now()->month, [5, 6, 7, 8, 9], true) ? 'summer' : 'winter';
+        return in_array($season, ['summer', 'winter'], true) ? $season : (in_array(now()->month, [5, 6, 7, 8, 9], true) ? 'summer' : 'winter');
+    }
+
+    /**
+     * Homepage blocks in order. Summer puts the resort first (hotels, sea and weather, guide,
+     * events); winter puts real estate, classifieds and jobs first. Without the seasonal switch
+     * the original order stays.
+     *
+     * @return list<string>
+     */
+    public function sections(): array
+    {
+        if (! Features::active(SiteFeature::SeasonalHome)) {
+            return ['hotels', 'real-estate', 'market', 'guide', 'info', 'news'];
         }
+
+        return $this->season() === 'summer'
+            ? ['hotels', 'info', 'guide', 'events', 'real-estate', 'market', 'news']
+            : ['real-estate', 'market', 'hotels', 'events', 'guide', 'info', 'news'];
+    }
+
+    /**
+     * @return list<array<string, mixed>>
+     */
+    public function events(): array
+    {
+        return PublicCache::remember('home.events', fn (): array => ListingQuery::public(Event::query())
+            ->with(['media', 'location', 'category', 'place'])
+            ->upcoming()
+            ->limit(4)
+            ->get()
+            ->map(fn (Event $event): array => $this->cards->event($event))
+            ->all());
+    }
+
+    public function heroImage(): ?string
+    {
+        $season = $this->season();
 
         $path = $this->settings->get("homepage.hero.{$season}") ?? $this->settings->get('homepage.hero.summer');
 

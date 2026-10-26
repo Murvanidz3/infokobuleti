@@ -334,4 +334,14 @@ return [
         'refund' => 'Возврат',
         'error' => 'Ошибка',
     ],
+    'site_feature' => [
+        'search-alerts' => 'Уведомления по сохранённым поискам',
+        'web-push' => 'Push-уведомления браузера',
+        'telegram-bot' => 'Telegram-бот',
+        'price-insight' => 'Анализ цены',
+        'pwa' => 'Приложение (PWA)',
+        'seasonal-home' => 'Сезонная главная',
+        'trust-layer' => 'Слой доверия',
+        'business-insights' => 'Дополнения бизнес-аналитики',
+    ],
 ];
