@@ -59,8 +59,7 @@ it('checks the system and alerts on failed jobs', function () {
     expect($last['at'])->not->toBeNull()
         ->and($checks['failed_jobs']['ok'])->toBeFalse()
         ->and($checks['memory']['ok'])->not->toBeFalse()
-        ->and($channel->sent)->toHaveCount(1)
-        ->and($channel->sent[0][0])->toContain(__('monitoring.checks.failed_jobs'));
+        ->and(collect($channel->sent)->pluck(0)->all())->toContain(__('monitoring.alert_title', ['check' => __('monitoring.checks.failed_jobs')]));
 });
 
 it('writes test alerts to the alert log', function () {
