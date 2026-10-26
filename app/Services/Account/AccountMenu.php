@@ -19,6 +19,7 @@ class AccountMenu
         $flags = DB::query()
             ->selectRaw('exists(select 1 from hotels where user_id = ? and deleted_at is null) as has_hotels', [$user->getKey()])
             ->selectRaw('exists(select 1 from vacancies where user_id = ? and deleted_at is null) as has_vacancies', [$user->getKey()])
+            ->selectRaw('exists(select 1 from business_subscriptions where user_id = ? and cancelled_at is null and starts_at <= ? and ends_at > ?) as has_package', [$user->getKey(), now(), now()])
             ->selectRaw('(select count(*) from notifications where notifiable_type = ? and notifiable_id = ? and read_at is null) as unread_notifications', [$user->getMorphClass(), $user->getKey()])
             ->first();
 
@@ -33,7 +34,8 @@ class AccountMenu
             ['notifications', 'account.notifications', 'inbox', (int) ($flags->unread_notifications ?? 0)],
             ['profile', 'account.profile', 'user', 0],
             ['security', 'account.security', 'shield', 0],
-            ['billing', 'account.billing', 'file', 0],
+            ['billing', 'account.billing', 'wallet', 0],
+            ['analytics', 'account.analytics', 'chart', 0, (bool) ($flags->has_package ?? false)],
         ];
 
         $menu = [];

@@ -331,7 +331,7 @@ class ListingWizard extends Component
 
             throw $exception;
         } catch (ListingLimitReached $exception) {
-            $this->addError('limit', __('account.wizard.limit_reached', ['count' => $exception->limit]));
+            $this->addError('limit', __($exception->package ? 'billing.package.limit_reached' : 'account.wizard.limit_reached', ['count' => $exception->limit]));
 
             return;
         }

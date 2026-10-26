@@ -77,8 +77,8 @@ class HomepageData
      */
     public function hotels(): array
     {
-        return $this->withSaved(PublicCache::remember('home.hotels', fn (): array => $this->curated(
-            Hotel::query(), 'homepage.featured_hotels', 8,
+        return $this->withSaved(PublicCache::remember('home.hotels.'.Hotel::rotationSeed(), fn (): array => $this->curated(
+            Hotel::query(), 'homepage.featured_hotels', 8, withPaidSlots: true,
         )->map(fn (Hotel $hotel): array => $this->cards->hotel($hotel))->all()));
     }
 
@@ -87,7 +87,7 @@ class HomepageData
      */
     public function properties(): array
     {
-        return $this->withSaved(PublicCache::remember('home.properties', fn (): array => $this->curated(
+        return $this->withSaved(PublicCache::remember('home.properties.'.Property::rotationSeed(), fn (): array => $this->curated(
             Property::query(), 'homepage.featured_properties', 6,
         )->map(fn (Property $property): array => $this->cards->property($property))->all()));
     }
@@ -97,9 +97,9 @@ class HomepageData
      */
     public function classifieds(): array
     {
-        return PublicCache::remember('home.classifieds', fn (): array => ListingQuery::public(Classified::query())
+        return PublicCache::remember('home.classifieds.'.Classified::rotationSeed(), fn (): array => ListingQuery::public(Classified::query())
             ->with(['media', 'location', 'category.parent'])
-            ->orderByPromotion()
+            ->orderByPromotionRotating()
             ->limit(5)
             ->get()
             ->map(fn (Classified $classified): array => $this->cards->classified($classified))
@@ -111,9 +111,9 @@ class HomepageData
      */
     public function jobs(): array
     {
-        return PublicCache::remember('home.jobs', fn (): array => ListingQuery::public(Vacancy::query())
-            ->with(['location', 'businessProfile'])
-            ->orderByPromotion()
+        return PublicCache::remember('home.jobs.'.Vacancy::rotationSeed(), fn (): array => ListingQuery::public(Vacancy::query())
+            ->with(['location', 'businessProfile.media'])
+            ->orderByPromotionRotating()
             ->limit(5)
             ->get()
             ->map(fn (Vacancy $vacancy): array => $this->cards->job($vacancy))
@@ -185,25 +185,37 @@ class HomepageData
     }
 
     /**
-     * Admin-picked items in their order, then promoted ones, up to $limit.
+     * Admin-picked items in their order, then paid homepage slots (hotels), then promoted ones
+     * taking turns, up to $limit.
      *
      * @template TModel of Hotel|Property
      *
      * @param  Builder<TModel>  $query
      * @return Collection<int, TModel>
      */
-    private function curated(Builder $query, string $setting, int $limit): Collection
+    private function curated(Builder $query, string $setting, int $limit, bool $withPaidSlots = false): Collection
     {
         $picked = array_values(array_filter(array_map('intval', (array) $this->settings->get($setting, []))));
-        $relations = ['media', 'location'];
+        $relations = ['media', 'location', 'businessProfile.media'];
 
         $featured = $picked === [] ? new Collection : ListingQuery::public(clone $query)->with($relations)->whereKey($picked)->get()
             ->sortBy(fn (Model $model): int|false => array_search($model->getKey(), $picked, true))
             ->values();
 
+        if ($withPaidSlots && $featured->count() < $limit) {
+            $featured = $featured->merge(
+                ListingQuery::public(clone $query)->with($relations)
+                    ->whereKeyNot($featured->modelKeys())
+                    ->featuredOnHome()
+                    ->orderByRaw('md5(id::text || ?)', [(string) Hotel::rotationSeed()])
+                    ->limit($limit - $featured->count())
+                    ->get(),
+            );
+        }
+
         $rest = ListingQuery::public($query)->with($relations)
             ->whereKeyNot($featured->modelKeys())
-            ->orderByPromotion()
+            ->orderByPromotionRotating()
             ->limit(max(0, $limit - $featured->count()))
             ->get();
 

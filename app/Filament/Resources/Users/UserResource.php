@@ -5,11 +5,14 @@ namespace App\Filament\Resources\Users;
 use App\Enums\AccountType;
 use App\Enums\Permission;
 use App\Enums\Role;
+use App\Enums\WalletEntryType;
+use App\Exceptions\InsufficientBalance;
 use App\Filament\NavigationGroup;
 use App\Filament\RelationManagers\ActivitiesRelationManager;
 use App\Filament\Support\ChecksPermission;
 use App\Models\User;
 use App\Services\Auth\Impersonation;
+use App\Services\Billing\Wallet;
 use App\Support\GeorgianPhone;
 use BackedEnum;
 use Filament\Actions\Action;
@@ -146,6 +149,7 @@ class UserResource extends Resource
                     IconEntry::make('phone_verified_at')->label(__('admin.fields.phone_verified'))->boolean()->getStateUsing(fn (User $record): bool => $record->hasVerifiedPhone()),
                     IconEntry::make('google_id')->label(__('admin.fields.google'))->boolean()->getStateUsing(fn (User $record): bool => $record->hasGoogle()),
                     IconEntry::make('two_factor_confirmed_at')->label(__('admin.fields.two_factor'))->boolean()->getStateUsing(fn (User $record): bool => $record->hasTwoFactorEnabled()),
+                    TextEntry::make('balance')->label(__('admin.fields.balance'))->formatStateUsing(fn ($state): string => number_format((float) $state, 2, '.', ' ').' ₾'),
                     TextEntry::make('created_at')->dateTime('d.m.Y H:i'),
                     TextEntry::make('last_seen_at')->dateTime('d.m.Y H:i')->placeholder('—'),
                     IconEntry::make('is_blocked')->boolean(),
@@ -183,9 +187,44 @@ class UserResource extends Resource
                     self::unblockAction(),
                     self::impersonateAction(),
                     self::resetTwoFactorAction(),
+                    self::adjustBalanceAction(),
                 ]),
             ])
             ->defaultSort('created_at', 'desc');
+    }
+
+    /**
+     * Support credit or correction of the wallet balance (positive adds, negative takes away).
+     */
+    public static function adjustBalanceAction(): Action
+    {
+        return Action::make('adjustBalance')
+            ->label(__('admin.users.adjust_balance'))
+            ->icon(Heroicon::OutlinedBanknotes)
+            ->visible(fn (): bool => auth()->user()?->can(Permission::ManagePayments->value) ?? false)
+            ->schema([
+                TextInput::make('amount')->label(__('admin.fields.amount'))->numeric()->required()->rule('not_in:0')->helperText(__('admin.users.adjust_balance_help')),
+                TextInput::make('note')->label(__('admin.fields.note'))->required()->maxLength(200),
+            ])
+            ->action(function (User $record, array $data): void {
+                $amount = round((float) $data['amount'], 2);
+                /** @var User $staff */
+                $staff = auth()->user();
+
+                try {
+                    $amount > 0
+                        ? app(Wallet::class)->credit($record, $amount, WalletEntryType::Adjustment, note: $data['note'], author: $staff)
+                        : app(Wallet::class)->debit($record, $amount, WalletEntryType::Adjustment, note: $data['note'], author: $staff);
+                } catch (InsufficientBalance) {
+                    Notification::make()->danger()->title(__('admin.users.balance_too_low'))->send();
+
+                    return;
+                }
+
+                activity('billing')->performedOn($record)->causedBy($staff)->event('balance_adjusted')->withProperties(['amount' => $amount, 'note' => $data['note']])->log('balance adjusted');
+
+                Notification::make()->success()->title(__('admin.saved'))->send();
+            });
     }
 
     public static function blockAction(): Action

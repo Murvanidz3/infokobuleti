@@ -19,6 +19,7 @@ return [
         'profile' => 'Profile',
         'security' => 'Security',
         'billing' => 'Payments',
+        'analytics' => 'Analytics',
     ],
 
     'types' => [
@@ -186,9 +187,9 @@ return [
 
     'billing' => [
         'title' => 'Payments',
-        'subtitle' => 'History of VIP placements, bumps and packages.',
+        'subtitle' => 'VIP, bumps, packages and your balance.',
         'empty_title' => 'No payments yet',
-        'empty_text' => 'Paid services (VIP, bumps, business packages) are coming soon.',
+        'empty_text' => 'Your orders and invoices appear here once you buy a paid service.',
     ],
 
     'wizard' => [

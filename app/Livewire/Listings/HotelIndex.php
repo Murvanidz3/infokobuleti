@@ -74,7 +74,7 @@ class HotelIndex extends ListingIndex
 
     protected function relations(): array
     {
-        return ['media', 'location'];
+        return ['media', 'location', 'businessProfile.media'];
     }
 
     protected function viewName(): string

@@ -44,7 +44,7 @@ class SubmitListing
         $editing = $draft->listing_id !== null ? $this->listings->find($user, $type, $draft->listing_id) : null;
 
         if ($editing === null && ! $this->limits->canCreate($user)) {
-            throw new ListingLimitReached((int) $this->limits->monthlyLimit($user));
+            throw new ListingLimitReached((int) $this->limits->limitFor($user), $this->limits->packageLimit($user) !== null);
         }
 
         return DB::transaction(function () use ($user, $draft, $type, $form, $editing): Model&Listing {

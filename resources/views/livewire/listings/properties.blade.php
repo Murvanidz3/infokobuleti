@@ -55,13 +55,13 @@
         @if ($display === 'list')
             <div class="flex flex-col gap-5">
                 @foreach ($items as $property)
-                    <x-card.property wire:key="property-{{ $property['favorite'] }}" horizontal :badge="$property['badge']" :price="$property['price']" :converted="$property['converted']" :title="$property['title']" :location="$property['location']" :features="$property['features']" :url="$property['url']" :image="$property['image']" :saved="$property['saved']" :favorite="$property['favorite']" :eager="$loop->first" />
+                    <x-card.property wire:key="property-{{ $property['favorite'] }}" horizontal :badge="$property['badge']" :price="$property['price']" :converted="$property['converted']" :title="$property['title']" :location="$property['location']" :features="$property['features']" :url="$property['url']" :image="$property['image']" :saved="$property['saved']" :favorite="$property['favorite']" :eager="$loop->first" :promotion="$property['promotion'] ?? null" :logo="$property['logo'] ?? null" />
                 @endforeach
             </div>
         @else
             <div class="grid grid-cols-[repeat(auto-fill,minmax(min(100%,290px),1fr))] gap-5">
                 @foreach ($items as $property)
-                    <x-card.property wire:key="property-{{ $property['favorite'] }}" :badge="$property['badge']" :price="$property['price']" :converted="$property['converted']" :title="$property['title']" :location="$property['location']" :features="$property['features']" :url="$property['url']" :image="$property['image']" :saved="$property['saved']" :favorite="$property['favorite']" :eager="$loop->first" />
+                    <x-card.property wire:key="property-{{ $property['favorite'] }}" :badge="$property['badge']" :price="$property['price']" :converted="$property['converted']" :title="$property['title']" :location="$property['location']" :features="$property['features']" :url="$property['url']" :image="$property['image']" :saved="$property['saved']" :favorite="$property['favorite']" :eager="$loop->first" :promotion="$property['promotion'] ?? null" :logo="$property['logo'] ?? null" />
                 @endforeach
             </div>
         @endif

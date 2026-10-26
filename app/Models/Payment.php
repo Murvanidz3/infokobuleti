@@ -68,4 +68,27 @@ class Payment extends Model
     {
         return $this->hasMany(Promotion::class);
     }
+
+    /**
+     * @return HasMany<PaymentEvent, $this>
+     */
+    public function events(): HasMany
+    {
+        return $this->hasMany(PaymentEvent::class)->latest('id');
+    }
+
+    /**
+     * The order this card payment pays for (payments made before Phase 8 have none).
+     */
+    public function order(): ?Order
+    {
+        $payable = $this->payable;
+
+        return $payable instanceof Order ? $payable : null;
+    }
+
+    public function refundableAmount(): float
+    {
+        return round((float) $this->amount - (float) $this->refunded_amount, 2);
+    }
 }

@@ -13,6 +13,7 @@
 <x-layout.app :title="$title">
     <x-slot:head>
         <meta name="robots" content="noindex, nofollow">
+        {{ $head ?? '' }}
     </x-slot:head>
 
     <section class="min-h-[70vh] bg-surface-alt pt-5 pb-14 md:pt-8 lg:pt-10">

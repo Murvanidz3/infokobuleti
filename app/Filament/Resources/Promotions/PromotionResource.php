@@ -100,7 +100,7 @@ class PromotionResource extends Resource
                     ->icon(Heroicon::OutlinedXCircle)
                     ->color('danger')
                     ->requiresConfirmation()
-                    ->visible(fn (Promotion $record): bool => $record->cancelled_at === null && $record->ends_at->isFuture())
+                    ->visible(fn (Promotion $record): bool => $record->cancelled_at === null && ($record->ends_at === null || $record->ends_at->isFuture()))
                     ->action(function (Promotion $record): void {
                         $record->forceFill(['cancelled_at' => now()])->save();
 

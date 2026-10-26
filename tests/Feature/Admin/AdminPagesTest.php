@@ -61,6 +61,8 @@ it('renders every other admin page', function (string $url) {
     '/admin/conversations',
     '/admin/promotions',
     '/admin/payments',
+    '/admin/orders',
+    '/admin/revenue',
     '/admin/price-plans',
     '/admin/pages',
     '/admin/banners',

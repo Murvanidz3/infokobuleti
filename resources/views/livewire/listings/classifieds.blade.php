@@ -58,13 +58,13 @@
         @if ($display === 'list')
             <x-list-panel>
                 @foreach ($items as $classified)
-                    <x-card.classified wire:key="classified-{{ $classified['favorite'] }}" :title="$classified['title']" :meta="$classified['meta']" :price="$classified['price']" :time="$classified['time']" :icon="$classified['icon']" :is-new="$classified['isNew']" :url="$classified['url']" />
+                    <x-card.classified wire:key="classified-{{ $classified['favorite'] }}" :title="$classified['title']" :meta="$classified['meta']" :price="$classified['price']" :time="$classified['time']" :icon="$classified['icon']" :is-new="$classified['isNew']" :url="$classified['url']" :promotion="$classified['promotion'] ?? null" />
                 @endforeach
             </x-list-panel>
         @else
             <div class="grid grid-cols-[repeat(auto-fill,minmax(min(100%,220px),1fr))] gap-4">
                 @foreach ($items as $classified)
-                    <x-card.classified-tile wire:key="classified-{{ $classified['favorite'] }}" :title="$classified['title']" :meta="$classified['meta']" :price="$classified['price']" :time="$classified['time']" :icon="$classified['icon']" :is-new="$classified['isNew']" :url="$classified['url']" :image="$classified['image']" :saved="$classified['saved']" :favorite="$classified['favorite']" />
+                    <x-card.classified-tile wire:key="classified-{{ $classified['favorite'] }}" :title="$classified['title']" :meta="$classified['meta']" :price="$classified['price']" :time="$classified['time']" :icon="$classified['icon']" :is-new="$classified['isNew']" :url="$classified['url']" :image="$classified['image']" :saved="$classified['saved']" :favorite="$classified['favorite']" :promotion="$classified['promotion'] ?? null" />
                 @endforeach
             </div>
         @endif

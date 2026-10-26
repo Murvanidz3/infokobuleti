@@ -7,6 +7,7 @@ use App\Enums\PropertyDeal;
 use App\Enums\PropertyType;
 use App\Enums\SalaryPeriod;
 use App\Models\Article;
+use App\Models\BusinessProfile;
 use App\Models\Classified;
 use App\Models\Event;
 use App\Models\Hotel;
@@ -35,7 +36,7 @@ class CardPresenter
     ) {}
 
     /**
-     * @return array{favorite: string, name: string, address: string, sea: ?string, rating: ?string, reviews: string, price: ?string, url: string, image: ?string, saved: bool, lat: ?float, lng: ?float, pin: ?string}
+     * @return array{favorite: string, name: string, address: string, sea: ?string, rating: ?string, reviews: string, price: ?string, url: string, image: ?string, saved: bool, lat: ?float, lng: ?float, pin: ?string, promotion: ?string, logo: ?string}
      */
     public function hotel(Hotel $hotel): array
     {
@@ -53,11 +54,13 @@ class CardPresenter
             'lat' => $this->coordinate($hotel->lat),
             'lng' => $this->coordinate($hotel->lng),
             'pin' => $hotel->price_from !== null ? $this->price->format((float) $hotel->price_from) : null,
+            'promotion' => $this->promotion($hotel),
+            'logo' => $this->packageLogo($hotel),
         ];
     }
 
     /**
-     * @return array{favorite: string, deal: string, badge: string, price: string, converted: ?string, title: string, location: string, features: list<array{icon: string, text: string}>, url: string, image: ?string, saved: bool, lat: ?float, lng: ?float, pin: string}
+     * @return array{favorite: string, deal: string, badge: string, price: string, converted: ?string, title: string, location: string, features: list<array{icon: string, text: string}>, url: string, image: ?string, saved: bool, lat: ?float, lng: ?float, pin: string, promotion: ?string, logo: ?string}
      */
     public function property(Property $property): array
     {
@@ -89,6 +92,8 @@ class CardPresenter
             'lat' => $this->coordinate($property->lat),
             'lng' => $this->coordinate($property->lng),
             'pin' => $this->price->compact($amount, $currency),
+            'promotion' => $this->promotion($property),
+            'logo' => $this->packageLogo($property),
         ];
     }
 
@@ -117,7 +122,7 @@ class CardPresenter
     }
 
     /**
-     * @return array{favorite: string, title: string, meta: string, price: string, time: string, icon: string, isNew: bool, url: string, image: ?string, saved: bool, lat: ?float, lng: ?float, pin: ?string}
+     * @return array{favorite: string, title: string, meta: string, price: string, time: string, icon: string, isNew: bool, url: string, image: ?string, saved: bool, lat: ?float, lng: ?float, pin: ?string, promotion: ?string}
      */
     public function classified(Classified $classified): array
     {
@@ -138,6 +143,7 @@ class CardPresenter
             'lat' => $this->coordinate($classified->lat),
             'lng' => $this->coordinate($classified->lng),
             'pin' => $classified->price !== null ? $this->price->compact((float) $classified->price, $this->currency($classified->currency)) : null,
+            'promotion' => $this->promotion($classified),
         ];
     }
 
@@ -151,7 +157,7 @@ class CardPresenter
     }
 
     /**
-     * @return array{favorite: string, title: string, employer: string, salary: string, period: string, type: string, seasonal: bool, posted: string, url: string, lat: ?float, lng: ?float, pin: ?string}
+     * @return array{favorite: string, title: string, employer: string, salary: string, period: string, type: string, seasonal: bool, posted: string, url: string, lat: ?float, lng: ?float, pin: ?string, promotion: ?string, logo: ?string}
      */
     public function job(Vacancy $vacancy): array
     {
@@ -168,6 +174,8 @@ class CardPresenter
             'lat' => $this->coordinate($vacancy->lat),
             'lng' => $this->coordinate($vacancy->lng),
             'pin' => $vacancy->salary_min !== null ? $this->price->compact((float) $vacancy->salary_min, $vacancy->salary_currency->value) : null,
+            'promotion' => $this->promotion($vacancy),
+            'logo' => $this->packageLogo($vacancy),
         ];
     }
 
@@ -248,6 +256,39 @@ class CardPresenter
             'lng' => $this->coordinate($event->lng),
             'pin' => null,
         ];
+    }
+
+    /**
+     * "super_vip" / "vip" for promoted listings (highlighted card and badge), otherwise null.
+     */
+    public function promotion(Model $listing): ?string
+    {
+        return match ((int) $listing->getAttribute('promotion_level')) {
+            2 => 'super_vip',
+            1 => 'vip',
+            default => null,
+        };
+    }
+
+    /**
+     * The business logo shown on cards of business package holders. Only read when the caller
+     * eager-loaded "businessProfile.media".
+     */
+    public function packageLogo(Model $listing): ?string
+    {
+        if (! $listing->relationLoaded('businessProfile')) {
+            return null;
+        }
+
+        $profile = $listing->getRelation('businessProfile');
+
+        if (! $profile instanceof BusinessProfile || ! $profile->hasPackage() || ! $profile->relationLoaded('media')) {
+            return null;
+        }
+
+        $url = $profile->getFirstMediaUrl('logo');
+
+        return $url !== '' ? $url : null;
     }
 
     public function sea(mixed $meters): ?string

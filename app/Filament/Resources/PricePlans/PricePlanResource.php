@@ -67,7 +67,7 @@ class PricePlanResource extends Resource
                 'description' => fn (string $name) => Textarea::make($name)->rows(2),
             ], required: ['name']),
             Grid::make(4)->schema([
-                Select::make('product')->options(PricePlanProduct::class)->required(),
+                Select::make('product')->options(PricePlanProduct::planOptions())->required(),
                 Select::make('module')->options(ListingModule::class)->placeholder(__('admin.price_plans.all_modules')),
                 TextInput::make('code')->required()->alphaDash()->unique(ignoreRecord: true)->maxLength(48),
                 TextInput::make('duration_days')->numeric()->minValue(1),
@@ -90,7 +90,7 @@ class PricePlanResource extends Resource
                 TextColumn::make('price')->formatStateUsing(fn ($state, PricePlan $record): string => number_format((float) $state, 2).' '.$record->currency->value)->sortable(),
                 ToggleColumn::make('is_active'),
             ])
-            ->filters([SelectFilter::make('product')->options(PricePlanProduct::class)])
+            ->filters([SelectFilter::make('product')->options(PricePlanProduct::planOptions())])
             ->reorderable('sort')
             ->defaultSort('sort')
             ->recordActions([EditAction::make(), DeleteAction::make()]);

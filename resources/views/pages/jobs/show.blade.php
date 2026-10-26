@@ -101,7 +101,7 @@
             <x-detail.section :title="__('site.jobs.similar')" class="mt-14 border-t pt-10">
                 <x-list-panel>
                     @foreach ($similar as $job)
-                        <x-card.job :title="$job['title']" :employer="$job['employer']" :salary="$job['salary']" :period="$job['period']" :type="$job['type']" :seasonal="$job['seasonal']" :posted="$job['posted']" :url="$job['url']" />
+                        <x-card.job :title="$job['title']" :employer="$job['employer']" :salary="$job['salary']" :period="$job['period']" :type="$job['type']" :seasonal="$job['seasonal']" :posted="$job['posted']" :url="$job['url']" :promotion="$job['promotion'] ?? null" :logo="$job['logo'] ?? null" />
                     @endforeach
                 </x-list-panel>
             </x-detail.section>

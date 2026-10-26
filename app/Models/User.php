@@ -52,6 +52,7 @@ class User extends Authenticatable implements FilamentUser, HasLocalePreference,
             'two_factor_recovery_codes' => 'encrypted:array',
             'two_factor_confirmed_at' => 'datetime',
             'notification_preferences' => 'array',
+            'balance' => 'decimal:2',
         ];
     }
 
@@ -306,5 +307,37 @@ class User extends Authenticatable implements FilamentUser, HasLocalePreference,
     public function payments(): HasMany
     {
         return $this->hasMany(Payment::class);
+    }
+
+    /**
+     * @return HasMany<Order, $this>
+     */
+    public function orders(): HasMany
+    {
+        return $this->hasMany(Order::class);
+    }
+
+    /**
+     * @return HasMany<WalletTransaction, $this>
+     */
+    public function walletTransactions(): HasMany
+    {
+        return $this->hasMany(WalletTransaction::class);
+    }
+
+    /**
+     * @return HasMany<BusinessSubscription, $this>
+     */
+    public function businessSubscriptions(): HasMany
+    {
+        return $this->hasMany(BusinessSubscription::class);
+    }
+
+    /**
+     * The business package running now, if any (the one that lasts longest).
+     */
+    public function activeBusinessSubscription(): ?BusinessSubscription
+    {
+        return $this->businessSubscriptions()->active()->latest('ends_at')->first();
     }
 }

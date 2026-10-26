@@ -61,7 +61,7 @@
             <x-detail.section :title="__('site.detail.similar')" class="mt-14 border-t pt-10">
                 <div class="grid grid-cols-[repeat(auto-fill,minmax(min(100%,220px),1fr))] gap-4">
                     @foreach ($similar as $item)
-                        <x-card.classified-tile :title="$item['title']" :meta="$item['meta']" :price="$item['price']" :time="$item['time']" :icon="$item['icon']" :is-new="$item['isNew']" :url="$item['url']" :image="$item['image']" :saved="$item['saved']" :favorite="$item['favorite']" />
+                        <x-card.classified-tile :title="$item['title']" :meta="$item['meta']" :price="$item['price']" :time="$item['time']" :icon="$item['icon']" :is-new="$item['isNew']" :url="$item['url']" :image="$item['image']" :saved="$item['saved']" :favorite="$item['favorite']" :promotion="$item['promotion'] ?? null" />
                     @endforeach
                 </div>
             </x-detail.section>

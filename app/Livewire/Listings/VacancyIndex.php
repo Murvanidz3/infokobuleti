@@ -54,7 +54,7 @@ class VacancyIndex extends ListingIndex
 
     protected function relations(): array
     {
-        return ['location', 'businessProfile'];
+        return ['location', 'businessProfile.media'];
     }
 
     protected function viewName(): string

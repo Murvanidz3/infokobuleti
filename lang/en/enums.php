@@ -181,6 +181,7 @@ return [
         'super_vip' => 'Super VIP',
         'bump' => 'Bump',
         'featured_home' => 'Featured on homepage',
+        'auto_bump' => 'Auto-bump',
     ],
 
     'property_condition' => [
@@ -296,6 +297,8 @@ return [
         'business_package' => 'Business package',
         'featured_hotel' => 'Featured hotel',
         'banner' => 'Banner',
+        'wallet_top_up' => 'Balance top-up',
+        'custom' => 'Custom order',
     ],
     'contact_topic' => [
         'general' => 'General question',
@@ -303,5 +306,32 @@ return [
         'advertising' => 'Advertising',
         'partnership' => 'Partnership',
         'bug' => 'Technical problem',
+    ],
+    'order_status' => [
+        'pending' => 'Awaiting payment',
+        'paid' => 'Paid',
+        'fulfilled' => 'Active',
+        'failed' => 'Failed',
+        'cancelled' => 'Cancelled',
+        'refunded' => 'Refunded',
+        'partially_refunded' => 'Partially refunded',
+    ],
+    'payment_method' => [
+        'card' => 'By card',
+        'balance' => 'From balance',
+    ],
+    'wallet_entry_type' => [
+        'top_up' => 'Top-up',
+        'purchase' => 'Purchase',
+        'refund' => 'Refund',
+        'adjustment' => 'Adjustment',
+    ],
+    'payment_event_type' => [
+        'created' => 'Order sent to bank',
+        'callback' => 'Bank callback',
+        'status_check' => 'Status check',
+        'status_changed' => 'Status change',
+        'refund' => 'Refund',
+        'error' => 'Error',
     ],
 ];

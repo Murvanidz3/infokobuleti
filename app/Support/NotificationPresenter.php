@@ -36,6 +36,10 @@ class NotificationPresenter
                 ? ['check-circle', __('account.notifications.types.booking_accepted', ['title' => $title]), $data['note'] ?? null, $data['url'] ?? null, false]
                 : ['info', __('account.notifications.types.booking_declined', ['title' => $title]), $data['note'] ?? null, $data['url'] ?? null, false],
             'application_status' => ['briefcase', __('account.notifications.types.application_status', ['title' => $title, 'status' => __('enums.application_status.'.($data['status'] ?? 'viewed'))]), null, $data['url'] ?? null, false],
+            'payment_receipt' => ['check-circle', __('billing.notifications.receipt', ['number' => (string) ($data['number'] ?? '')]), $this->orderText($data), localized_route('account.billing'), false],
+            'order_refunded' => ['wallet', __('billing.notifications.refunded', ['amount' => (string) ($data['amount'] ?? '')]), ($data['to_balance'] ?? false) ? __('billing.notifications.refunded_balance') : __('billing.notifications.refunded_card'), localized_route('account.billing'), false],
+            'invoice_issued' => ['file', __('billing.notifications.invoice', ['amount' => (string) ($data['amount'] ?? '')]), $this->translated($data['title'] ?? null), localized_route('account.billing'), true],
+            'promotion_expiring' => ['star', __('billing.notifications.expiring', ['kind' => __('billing.expiring.kinds.'.($data['kind'] ?? 'vip'))]), $title !== '' ? __('billing.notifications.expiring_text', ['title' => $title, 'date' => (string) ($data['date'] ?? '')]) : __('billing.notifications.expiring_package', ['date' => (string) ($data['date'] ?? '')]), isset($data['listing_type'], $data['listing_id']) ? localized_route('account.promote', ['type' => $data['listing_type'], 'id' => $data['listing_id']]) : localized_route('account.billing'), true],
             default => ['info', $title !== '' ? $title : __('account.notifications.types.generic'), null, null, false],
         };
 
@@ -59,6 +63,29 @@ class NotificationPresenter
         $details = is_array($data['details'] ?? null) ? $data['details'] : [];
 
         return collect([$details['name'] ?? null, $details['dates'] ?? null, $this->excerpt($details['text'] ?? null)])->filter()->implode(' · ') ?: null;
+    }
+
+    /**
+     * @param  array<string, mixed>  $data
+     */
+    private function orderText(array $data): ?string
+    {
+        $title = $this->translated($data['title'] ?? null);
+
+        if ($title === null && is_string($data['product'] ?? null)) {
+            $title = __('enums.price_plan_product.'.$data['product']);
+        }
+
+        return collect([$title, $data['amount'] ?? null])->filter()->implode(' · ') ?: null;
+    }
+
+    private function translated(mixed $value): ?string
+    {
+        if (is_array($value)) {
+            $value = $value[app()->getLocale()] ?? $value['ka'] ?? reset($value);
+        }
+
+        return is_string($value) && $value !== '' ? $value : null;
     }
 
     private function excerpt(mixed $text): ?string

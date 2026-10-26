@@ -20,7 +20,7 @@ use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 use Spatie\Translatable\HasTranslations;
 
-#[Guarded(['id', 'verified_at', 'rating_avg', 'reviews_count'])]
+#[Guarded(['id', 'verified_at', 'package_until', 'rating_avg', 'reviews_count'])]
 class BusinessProfile extends Model implements HasMedia
 {
     /** @use HasFactory<BusinessProfileFactory> */
@@ -35,12 +35,21 @@ class BusinessProfile extends Model implements HasMedia
             'type' => BusinessType::class,
             'socials' => 'array',
             'verified_at' => 'datetime',
+            'package_until' => 'datetime',
         ];
     }
 
+    /**
+     * Verified by staff, or covered by a paid business package (which includes the badge).
+     */
     public function isVerified(): bool
     {
-        return $this->verified_at !== null;
+        return $this->verified_at !== null || $this->hasPackage();
+    }
+
+    public function hasPackage(): bool
+    {
+        return $this->package_until !== null && $this->package_until->isFuture();
     }
 
     public function registerMediaCollections(): void

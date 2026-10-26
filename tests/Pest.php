@@ -1,12 +1,19 @@
 <?php
 
+use App\Actions\Billing\StartCardPayment;
+use App\Enums\PaymentGateway;
 use App\Enums\Role;
+use App\Models\Order;
+use App\Models\Payment;
 use App\Models\User;
 use App\Services\Auth\TwoFactorAuthenticator;
+use App\Services\Payments\FakeGateway;
+use App\Services\Payments\PaymentGatewayManager;
 use App\Services\Sms\ArraySmsGateway;
 use App\Services\Sms\SmsManager;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Testing\TestResponse;
 use Tests\TestCase;
 
 /*
@@ -89,4 +96,31 @@ function staffMember(Role $role = Role::Admin, bool $withTwoFactor = true): arra
     }
 
     return [$user->fresh(), $secret];
+}
+
+/**
+ * A pending card payment for an order, already registered with the fake test bank.
+ *
+ * @return array{0: Payment, 1: string} the payment and its fake bank order id
+ */
+function fakeBankPayment(Order $order): array
+{
+    $payment = app(StartCardPayment::class)->handle($order, PaymentGateway::Fake);
+
+    return [$payment, (string) $payment->gateway_order_id];
+}
+
+/**
+ * Posts the fake bank's signed callback for an approved (or declined) payment.
+ */
+function postFakeCallback(string $orderId, bool $approve = true, ?string $signature = null): TestResponse
+{
+    $bank = app(PaymentGatewayManager::class)->for(PaymentGateway::Fake);
+    assert($bank instanceof FakeGateway);
+    $result = $bank->decide($orderId, $approve);
+
+    return test()->call('POST', '/webhooks/payments/fake', [], [], [], [
+        'CONTENT_TYPE' => 'application/json',
+        'HTTP_X_FAKE_SIGNATURE' => $signature ?? $result['signature'],
+    ], $result['body']);
 }

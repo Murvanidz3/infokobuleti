@@ -47,6 +47,38 @@ trait Promotable
             ->orderByDesc($this->qualifyColumn('published_at'));
     }
 
+    /**
+     * Same order, but promoted items take turns: within each level they are shuffled by a seed
+     * that changes every few minutes (config payments.rotation_minutes), so every VIP gets the
+     * homepage's first slots in turn.
+     *
+     * @param  Builder<static>  $query
+     */
+    public function scopeOrderByPromotionRotating(Builder $query, ?int $seed = null): void
+    {
+        $seed ??= self::rotationSeed();
+
+        $query->orderByDesc($this->qualifyColumn('promotion_level'))
+            ->orderByRaw('case when '.$this->qualifyColumn('promotion_level').' > 0 then md5('.$this->qualifyColumn('id').'::text || ?) end', [(string) $seed])
+            ->orderByRaw($this->qualifyColumn('bumped_at').' DESC NULLS LAST')
+            ->orderByDesc($this->qualifyColumn('published_at'));
+    }
+
+    /**
+     * Listings with a running homepage slot (featured hotel).
+     *
+     * @param  Builder<static>  $query
+     */
+    public function scopeFeaturedOnHome(Builder $query): void
+    {
+        $query->whereHas('promotions', fn (Builder $promotions) => $promotions->where('type', PromotionType::FeaturedHome->value)->active());
+    }
+
+    public static function rotationSeed(): int
+    {
+        return intdiv(now()->getTimestamp(), max(1, (int) config('payments.rotation_minutes', 10)) * 60);
+    }
+
     public function refreshPromotionCache(): void
     {
         $active = $this->promotions()->active()->get();

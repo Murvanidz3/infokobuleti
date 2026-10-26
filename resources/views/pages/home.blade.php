@@ -20,7 +20,7 @@
             <x-carousel :label="__('home.hotels.title')" x-ignore>
                 @foreach ($hotels as $hotel)
                     <x-carousel.item>
-                        <x-card.hotel class="h-full" :name="$hotel['name']" :address="$hotel['address']" :sea="$hotel['sea']" :rating="$hotel['rating']" :reviews="$hotel['reviews']" :price="$hotel['price']" :url="$hotel['url']" :image="$hotel['image']" :saved="$hotel['saved']" :favorite="$hotel['favorite']" :eager="$loop->first" />
+                        <x-card.hotel class="h-full" :name="$hotel['name']" :address="$hotel['address']" :sea="$hotel['sea']" :rating="$hotel['rating']" :reviews="$hotel['reviews']" :price="$hotel['price']" :url="$hotel['url']" :image="$hotel['image']" :saved="$hotel['saved']" :favorite="$hotel['favorite']" :eager="$loop->first" :promotion="$hotel['promotion'] ?? null" :logo="$hotel['logo'] ?? null" />
                     </x-carousel.item>
                 @endforeach
             </x-carousel>
@@ -36,7 +36,7 @@
             </x-section-header>
             <div class="grid grid-cols-[repeat(auto-fill,minmax(min(100%,340px),1fr))] gap-6">
                 @foreach ($properties as $property)
-                    <x-card.property :data-segment="$property['deal']" x-ignore :badge="$property['badge']" :price="$property['price']" :converted="$property['converted']" :title="$property['title']" :location="$property['location']" :features="$property['features']" :url="$property['url']" :image="$property['image']" :saved="$property['saved']" :favorite="$property['favorite']" />
+                    <x-card.property :data-segment="$property['deal']" x-ignore :badge="$property['badge']" :price="$property['price']" :converted="$property['converted']" :title="$property['title']" :location="$property['location']" :features="$property['features']" :url="$property['url']" :image="$property['image']" :saved="$property['saved']" :favorite="$property['favorite']" :promotion="$property['promotion'] ?? null" :logo="$property['logo'] ?? null" />
                 @endforeach
             </div>
         </div>
@@ -48,7 +48,7 @@
                 <x-section-header size="sm" id="classifieds-title" :title="__('home.classifieds.title')" :href="localized_route('classifieds.index')" />
                 <x-list-panel>
                     @foreach ($classifieds as $classified)
-                        <x-card.classified :title="$classified['title']" :meta="$classified['meta']" :price="$classified['price']" :time="$classified['time']" :icon="$classified['icon']" :is-new="$classified['isNew']" :url="$classified['url']" />
+                        <x-card.classified :title="$classified['title']" :meta="$classified['meta']" :price="$classified['price']" :time="$classified['time']" :icon="$classified['icon']" :is-new="$classified['isNew']" :url="$classified['url']" :promotion="$classified['promotion'] ?? null" />
                     @endforeach
                 </x-list-panel>
             </div>
@@ -56,7 +56,7 @@
                 <x-section-header size="sm" id="jobs-title" :title="__('home.jobs.title')" :href="localized_route('jobs.index')" />
                 <x-list-panel>
                     @foreach ($jobs as $job)
-                        <x-card.job :title="$job['title']" :employer="$job['employer']" :salary="$job['salary']" :period="$job['period']" :type="$job['type']" :seasonal="$job['seasonal']" :posted="$job['posted']" :url="$job['url']" />
+                        <x-card.job :title="$job['title']" :employer="$job['employer']" :salary="$job['salary']" :period="$job['period']" :type="$job['type']" :seasonal="$job['seasonal']" :posted="$job['posted']" :url="$job['url']" :promotion="$job['promotion'] ?? null" :logo="$job['logo'] ?? null" />
                     @endforeach
                 </x-list-panel>
             </div>

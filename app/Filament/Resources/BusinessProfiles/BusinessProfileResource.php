@@ -136,12 +136,12 @@ class BusinessProfileResource extends Resource
     public static function verifyAction(): Action
     {
         return Action::make('toggleVerified')
-            ->label(fn (BusinessProfile $record): string => $record->isVerified() ? __('admin.business.unverify') : __('admin.business.verify'))
-            ->icon(fn (BusinessProfile $record) => $record->isVerified() ? Heroicon::OutlinedXMark : Heroicon::OutlinedCheckBadge)
-            ->color(fn (BusinessProfile $record): string => $record->isVerified() ? 'gray' : 'success')
+            ->label(fn (BusinessProfile $record): string => $record->verified_at !== null ? __('admin.business.unverify') : __('admin.business.verify'))
+            ->icon(fn (BusinessProfile $record) => $record->verified_at !== null ? Heroicon::OutlinedXMark : Heroicon::OutlinedCheckBadge)
+            ->color(fn (BusinessProfile $record): string => $record->verified_at !== null ? 'gray' : 'success')
             ->requiresConfirmation()
             ->action(function (BusinessProfile $record): void {
-                $record->forceFill(['verified_at' => $record->isVerified() ? null : now()])->save();
+                $record->forceFill(['verified_at' => $record->verified_at !== null ? null : now()])->save();
 
                 Notification::make()->success()->title(__('admin.saved'))->send();
             });

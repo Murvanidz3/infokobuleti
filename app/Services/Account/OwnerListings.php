@@ -5,6 +5,7 @@ namespace App\Services\Account;
 use App\Contracts\Listing;
 use App\Enums\ListingGroup;
 use App\Enums\ListingStatus;
+use App\Enums\PromotionType;
 use App\Models\Classified;
 use App\Models\Hotel;
 use App\Models\Property;
@@ -219,7 +220,16 @@ class OwnerListings
                 'views' => (int) $listing->getAttribute('views_count'),
                 'phone_reveals' => $stats[$key]['phone_reveals'] ?? 0,
                 'favorites' => $stats[$key]['favorites'] ?? 0,
+                'promotion' => match ((int) $listing->getAttribute('promotion_level')) {
+                    2 => PromotionType::SuperVip->label(),
+                    1 => PromotionType::Vip->label(),
+                    default => null,
+                },
+                'promoted_until' => (int) $listing->getAttribute('promotion_level') > 0 && $listing->getAttribute('promoted_until') instanceof Carbon
+                    ? __('billing.until', ['date' => $this->dates->date($listing->getAttribute('promoted_until'))])
+                    : null,
                 'can' => [
+                    'promote' => $user !== null && (int) $listing->getAttribute('user_id') === (int) $user->getKey() && $status === ListingStatus::Published && ! ($expiresAt instanceof Carbon && $expiresAt->isPast()),
                     'edit' => $user !== null && Gate::forUser($user)->allows('update', $listing),
                     'pause' => $user !== null && Gate::forUser($user)->allows('pause', $listing),
                     'resume' => $user !== null && Gate::forUser($user)->allows('resume', $listing),

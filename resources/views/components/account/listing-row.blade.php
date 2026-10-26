@@ -25,6 +25,11 @@
                     <x-icon :name="$row['icon']" :size="13" />{{ $row['status'] }}
                 </span>
                 <span class="text-[12.5px] font-medium text-secondary">{{ $row['module'] }}</span>
+                @if ($row['promotion'] ?? null)
+                    <span class="inline-flex items-center gap-1 rounded-full bg-coral-tint px-2.5 py-[3px] text-xs font-semibold text-coral-pressed">
+                        <x-icon name="star" :size="12" />{{ $row['promotion'] }}@if ($row['promoted_until']) <span class="font-medium">· {{ $row['promoted_until'] }}</span>@endif
+                    </span>
+                @endif
                 @if ($row['expiring'])
                     <span class="text-[12.5px] font-semibold text-coral-pressed">{{ __('account.listings.expiring_soon') }}</span>
                 @endif
@@ -59,6 +64,9 @@
     <div class="mt-4 flex flex-wrap gap-2 border-t border-line pt-4">
         @if ($row['can']['renew'])
             <x-button size="sm" icon="refresh" wire:click="renew('{{ $row['type'] }}', {{ $row['id'] }})" wire:loading.attr="disabled">{{ __('account.listings.renew') }}</x-button>
+        @endif
+        @if ($row['can']['promote'] ?? false)
+            <x-button size="sm" variant="secondary" icon="arrow-up" :href="localized_route('account.promote', ['type' => $row['type'], 'id' => $row['id']])">{{ __('billing.promote.button') }}</x-button>
         @endif
         @if ($row['can']['edit'])
             <x-button size="sm" variant="secondary" icon="file" :href="localized_route('listings.edit', ['type' => $row['type'], 'id' => $row['id']])">{{ __('account.listings.edit') }}</x-button>

@@ -16,7 +16,7 @@ use Illuminate\Database\Eloquent\Relations\MorphTo;
  * A paid placement on a hotel, property, classified or vacancy. Saving one refreshes the
  * promotable's cached promotion columns.
  */
-#[Fillable(['promotable_type', 'promotable_id', 'user_id', 'payment_id', 'type', 'starts_at', 'ends_at', 'cancelled_at'])]
+#[Fillable(['promotable_type', 'promotable_id', 'user_id', 'payment_id', 'order_id', 'type', 'starts_at', 'ends_at', 'cancelled_at', 'next_run_at', 'expiry_notified_at'])]
 class Promotion extends Model
 {
     /** @use HasFactory<PromotionFactory> */
@@ -43,6 +43,8 @@ class Promotion extends Model
             'starts_at' => 'datetime',
             'ends_at' => 'datetime',
             'cancelled_at' => 'datetime',
+            'next_run_at' => 'datetime',
+            'expiry_notified_at' => 'datetime',
         ];
     }
 
@@ -70,6 +72,14 @@ class Promotion extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    /**
+     * @return BelongsTo<Order, $this>
+     */
+    public function order(): BelongsTo
+    {
+        return $this->belongsTo(Order::class);
     }
 
     /**

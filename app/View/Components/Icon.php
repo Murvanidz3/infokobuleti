@@ -90,6 +90,12 @@ class Icon extends Component
         'newspaper' => 'M4 5h13v14H6a2 2 0 0 1-2-2zM17 9h3v8a2 2 0 0 1-2 2M8 9h5M8 13h5M8 16h3',
         'compass' => 'M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18zM15.5 8.5l-2 5-5 2 2-5z',
         'refresh' => 'M20 11a8 8 0 0 0-14.5-4.5L4 8M4 4v4h4M4 13a8 8 0 0 0 14.5 4.5L20 16M20 20v-4h-4',
+        'arrow-up' => 'M12 19V5M5 12l7-7 7 7',
+        'wallet' => 'M4 7h15a1 1 0 0 1 1 1v11a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1zM4 7l11-3v3M16 13.5h.01',
+        'card' => 'M3 6h18v12H3zM3 10h18M7 15h3',
+        'chart' => 'M4 20h16M6 16v-5M11 16V7M16 16v-8',
+        'download' => 'M12 4v11M7 10l5 5 5-5M5 20h14',
+        'crown' => 'M3 8l4.5 4L12 5l4.5 7L21 8l-2 11H5z',
     ];
 
     public function __construct(

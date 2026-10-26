@@ -181,6 +181,7 @@ return [
         'super_vip' => 'Супер VIP',
         'bump' => 'Поднятие',
         'featured_home' => 'На главной странице',
+        'auto_bump' => 'Автоподнятие',
     ],
 
     'property_condition' => [
@@ -296,6 +297,8 @@ return [
         'business_package' => 'Бизнес-пакет',
         'featured_hotel' => 'Избранный отель',
         'banner' => 'Баннер',
+        'wallet_top_up' => 'Пополнение баланса',
+        'custom' => 'Индивидуальный заказ',
     ],
     'contact_topic' => [
         'general' => 'Общий вопрос',
@@ -303,5 +306,32 @@ return [
         'advertising' => 'Реклама',
         'partnership' => 'Сотрудничество',
         'bug' => 'Техническая проблема',
+    ],
+    'order_status' => [
+        'pending' => 'Ожидает оплаты',
+        'paid' => 'Оплачен',
+        'fulfilled' => 'Активен',
+        'failed' => 'Не удался',
+        'cancelled' => 'Отменён',
+        'refunded' => 'Возвращён',
+        'partially_refunded' => 'Частично возвращён',
+    ],
+    'payment_method' => [
+        'card' => 'Картой',
+        'balance' => 'С баланса',
+    ],
+    'wallet_entry_type' => [
+        'top_up' => 'Пополнение',
+        'purchase' => 'Покупка',
+        'refund' => 'Возврат',
+        'adjustment' => 'Корректировка',
+    ],
+    'payment_event_type' => [
+        'created' => 'Заказ в банке',
+        'callback' => 'Уведомление банка',
+        'status_check' => 'Проверка статуса',
+        'status_changed' => 'Смена статуса',
+        'refund' => 'Возврат',
+        'error' => 'Ошибка',
     ],
 ];

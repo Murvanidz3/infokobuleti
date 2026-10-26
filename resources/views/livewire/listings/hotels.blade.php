@@ -59,13 +59,13 @@
         @if ($display === 'list')
             <div class="flex flex-col gap-5">
                 @foreach ($items as $hotel)
-                    <x-card.hotel wire:key="hotel-{{ $hotel['favorite'] }}" horizontal :name="$hotel['name']" :address="$hotel['address']" :sea="$hotel['sea']" :rating="$hotel['rating']" :reviews="$hotel['reviews']" :price="$hotel['price']" :url="$hotel['url']" :image="$hotel['image']" :saved="$hotel['saved']" :favorite="$hotel['favorite']" :eager="$loop->first" />
+                    <x-card.hotel wire:key="hotel-{{ $hotel['favorite'] }}" horizontal :name="$hotel['name']" :address="$hotel['address']" :sea="$hotel['sea']" :rating="$hotel['rating']" :reviews="$hotel['reviews']" :price="$hotel['price']" :url="$hotel['url']" :image="$hotel['image']" :saved="$hotel['saved']" :favorite="$hotel['favorite']" :eager="$loop->first" :promotion="$hotel['promotion'] ?? null" :logo="$hotel['logo'] ?? null" />
                 @endforeach
             </div>
         @else
             <div class="grid grid-cols-[repeat(auto-fill,minmax(min(100%,280px),1fr))] gap-5">
                 @foreach ($items as $hotel)
-                    <x-card.hotel wire:key="hotel-{{ $hotel['favorite'] }}" :name="$hotel['name']" :address="$hotel['address']" :sea="$hotel['sea']" :rating="$hotel['rating']" :reviews="$hotel['reviews']" :price="$hotel['price']" :url="$hotel['url']" :image="$hotel['image']" :saved="$hotel['saved']" :favorite="$hotel['favorite']" :eager="$loop->first" />
+                    <x-card.hotel wire:key="hotel-{{ $hotel['favorite'] }}" :name="$hotel['name']" :address="$hotel['address']" :sea="$hotel['sea']" :rating="$hotel['rating']" :reviews="$hotel['reviews']" :price="$hotel['price']" :url="$hotel['url']" :image="$hotel['image']" :saved="$hotel['saved']" :favorite="$hotel['favorite']" :eager="$loop->first" :promotion="$hotel['promotion'] ?? null" :logo="$hotel['logo'] ?? null" />
                 @endforeach
             </div>
         @endif

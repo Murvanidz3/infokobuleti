@@ -11,15 +11,25 @@
     'favorite' => null,
     'horizontal' => false,
     'eager' => false,
+    'promotion' => null,
+    'logo' => null,
 ])
 
 <article {{ $attributes->class([
-    'group card-lift relative overflow-hidden rounded-card border border-line bg-white shadow-card',
+    'group card-lift relative overflow-hidden rounded-card border bg-white shadow-card',
+    'border-coral' => $promotion,
+    'border-line' => ! $promotion,
     'xs:grid xs:grid-cols-[minmax(220px,300px)_1fr]' => $horizontal,
 ]) }}>
     <div @class(['relative aspect-3/2 overflow-hidden bg-line', 'xs:aspect-auto xs:min-h-[200px]' => $horizontal])>
         <x-image :src="$image" :alt="$title" :loading="$eager ? 'eager' : 'lazy'" class="media-zoom absolute inset-0" />
-        <x-badge variant="navy" class="pointer-events-none absolute top-3.5 left-3.5">{{ $badge }}</x-badge>
+        <div class="pointer-events-none absolute top-3.5 left-3.5 flex flex-wrap items-center gap-1.5">
+            <x-badge variant="navy">{{ $badge }}</x-badge>
+            <x-card.promotion-badge :promotion="$promotion" />
+        </div>
+        @if ($logo)
+            <img src="{{ $logo }}" alt="" loading="lazy" class="pointer-events-none absolute bottom-3 left-3 size-11 rounded-chip bg-white object-contain p-1 shadow-card-soft">
+        @endif
         <x-favorite-button :saved="$saved" :item="$favorite" class="absolute top-3 right-3" />
     </div>
     <div class="p-5">

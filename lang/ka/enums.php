@@ -183,6 +183,7 @@ return [
         'super_vip' => 'სუპერ VIP',
         'bump' => 'ამოწევა',
         'featured_home' => 'მთავარ გვერდზე',
+        'auto_bump' => 'ავტო-ამოწევა',
     ],
 
     'property_condition' => [
@@ -292,12 +293,14 @@ return [
     ],
     'price_plan_product' => [
         'vip' => 'VIP',
-        'super_vip' => 'Super VIP',
+        'super_vip' => 'სუპერ VIP',
         'bump' => 'ამოწევა',
         'auto_bump' => 'ავტო-ამოწევა',
         'business_package' => 'ბიზნეს პაკეტი',
         'featured_hotel' => 'რჩეული სასტუმრო',
         'banner' => 'ბანერი',
+        'wallet_top_up' => 'ბალანსის შევსება',
+        'custom' => 'ინდივიდუალური შეკვეთა',
     ],
     'contact_topic' => [
         'general' => 'ზოგადი კითხვა',
@@ -305,5 +308,32 @@ return [
         'advertising' => 'რეკლამა',
         'partnership' => 'თანამშრომლობა',
         'bug' => 'ტექნიკური პრობლემა',
+    ],
+    'order_status' => [
+        'pending' => 'გადახდის მოლოდინში',
+        'paid' => 'გადახდილი',
+        'fulfilled' => 'აქტიური',
+        'failed' => 'წარუმატებელი',
+        'cancelled' => 'გაუქმებული',
+        'refunded' => 'დაბრუნებული',
+        'partially_refunded' => 'ნაწილობრივ დაბრუნებული',
+    ],
+    'payment_method' => [
+        'card' => 'ბარათით',
+        'balance' => 'ბალანსიდან',
+    ],
+    'wallet_entry_type' => [
+        'top_up' => 'შევსება',
+        'purchase' => 'შეძენა',
+        'refund' => 'დაბრუნება',
+        'adjustment' => 'კორექტირება',
+    ],
+    'payment_event_type' => [
+        'created' => 'შეკვეთა ბანკში',
+        'callback' => 'ბანკის შეტყობინება',
+        'status_check' => 'სტატუსის შემოწმება',
+        'status_changed' => 'სტატუსის ცვლილება',
+        'refund' => 'დაბრუნება',
+        'error' => 'შეცდომა',
     ],
 ];

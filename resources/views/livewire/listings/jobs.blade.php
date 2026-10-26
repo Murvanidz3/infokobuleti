@@ -31,7 +31,7 @@
 
         <x-list-panel>
             @foreach ($items as $job)
-                <x-card.job wire:key="job-{{ $job['favorite'] }}" :title="$job['title']" :employer="$job['employer']" :salary="$job['salary']" :period="$job['period']" :type="$job['type']" :seasonal="$job['seasonal']" :posted="$job['posted']" :url="$job['url']" />
+                <x-card.job wire:key="job-{{ $job['favorite'] }}" :title="$job['title']" :employer="$job['employer']" :salary="$job['salary']" :period="$job['period']" :type="$job['type']" :seasonal="$job['seasonal']" :posted="$job['posted']" :url="$job['url']" :promotion="$job['promotion'] ?? null" :logo="$job['logo'] ?? null" />
             @endforeach
         </x-list-panel>
     </x-listing.page>

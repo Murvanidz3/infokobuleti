@@ -5,6 +5,7 @@ namespace App\Providers;
 use App\Contracts\ExchangeRates;
 use App\Contracts\Geocoder;
 use App\Contracts\HumanVerifier;
+use App\Contracts\PaymentGateway;
 use App\Contracts\SmsGateway;
 use App\Enums\Role;
 use App\Http\Middleware\SetLocale;
@@ -22,6 +23,7 @@ use App\Services\Favorites;
 use App\Services\Geo\FakeGeocoder;
 use App\Services\Geo\NominatimGeocoder;
 use App\Services\LocaleRouter;
+use App\Services\Payments\PaymentGatewayManager;
 use App\Services\Settings;
 use App\Services\Sms\SmsManager;
 use App\Support\Listings\PublicCache;
@@ -71,6 +73,8 @@ class AppServiceProvider extends ServiceProvider
         'price_plan' => Models\PricePlan::class,
         'contact_message' => Models\ContactMessage::class,
         'listing_draft' => Models\ListingDraft::class,
+        'order' => Models\Order::class,
+        'business_subscription' => Models\BusinessSubscription::class,
     ];
 
     /**
@@ -95,6 +99,8 @@ class AppServiceProvider extends ServiceProvider
         $this->app->scoped(Favorites::class);
 
         $this->app->singleton(SmsManager::class);
+        $this->app->singleton(PaymentGatewayManager::class);
+        $this->app->bind(PaymentGateway::class, fn ($app) => $app->make(PaymentGatewayManager::class)->driver());
         $this->app->singleton(Settings::class);
         $this->app->bind(SmsGateway::class, fn ($app) => $app->make(SmsManager::class)->driver());
 

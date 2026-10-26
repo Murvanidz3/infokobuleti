@@ -18,3 +18,9 @@ Schedule::command('listings:expire')->dailyAt('09:05')->withoutOverlapping()->on
 
 // Add-listing drafts nobody touched for 30 days (and their photos).
 Schedule::command('model:prune', ['--model' => [ListingDraft::class]])->dailyAt('04:20')->onOneServer();
+
+// Promotions: auto-bumps, VIP / package expiry and "ends tomorrow" reminders.
+Schedule::command('promotions:run')->everyTenMinutes()->withoutOverlapping()->onOneServer();
+
+// Card payments whose callback never came are re-checked with the bank; abandoned orders close.
+Schedule::command('payments:reconcile')->everyFifteenMinutes()->withoutOverlapping()->onOneServer();
