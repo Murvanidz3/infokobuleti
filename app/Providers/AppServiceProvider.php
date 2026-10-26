@@ -38,10 +38,14 @@ use Illuminate\Auth\Events\Login;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\Relation;
+use Illuminate\Database\Events\QueryExecuted;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\RateLimiter;
+use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
 use Laravel\Scout\EngineManager;
 use Livewire\Livewire;
@@ -137,6 +141,8 @@ class AppServiceProvider extends ServiceProvider
     {
         Model::preventLazyLoading(! $this->app->isProduction());
 
+        $this->logSlowQueries();
+
         Features::define();
 
         Relation::enforceMorphMap(self::MORPH_MAP);
@@ -178,5 +184,31 @@ class AppServiceProvider extends ServiceProvider
         ]);
         RateLimiter::for('interactions', fn (Request $request) => Limit::perMinute(20)->by('interact:'.($request->user()?->getAuthIdentifier() ?? $request->ip())));
         RateLimiter::for('search', fn (Request $request) => Limit::perMinute(90)->by('search:'.$request->ip()));
+        RateLimiter::for('livewire', fn (Request $request) => Limit::perMinute(300)->by('livewire:'.($request->user()?->getAuthIdentifier() ?? $request->ip())));
+        RateLimiter::for('webhooks', fn (Request $request) => Limit::perMinute(120)->by('webhooks:'.$request->ip()));
+
+        // Every Livewire request (filters, forms, uploads) is rate-limited like the other endpoints.
+        Livewire::setUpdateRoute(fn ($handle, string $path) => Route::post($path, $handle)->middleware(['web', 'throttle:livewire']));
+    }
+
+    /**
+     * Queries slower than seo.slow_query_ms go to storage/logs/slow-queries-*.log with the page.
+     */
+    private function logSlowQueries(): void
+    {
+        $threshold = (int) config('seo.slow_query_ms');
+
+        if ($threshold <= 0) {
+            return;
+        }
+
+        DB::listen(function (QueryExecuted $query) use ($threshold): void {
+            if ($query->time >= $threshold) {
+                Log::channel('slow-queries')->warning(sprintf('%.0f ms', $query->time), [
+                    'sql' => $query->sql,
+                    'url' => app()->runningInConsole() ? 'console' : request()->fullUrl(),
+                ]);
+            }
+        });
     }
 }

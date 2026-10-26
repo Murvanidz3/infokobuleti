@@ -4,7 +4,7 @@
     $user = auth()->user();
 @endphp
 
-<x-layout.app :title="$vacancy->title" :description="$description">
+<x-layout.app :title="$vacancy->title" :description="$description" :seo="$seo" :noindex="$preview">
     @if ($preview)
         <x-detail.preview-banner :status="$vacancy->status->getLabel()" />
     @endif

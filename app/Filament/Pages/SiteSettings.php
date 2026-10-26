@@ -7,6 +7,7 @@ use App\Enums\Permission;
 use App\Filament\NavigationGroup;
 use App\Filament\Support\ChecksPermission;
 use App\Filament\Support\Translatable;
+use App\Services\Seo\MetaTemplates;
 use App\Services\Settings;
 use BackedEnum;
 use Filament\Actions\Action;
@@ -110,6 +111,17 @@ class SiteSettings extends Page
                             'seo.title' => fn (string $name) => TextInput::make($name)->maxLength(70),
                             'seo.description' => fn (string $name) => Textarea::make($name)->rows(3)->maxLength(170),
                         ]),
+                        Section::make(__('admin.seo.google'))->schema([
+                            Grid::make(2)->schema([
+                                TextInput::make('seo.ga4_id')->label(__('admin.seo.ga4'))->helperText(__('admin.seo.ga4_help'))
+                                    ->regex('/^G-[A-Z0-9]{4,16}$/')->placeholder('G-XXXXXXXXXX'),
+                                TextInput::make('seo.google_verification')->label(__('admin.seo.verification'))->helperText(__('admin.seo.verification_help'))
+                                    ->maxLength(100)->regex('/^[A-Za-z0-9_-]+$/'),
+                            ]),
+                        ]),
+                        Section::make(__('admin.seo.templates'))->description(__('admin.seo.templates_help', ['placeholders' => implode(' ', MetaTemplates::PLACEHOLDERS)]))
+                            ->collapsible()->collapsed()
+                            ->schema(array_map(self::templateFields(...), MetaTemplates::PAGES)),
                     ]),
                     Tab::make(__('admin.settings.tabs.listings'))->icon(Heroicon::OutlinedClock)->schema([
                         Section::make(__('admin.settings.expiry_days'))->description(__('admin.settings.expiry_help'))->schema([
@@ -181,6 +193,22 @@ class SiteSettings extends Page
     }
 
     /**
+     * Title and description template of one page type, per language.
+     */
+    private static function templateFields(string $page): Section
+    {
+        return Section::make(__('admin.seo.pages.'.$page))->compact()->schema([
+            Tabs::make("seo-{$page}")->tabs(array_map(
+                fn (string $locale): Tab => Tab::make(__('locales.'.$locale, locale: $locale))->schema([
+                    TextInput::make("seo.templates.{$page}.title.{$locale}")->label(__('admin.seo.title_template'))->maxLength(120),
+                    Textarea::make("seo.templates.{$page}.description.{$locale}")->label(__('admin.seo.description_template'))->rows(2)->maxLength(300),
+                ]),
+                Translatable::LOCALES,
+            )),
+        ]);
+    }
+
+    /**
      * Read-only status of every external service, keys masked.
      *
      * @return list<TextEntry>
@@ -197,8 +225,10 @@ class SiteSettings extends Page
             TextEntry::make('turnstile')->label('Cloudflare Turnstile')
                 ->state(fn (): string => app(HumanVerifier::class)->enabled() ? $mask(config('services.turnstile.site_key')) : __('admin.settings.not_configured')),
             TextEntry::make('mail')->label(__('admin.settings.integration.mail'))->state(fn (): string => (string) config('mail.default')),
-            TextEntry::make('payments')->label(__('admin.settings.integration.payments'))->state(fn (): string => __('admin.settings.coming_phase', ['phase' => 8])),
-            TextEntry::make('ai')->label(__('admin.settings.integration.ai'))->state(fn (): string => __('admin.settings.coming_phase', ['phase' => 9])),
+            TextEntry::make('payments')->label(__('admin.settings.integration.payments'))->state(fn (): string => implode(', ', (array) config('payments.gateways')) ?: __('admin.settings.not_configured')),
+            TextEntry::make('telegram')->label('Telegram')->state(fn (): string => $mask(config('services.telegram.bot_token'))),
+            TextEntry::make('webpush')->label('Web push (VAPID)')->state(fn (): string => $mask(config('webpush.vapid.public_key'))),
+            TextEntry::make('analytics')->label('Google Analytics 4')->state(fn (): string => (string) (site_setting('seo.ga4_id') ?: __('admin.settings.not_configured'))),
             TextEntry::make('search')->label(__('admin.settings.integration.search'))->state(fn (): string => (string) config('scout.driver')),
             TextEntry::make('queue')->label(__('admin.settings.integration.queue'))->state(fn (): string => (string) config('queue.default')),
         ];

@@ -33,7 +33,7 @@ final class PublicCache
         Cache::forever(self::VERSION_KEY, self::version() + 1);
     }
 
-    private static function version(): int
+    public static function version(): int
     {
         return (int) Cache::get(self::VERSION_KEY, 1);
     }

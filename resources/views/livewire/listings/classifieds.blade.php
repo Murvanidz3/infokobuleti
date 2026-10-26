@@ -4,7 +4,7 @@
         <x-slot:filters>
             <x-filters.group :title="__('home.search.fields.category')">
                 <div wire:key="root-{{ $rootSlug }}">
-                    <x-form.select name="root" :options="$roots" :selected="$rootSlug" :placeholder="__('site.filters.all_categories')" x-on:change="$wire.set('category', $event.target.value)" />
+                    <x-form.select :aria-label="__('home.search.fields.category')" name="root" :options="$roots" :selected="$rootSlug" :placeholder="__('site.filters.all_categories')" x-on:change="$wire.set('category', $event.target.value)" />
                 </div>
                 @if ($children)
                     <x-filters.pills model="category" :multiple="false" class="mt-3" :options="[$rootSlug => __('site.filters.all_in_category')] + $children" />
@@ -15,7 +15,7 @@
                 <x-filters.group :title="$field['name'].(isset($field['unit']) ? ', '.$field['unit'] : '')" wire:key="field-{{ $field['key'] }}">
                     @switch($field['type'])
                         @case('select')
-                            <x-form.select :name="'attrs-'.$field['key']" wire:model.live="attrs.{{ $field['key'] }}" :options="$field['choices']" :placeholder="__('site.filters.any')" />
+                            <x-form.select :aria-label="$field['name'].(isset($field['unit']) ? ', '.$field['unit'] : '')" :name="'attrs-'.$field['key']" wire:model.live="attrs.{{ $field['key'] }}" :options="$field['choices']" :placeholder="__('site.filters.any')" />
                             @break
                         @case('multiselect')
                             <x-filters.pills :model="'attrs.'.$field['key']" :options="$field['choices']" />
@@ -43,7 +43,7 @@
 
             @if ($locationOptions)
                 <x-filters.group :title="__('home.search.fields.location')">
-                    <x-form.select name="location" wire:model.live="location" :options="$locationOptions" :placeholder="__('site.filters.all_locations')" />
+                    <x-form.select :aria-label="__('home.search.fields.location')" name="location" wire:model.live="location" :options="$locationOptions" :placeholder="__('site.filters.all_locations')" />
                 </x-filters.group>
             @endif
 

@@ -27,11 +27,20 @@ export function registerPwa(Alpine) {
             window.addEventListener('beforeinstallprompt', (event) => {
                 event.preventDefault();
                 this.deferred = event;
-                this.open = phone;
+                this.show(phone);
             });
 
             if (this.ios && phone) {
-                setTimeout(() => (this.open = true), 4000);
+                setTimeout(() => this.show(true), 4000);
+            }
+        },
+
+        // Never on top of the cookie banner: wait until the visitor has made the cookie choice.
+        show(open) {
+            if (document.cookie.includes('ik_consent=')) {
+                this.open = open;
+            } else {
+                window.addEventListener('cookie-chosen', () => (this.open = open), { once: true });
             }
         },
 

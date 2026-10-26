@@ -34,6 +34,7 @@
                     @foreach (config('site.info_links') as $link => [$route, $parameters])
                         <li><a href="{{ localized_route($route, $parameters) }}" class="text-line-strong transition-colors hover:text-white">{{ __('footer.links.'.$link) }}</a></li>
                     @endforeach
+                    <li><button type="button" x-data x-on:click="$dispatch('cookie-settings')" class="cursor-pointer text-left text-line-strong transition-colors hover:text-white">{{ __('privacy.cookies.settings') }}</button></li>
                 </ul>
             </nav>
 

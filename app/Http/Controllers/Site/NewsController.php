@@ -8,6 +8,7 @@ use App\Http\Controllers\Site\Concerns\ShowsListing;
 use App\Models\Article;
 use App\Models\Category;
 use App\Services\DateFormatter;
+use App\Services\Seo\StructuredData;
 use App\Support\Listings\CardPresenter;
 use App\Support\Listings\ListingQuery;
 use App\Support\SafeHtml;
@@ -38,7 +39,7 @@ class NewsController extends Controller
         ]);
     }
 
-    public function show(Article $article, CardPresenter $cards, DateFormatter $dates): View
+    public function show(Article $article, CardPresenter $cards, DateFormatter $dates, StructuredData $seo): View
     {
         $preview = $this->visit($article);
         $article->load(['media', 'category', 'author']);
@@ -55,6 +56,7 @@ class NewsController extends Controller
         $body = SafeHtml::clean((string) $article->body);
 
         return view('pages.news.show', [
+            'seo' => $seo->for($article),
             'article' => $article,
             'preview' => $preview,
             'body' => $body,

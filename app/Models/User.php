@@ -121,7 +121,7 @@ class User extends Authenticatable implements FilamentUser, HasLocalePreference,
      */
     public function wantsEmailFor(NotificationTopic $topic): bool
     {
-        return $this->email !== null && ($this->notification_preferences[$topic->value] ?? true) !== false;
+        return $this->email !== null && ! $this->trashed() && ($this->notification_preferences[$topic->value] ?? true) !== false;
     }
 
     /**

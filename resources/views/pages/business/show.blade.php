@@ -1,4 +1,4 @@
-<x-layout.app :title="$profile->name" :description="$description">
+<x-layout.app :title="$profile->name" :description="$description" :seo="$seo">
     <div class="border-b border-line bg-surface-alt">
         <div class="container-page py-[clamp(24px,3.5vw,44px)]">
             <x-breadcrumbs :items="[['label' => __('nav.home'), 'url' => localized_route('home')], ['label' => $profile->name]]" class="mb-5" />

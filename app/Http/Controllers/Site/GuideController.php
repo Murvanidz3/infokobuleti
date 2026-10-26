@@ -8,6 +8,7 @@ use App\Http\Controllers\Site\Concerns\ShowsListing;
 use App\Models\Event;
 use App\Models\Place;
 use App\Services\Favorites;
+use App\Services\Seo\StructuredData;
 use App\Support\Listings\CardPresenter;
 use App\Support\Listings\Contact;
 use App\Support\Listings\DetailPresenter;
@@ -56,7 +57,7 @@ class GuideController extends Controller
         ]);
     }
 
-    public function show(Place $place, CardPresenter $cards, DetailPresenter $detail, Favorites $favorites): View
+    public function show(Place $place, CardPresenter $cards, DetailPresenter $detail, Favorites $favorites, StructuredData $seo): View
     {
         $preview = $this->visit($place);
         $place->load(['media', 'location', 'businessProfile', 'user']);
@@ -64,6 +65,7 @@ class GuideController extends Controller
         $hours = is_array($place->opening_hours) ? $place->opening_hours : [];
 
         return view('pages.guide.show', [
+            'seo' => $seo->for($place),
             'place' => $place,
             'preview' => $preview,
             'gallery' => $detail->gallery($place),

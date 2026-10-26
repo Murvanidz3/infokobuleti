@@ -11,6 +11,7 @@ use App\Http\Requests\Auth\SendLoginCodeRequest;
 use App\Http\Requests\Auth\VerifyLoginCodeRequest;
 use App\Services\Auth\LoginRedirect;
 use App\Services\Auth\PhoneOtp;
+use App\Support\AuthLog;
 use App\Support\GeorgianPhone;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
@@ -27,6 +28,8 @@ class PhoneLoginController extends Controller
         try {
             $sent = $otp->send($phone, OtpPurpose::Login, $request->ip());
         } catch (OtpException $exception) {
+            AuthLog::failed($request, 'otp-'.$exception->error->value);
+
             return response()->json([
                 'message' => $exception->userMessage(),
                 'retry_after' => $exception->retryAfter,

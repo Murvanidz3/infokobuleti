@@ -2,7 +2,7 @@
 <div class="lg:grid lg:grid-cols-[minmax(0,1fr)_340px] lg:items-start lg:gap-6">
     <div class="flex flex-col gap-4">
         @unless ($canPromote)
-            <p class="flex items-start gap-2.5 rounded-tile bg-coral-tint px-4 py-3 text-[14px] leading-normal text-coral-pressed">
+            <p class="flex items-start gap-2.5 rounded-tile bg-coral-tint px-4 py-3 text-[14px] leading-normal text-navy">
                 <x-icon name="alert" :size="18" class="mt-px shrink-0" />{{ __('billing.promote.not_live') }}
             </p>
         @endunless
@@ -13,7 +13,7 @@
                     <span @class([
                         'grid size-11 shrink-0 place-items-center rounded-full',
                         'bg-navy text-white' => $group['product'] === 'super_vip',
-                        'bg-coral-tint text-coral-pressed' => $group['product'] === 'vip',
+                        'bg-coral-tint text-navy' => $group['product'] === 'vip',
                         'bg-surface-alt text-navy' => ! in_array($group['product'], ['super_vip', 'vip'], true),
                     ])>
                         <x-icon :name="match ($group['product']) { 'super_vip' => 'crown', 'vip' => 'star', 'featured_hotel' => 'house', 'auto_bump' => 'refresh', default => 'arrow-up' }" :size="20" />

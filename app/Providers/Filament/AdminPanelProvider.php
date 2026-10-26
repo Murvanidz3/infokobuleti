@@ -7,6 +7,7 @@ use App\Filament\Pages\Dashboard;
 use App\Http\Controllers\Admin\SwitchAdminLocaleController;
 use App\Http\Middleware\AuthenticateAdmin;
 use App\Http\Middleware\LogoutBlockedUsers;
+use App\Http\Middleware\SecurityHeaders;
 use App\Http\Middleware\SetAdminLocale;
 use App\Http\Middleware\TrackUserSessions;
 use Filament\Actions\Action;
@@ -90,6 +91,7 @@ class AdminPanelProvider extends PanelProvider
                     ->name('locale');
             })
             ->middleware([
+                SecurityHeaders::class.':admin',
                 EncryptCookies::class,
                 AddQueuedCookiesToResponse::class,
                 StartSession::class,

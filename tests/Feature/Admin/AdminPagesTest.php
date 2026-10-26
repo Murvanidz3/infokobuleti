@@ -67,6 +67,8 @@ it('renders every other admin page', function (string $url) {
     '/admin/pages',
     '/admin/banners',
     '/admin/activities',
+    '/admin/redirects',
+    '/admin/features',
 ]);
 
 it('renders record pages of users, businesses, categories and conversations', function () {

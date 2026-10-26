@@ -9,6 +9,7 @@ use App\Models\Place;
 use App\Models\Property;
 use App\Models\Vacancy;
 use App\Services\ListingStats;
+use App\Services\Seo\StructuredData;
 use App\Support\Listings\CardPresenter;
 use App\Support\Listings\DetailPresenter;
 use App\Support\Listings\ListingQuery;
@@ -19,7 +20,7 @@ use Illuminate\View\View;
  */
 class BusinessProfileController extends Controller
 {
-    public function __invoke(BusinessProfile $businessProfile, CardPresenter $cards, DetailPresenter $detail, ListingStats $stats): View
+    public function __invoke(BusinessProfile $businessProfile, CardPresenter $cards, DetailPresenter $detail, ListingStats $stats, StructuredData $seo): View
     {
         $profile = $businessProfile->load(['location', 'user', 'media']);
 
@@ -37,6 +38,7 @@ class BusinessProfileController extends Controller
         $logo = $profile->getFirstMediaUrl('logo');
 
         return view('pages.business.show', [
+            'seo' => $seo->for($profile),
             'profile' => $profile,
             'sections' => $sections,
             'reviews' => $detail->reviews($profile),

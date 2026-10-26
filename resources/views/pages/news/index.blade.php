@@ -1,4 +1,4 @@
-<x-layout.app :title="__('site.news.title')" :description="__('site.news.subtitle')">
+<x-layout.app :title="__('site.news.title')" :description="__('site.news.subtitle')" :seo="['page' => 'news']">
     <x-page-header :title="__('site.news.title')" :subtitle="__('site.news.subtitle')"
                    :breadcrumbs="[['label' => __('nav.home'), 'url' => localized_route('home')], ['label' => __('nav.news')]]" />
 

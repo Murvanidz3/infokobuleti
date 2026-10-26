@@ -32,7 +32,7 @@
                         'bg-line' => $number > $reached && $number !== $step,
                     ])></span>
                     <span @class([
-                        'hidden truncate text-[12.5px] font-semibold md:block',
+                        'truncate text-[12.5px] font-semibold max-md:sr-only',
                         'text-navy' => $number <= $reached,
                         'text-secondary' => $number > $reached,
                         'group-enabled:group-hover:text-coral-pressed' => $number !== $step,
@@ -43,7 +43,7 @@
     </ol>
 
     @error('limit')
-        <p role="alert" class="mt-5 flex items-start gap-2.5 rounded-tile bg-coral-tint px-4 py-3 text-[14px] leading-normal font-medium text-coral-pressed">
+        <p role="alert" class="mt-5 flex items-start gap-2.5 rounded-tile bg-coral-tint px-4 py-3 text-[14px] leading-normal font-medium text-navy">
             <x-icon name="alert" :size="18" class="mt-px shrink-0" />{{ $message }}
         </p>
     @enderror

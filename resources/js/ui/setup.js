@@ -1,5 +1,6 @@
 import { registerAuth } from './auth';
 import { registerComponents } from './components';
+import { registerConsent } from './consent';
 import { initFavorites } from './favorites';
 import { registerListing } from './listing';
 import { registerMap } from './map';
@@ -30,6 +31,7 @@ export function setupUi(Alpine) {
     registerRangeCalendar(Alpine);
     registerPush(Alpine);
     registerPwa(Alpine);
+    registerConsent(Alpine);
     initFavorites();
     initReveal();
 }

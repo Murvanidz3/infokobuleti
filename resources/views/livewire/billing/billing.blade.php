@@ -137,7 +137,7 @@
                         <span @class([
                             'inline-flex items-center rounded-full px-2.5 py-[3px] text-xs font-semibold',
                             'bg-navy text-white' => $row['tone'] === 'success',
-                            'bg-coral-tint text-coral-pressed' => in_array($row['tone'], ['warning', 'danger'], true),
+                            'bg-coral-tint text-navy' => in_array($row['tone'], ['warning', 'danger'], true),
                             'bg-line text-navy' => $row['tone'] === 'gray',
                         ])>{{ $row['status'] }}</span>
                         <span class="text-right">

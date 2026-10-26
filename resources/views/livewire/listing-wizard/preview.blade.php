@@ -3,7 +3,7 @@
 
 <div class="flex flex-col gap-6">
     @if ($errors->any())
-        <div role="alert" class="rounded-tile bg-coral-tint px-4 py-3 text-[14px] leading-normal text-coral-pressed">
+        <div role="alert" class="rounded-tile bg-coral-tint px-4 py-3 text-[14px] leading-normal text-navy">
             <p class="flex items-center gap-2 font-semibold"><x-icon name="alert" :size="18" />{{ __('account.wizard.fix_errors') }}</p>
             <ul class="mt-1.5 list-disc pl-6">
                 @foreach ($errors->all() as $message)

@@ -9,6 +9,7 @@ use App\Models\Property;
 use App\Services\Favorites;
 use App\Services\Insights\PriceInsight;
 use App\Services\PriceFormatter;
+use App\Services\Seo\StructuredData;
 use App\Support\Listings\CardPresenter;
 use App\Support\Listings\Contact;
 use App\Support\Listings\DetailPresenter;
@@ -19,7 +20,7 @@ class PropertyController extends Controller
 {
     use ShowsListing;
 
-    public function show(Property $property, CardPresenter $cards, DetailPresenter $detail, PriceFormatter $price, Favorites $favorites): View
+    public function show(Property $property, CardPresenter $cards, DetailPresenter $detail, PriceFormatter $price, Favorites $favorites, StructuredData $seo): View
     {
         $preview = $this->visit($property);
         $property->load(['media', 'location', 'businessProfile', 'user', 'features']);
@@ -52,6 +53,7 @@ class PropertyController extends Controller
         ]));
 
         return view('pages.real-estate.show', [
+            'seo' => $seo->for($property),
             'property' => $property,
             'card' => $cards->property($property),
             'insight' => app(PriceInsight::class)->forProperty($property),

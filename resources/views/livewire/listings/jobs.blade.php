@@ -3,7 +3,7 @@
                     :has-more="$hasMore" :markers="$markers" :active-count="$activeCount" :targets="$targets" :search-placeholder="__('home.search.placeholders.keyword')">
         <x-slot:filters>
             <x-filters.group :title="__('home.search.fields.category')">
-                <x-form.select name="category" wire:model.live="category" :options="$categoryOptions" :placeholder="__('site.filters.all_categories')" />
+                <x-form.select :aria-label="__('home.search.fields.category')" name="category" wire:model.live="category" :options="$categoryOptions" :placeholder="__('site.filters.all_categories')" />
             </x-filters.group>
 
             <x-filters.group :title="__('home.search.fields.employment')">
@@ -24,7 +24,7 @@
 
             @if ($locationOptions)
                 <x-filters.group :title="__('home.search.fields.location')">
-                    <x-form.select name="location" wire:model.live="location" :options="$locationOptions" :placeholder="__('site.filters.all_locations')" />
+                    <x-form.select :aria-label="__('home.search.fields.location')" name="location" wire:model.live="location" :options="$locationOptions" :placeholder="__('site.filters.all_locations')" />
                 </x-filters.group>
             @endif
         </x-slot:filters>

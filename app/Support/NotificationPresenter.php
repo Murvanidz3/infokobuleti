@@ -2,6 +2,7 @@
 
 namespace App\Support;
 
+use App\Actions\Privacy\ExportUserData;
 use App\Services\DateFormatter;
 use Illuminate\Notifications\DatabaseNotification;
 
@@ -41,6 +42,7 @@ class NotificationPresenter
             'order_refunded' => ['wallet', __('billing.notifications.refunded', ['amount' => (string) ($data['amount'] ?? '')]), ($data['to_balance'] ?? false) ? __('billing.notifications.refunded_balance') : __('billing.notifications.refunded_card'), localized_route('account.billing'), false],
             'invoice_issued' => ['file', __('billing.notifications.invoice', ['amount' => (string) ($data['amount'] ?? '')]), $this->translated($data['title'] ?? null), localized_route('account.billing'), true],
             'promotion_expiring' => ['star', __('billing.notifications.expiring', ['kind' => __('billing.expiring.kinds.'.($data['kind'] ?? 'vip'))]), $title !== '' ? __('billing.notifications.expiring_text', ['title' => $title, 'date' => (string) ($data['date'] ?? '')]) : __('billing.notifications.expiring_package', ['date' => (string) ($data['date'] ?? '')]), isset($data['listing_type'], $data['listing_id']) ? localized_route('account.promote', ['type' => $data['listing_type'], 'id' => $data['listing_id']]) : localized_route('account.billing'), true],
+            'data_export_ready' => ['download', __('privacy.export.ready'), __('privacy.export.ready_text', ['days' => ExportUserData::DAYS]), $data['url'] ?? null, false],
             default => ['info', $title !== '' ? $title : __('account.notifications.types.generic'), null, null, false],
         };
 

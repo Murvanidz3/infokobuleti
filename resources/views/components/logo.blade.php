@@ -1,6 +1,7 @@
 @props(['size' => 'header'])
 
-<a href="{{ localized_route('home') }}" aria-label="infokobuleti" {{ $attributes->class(['flex shrink-0 items-center text-white transition-opacity duration-200 hover:opacity-85']) }}>
+<a href="{{ localized_route('home') }}" {{ $attributes->class(['flex shrink-0 items-center text-white transition-opacity duration-200 hover:opacity-85']) }}>
+    <span class="sr-only">infokobuleti</span>
     <span aria-hidden="true" @class([
         'font-logo leading-none tracking-[-0.025em] whitespace-nowrap',
         'text-[26px]' => $size === 'header',

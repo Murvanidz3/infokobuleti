@@ -1,8 +1,8 @@
 <div>
         {{-- Module tabs --}}
-        <div class="scrollbar-none -mx-4 flex gap-2 overflow-x-auto px-4 pb-1 xs:mx-0 xs:px-0" role="tablist" aria-label="{{ __('account.listings.modules') }}">
+        <div class="scrollbar-none -mx-4 flex gap-2 overflow-x-auto px-4 pb-1 xs:mx-0 xs:px-0" role="group" aria-label="{{ __('account.listings.modules') }}">
             @foreach ($types as $value => $label)
-                <x-pill :active="$type === $value" wire:click="$set('type', '{{ $value }}')" role="tab" aria-selected="{{ $type === $value ? 'true' : 'false' }}" class="shrink-0">
+                <x-pill :active="$type === $value" wire:click="$set('type', '{{ $value }}')" class="shrink-0">
                     {{ $label }}
                     <span @class(['text-xs', 'text-white/70' => $type === $value, 'text-secondary' => $type !== $value])>{{ $counts[$value]['total'] }}</span>
                 </x-pill>

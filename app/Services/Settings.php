@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\Setting;
+use App\Support\Listings\PublicCache;
 use Illuminate\Contracts\Cache\Repository as Cache;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Arr;
@@ -95,6 +96,9 @@ class Settings
     {
         $this->values = null;
         $this->cache->forget(self::CACHE_KEY);
+
+        // Contacts, SEO texts and other settings are part of every cached page.
+        PublicCache::bump();
     }
 
     /**

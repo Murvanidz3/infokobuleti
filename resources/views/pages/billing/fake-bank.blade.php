@@ -1,13 +1,9 @@
 {{-- The fake test bank's payment page (staging only). Clearly marked as a test; no card data is asked for. --}}
-<x-layout.app :title="__('billing.fake_bank.title')">
-    <x-slot:head>
-        <meta name="robots" content="noindex, nofollow">
-    </x-slot:head>
-
+<x-layout.app :noindex="true" :title="__('billing.fake_bank.title')">
     <section class="min-h-[70vh] bg-surface-alt py-10 md:py-16">
         <div class="container-page">
             <div class="mx-auto max-w-[460px] rounded-panel border border-line bg-white p-6 shadow-card md:p-8">
-                <p class="inline-flex items-center gap-1.5 rounded-full bg-coral-tint px-3 py-1 text-[12.5px] font-semibold text-coral-pressed">
+                <p class="inline-flex items-center gap-1.5 rounded-full bg-coral-tint px-3 py-1 text-[12.5px] font-semibold text-navy">
                     <x-icon name="alert" :size="14" />{{ __('billing.fake_bank.badge') }}
                 </p>
                 <h1 class="mt-4 font-serif text-[26px] leading-tight font-semibold text-navy">{{ __('billing.fake_bank.title') }}</h1>

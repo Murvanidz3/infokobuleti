@@ -1,4 +1,4 @@
-<x-layout.app :title="$place->title" :description="$description">
+<x-layout.app :title="$place->title" :description="$description" :seo="$seo" :noindex="$preview">
     @if ($preview)
         <x-detail.preview-banner :status="$place->status->getLabel()" />
     @endif

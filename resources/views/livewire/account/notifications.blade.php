@@ -19,7 +19,7 @@
                 <li wire:key="notification-{{ $item['id'] }}" @class(['relative flex gap-3.5 border-b border-line px-4 py-4 last:border-b-0 md:px-5', 'bg-coral-tint/40' => $item['unread']])>
                     <span @class([
                         'grid size-10 shrink-0 place-items-center rounded-full',
-                        'bg-coral-tint text-coral-pressed' => $item['alert'],
+                        'bg-coral-tint text-navy' => $item['alert'],
                         'bg-surface-alt text-navy' => ! $item['alert'],
                     ])><x-icon :name="$item['icon']" :size="18" /></span>
                     <div class="min-w-0 flex-1">

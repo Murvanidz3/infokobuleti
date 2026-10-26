@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Staff;
 use App\Http\Controllers\Controller;
 use App\Services\Auth\PendingStaffLogin;
 use App\Services\Auth\TwoFactorAuthenticator;
+use App\Support\AuthLog;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -52,6 +53,7 @@ class TwoFactorChallengeController extends Controller
             : $twoFactor->verify((string) $user->two_factor_secret, $request->string('code')->toString(), $user->id);
 
         if (! $valid) {
+            AuthLog::failed($request, 'staff-2fa');
             RateLimiter::hit($key, 60);
 
             throw ValidationException::withMessages([

@@ -1,4 +1,4 @@
-<x-layout.app :title="$page->title" :description="$description">
+<x-layout.app :title="$page->title" :description="$description" :seo="['page' => 'page']" :noindex="! $page->is_published">
     <x-page-header :title="$page->title" :breadcrumbs="[['label' => __('nav.home'), 'url' => localized_route('home')], ['label' => $page->title]]" />
     <div class="container-page max-w-[840px] py-10 pb-[clamp(56px,6vw,96px)]">
         @if ($body !== '')

@@ -6,7 +6,7 @@
 @if ($captcha->enabled())
     <div {{ $attributes->class(['cf-turnstile min-h-[65px]']) }} data-sitekey="{{ $captcha->siteKey() }}" data-language="{{ app()->getLocale() }}" data-size="flexible"></div>
     @once
-        <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+        <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" nonce="{{ \Illuminate\Support\Facades\Vite::cspNonce() }}" async defer></script>
     @endonce
 @endif
 @error('cf-turnstile-response', $bag ?? 'default')

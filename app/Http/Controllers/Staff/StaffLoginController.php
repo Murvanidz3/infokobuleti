@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\StaffLoginRequest;
 use App\Models\User;
 use App\Services\Auth\PendingStaffLogin;
+use App\Support\AuthLog;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\RateLimiter;
@@ -36,6 +37,7 @@ class StaffLoginController extends Controller
         $user = User::query()->where('email', Str::lower($request->string('email')->toString()))->first();
 
         if ($user === null || $user->password === null || ! Hash::check($request->string('password')->toString(), $user->password) || ! $user->isStaff()) {
+            AuthLog::failed($request, 'staff-password');
             RateLimiter::hit($key, 60);
 
             throw ValidationException::withMessages(['email' => __('auth.failed')]);

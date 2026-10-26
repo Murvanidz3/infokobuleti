@@ -9,6 +9,7 @@ use App\Http\Controllers\Site\Concerns\ShowsListing;
 use App\Models\User;
 use App\Models\Vacancy;
 use App\Services\Favorites;
+use App\Services\Seo\StructuredData;
 use App\Support\Listings\CardPresenter;
 use App\Support\Listings\Contact;
 use App\Support\Listings\DetailPresenter;
@@ -20,7 +21,7 @@ class VacancyController extends Controller
 {
     use ShowsListing;
 
-    public function show(Vacancy $vacancy, CardPresenter $cards, DetailPresenter $detail, Favorites $favorites): View
+    public function show(Vacancy $vacancy, CardPresenter $cards, DetailPresenter $detail, Favorites $favorites, StructuredData $seo): View
     {
         $preview = $this->visit($vacancy);
         $vacancy->load(['location', 'businessProfile', 'user', 'category']);
@@ -45,6 +46,7 @@ class VacancyController extends Controller
             ->map(fn (Vacancy $item): array => $cards->job($item));
 
         return view('pages.jobs.show', [
+            'seo' => $seo->for($vacancy),
             'vacancy' => $vacancy,
             'preview' => $preview,
             'facts' => $facts,

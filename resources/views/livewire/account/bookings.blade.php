@@ -59,7 +59,7 @@
                         </div>
                         <span @class([
                             'inline-flex items-center rounded-full px-2.5 py-[3px] text-xs font-semibold',
-                            'bg-coral-tint text-coral-pressed' => $booking['status']->value === 'pending',
+                            'bg-coral-tint text-navy' => $booking['status']->value === 'pending',
                             'bg-navy text-white' => $booking['status']->value === 'accepted',
                             'bg-line text-navy' => ! in_array($booking['status']->value, ['pending', 'accepted'], true),
                         ])>{{ $booking['status']->label() }}</span>

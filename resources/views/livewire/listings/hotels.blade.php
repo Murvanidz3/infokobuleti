@@ -51,7 +51,7 @@
 
             @if ($locationOptions)
                 <x-filters.group :title="__('home.search.fields.location')">
-                    <x-form.select name="location" wire:model.live="location" :options="$locationOptions" :placeholder="__('site.filters.all_locations')" />
+                    <x-form.select :aria-label="__('home.search.fields.location')" name="location" wire:model.live="location" :options="$locationOptions" :placeholder="__('site.filters.all_locations')" />
                 </x-filters.group>
             @endif
         </x-slot:filters>

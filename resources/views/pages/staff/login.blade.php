@@ -1,8 +1,4 @@
-<x-layout.app :title="__('auth.staff.title')">
-    <x-slot:head>
-        <meta name="robots" content="noindex, nofollow">
-    </x-slot:head>
-
+<x-layout.app :noindex="true" :title="__('auth.staff.title')">
     <x-auth.card :title="__('auth.staff.title')" :subtitle="__('auth.staff.subtitle')" icon="shield">
         <form method="POST" action="{{ localized_route('staff.login.store') }}" class="flex flex-col gap-5">
             @csrf

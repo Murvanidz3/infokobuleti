@@ -2,7 +2,7 @@
     $query = fn (array $extra) => array_filter(array_merge(['category' => $category?->slug, 'view' => $mode === 'calendar' ? 'calendar' : null, 'month' => $mode === 'calendar' ? $month->format('Y-m') : null], $extra));
 @endphp
 
-<x-layout.app :title="__('site.events.title')" :description="__('site.events.subtitle')">
+<x-layout.app :title="__('site.events.title')" :description="__('site.events.subtitle')" :seo="['page' => 'events']">
     <x-page-header :title="__('site.events.title')" :subtitle="__('site.events.subtitle')"
                    :breadcrumbs="[['label' => __('nav.home'), 'url' => localized_route('home')], ['label' => __('nav.guide'), 'url' => localized_route('guide.index')], ['label' => __('nav.events')]]">
         <div role="group" aria-label="{{ __('site.list.view') }}" class="inline-flex rounded-button border border-line bg-white p-1">

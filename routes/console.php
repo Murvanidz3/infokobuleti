@@ -27,3 +27,9 @@ Schedule::command('payments:reconcile')->everyFifteenMinutes()->withoutOverlappi
 
 // Saved-search alerts: instant ones every run, daily and weekly ones from 09:00.
 Schedule::command('alerts:run')->everyTenMinutes()->withoutOverlapping()->onOneServer();
+
+// XML sitemaps for search engines (one file per module).
+Schedule::command('sitemap:generate')->dailyAt('03:40')->withoutOverlapping()->onOneServer();
+
+// Expired account-data exports are removed after their download link stops working.
+Schedule::command('privacy:prune-exports')->dailyAt('04:40')->onOneServer();

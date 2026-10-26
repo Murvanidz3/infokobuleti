@@ -4,7 +4,7 @@
     $user = auth()->user();
 @endphp
 
-<x-layout.app :title="$hotel->title" :description="$description">
+<x-layout.app :title="$hotel->title" :description="$description" :seo="$seo" :noindex="$preview">
     @if ($preview)
         <x-detail.preview-banner :status="$hotel->status->getLabel()" />
     @endif
@@ -96,7 +96,7 @@
                         @foreach ($months as $month)
                             <div class="w-[min(100%,340px)] shrink-0 snap-start">
                                 <h3 class="mb-3 text-[15px] font-semibold text-navy">{{ $month['label'] }}</h3>
-                                <div class="grid grid-cols-7 gap-1 text-center" role="grid">
+                                <div class="grid grid-cols-7 gap-1 text-center">
                                     @foreach (__('time.weekdays_short') as $weekday)
                                         <span class="pb-1 text-[11.5px] font-semibold text-secondary">{{ $weekday }}</span>
                                     @endforeach
@@ -107,13 +107,12 @@
                                         @if ($day['available'])
                                             <button type="button" x-on:click="pick('{{ $day['date'] }}')"
                                                     x-bind:class="{ '!bg-navy !text-white': state('{{ $day['date'] }}') === 'edge', '!bg-navy/10': state('{{ $day['date'] }}') === 'inside' }"
-                                                    aria-label="{{ $day['date'] }}"
                                                     class="flex aspect-square flex-col items-center justify-center rounded-chip bg-surface-alt text-navy transition-colors hover:bg-coral-tint">
-                                                <span class="text-[13.5px] font-semibold">{{ $day['day'] }}</span>
-                                                <span class="text-[9.5px] leading-none opacity-75">{{ (int) $day['price'] }}</span>
+                                                <span class="text-[13.5px] font-semibold">{{ $day['day'] }}<span class="sr-only"> {{ $month['label'] }},</span></span>
+                                                <span class="text-[9.5px] leading-none">{{ (int) $day['price'] }}<span class="sr-only"> ₾</span></span>
                                             </button>
                                         @else
-                                            <span @class(['flex aspect-square items-center justify-center rounded-chip text-[13.5px]', 'text-secondary/40' => $day['past'], 'text-secondary/60 line-through' => ! $day['past']])>{{ $day['day'] }}</span>
+                                            <span @class(['flex aspect-square items-center justify-center rounded-chip text-[13.5px]', 'text-secondary' => $day['past'], 'text-secondary line-through' => ! $day['past']])>{{ $day['day'] }}</span>
                                         @endif
                                     @endforeach
                                 </div>
@@ -198,11 +197,11 @@
                             <input type="tel" name="contact_phone" required autocomplete="tel" value="{{ old('contact_phone', $user?->phone ? \App\Support\GeorgianPhone::format($user->phone) : '') }}" class="{{ $input }}">
                         </label>
                         <label>
-                            <span class="mb-1 block text-[12.5px] text-secondary">{{ __('site.booking.fields.contact_email') }} <span class="opacity-70">({{ __('components.optional') }})</span></span>
+                            <span class="mb-1 block text-[12.5px] text-secondary">{{ __('site.booking.fields.contact_email') }} ({{ __('components.optional') }})</span>
                             <input type="email" name="contact_email" autocomplete="email" value="{{ old('contact_email', $user?->email) }}" class="{{ $input }}">
                         </label>
                         <label>
-                            <span class="mb-1 block text-[12.5px] text-secondary">{{ __('site.booking.fields.message') }} <span class="opacity-70">({{ __('components.optional') }})</span></span>
+                            <span class="mb-1 block text-[12.5px] text-secondary">{{ __('site.booking.fields.message') }} ({{ __('components.optional') }})</span>
                             <textarea name="message" rows="3" maxlength="1000" class="{{ $input }} py-2.5">{{ old('message') }}</textarea>
                         </label>
                         @foreach (['room_type_id', 'adults', 'children', 'contact_name', 'contact_phone', 'contact_email', 'message', 'cf-turnstile-response'] as $field)

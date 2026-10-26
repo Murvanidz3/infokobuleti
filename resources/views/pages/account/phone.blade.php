@@ -1,8 +1,4 @@
-<x-layout.app :title="__('auth.phone.verify_title')">
-    <x-slot:head>
-        <meta name="robots" content="noindex, nofollow">
-    </x-slot:head>
-
+<x-layout.app :noindex="true" :title="__('auth.phone.verify_title')">
     <x-auth.card :title="__('auth.phone.verify_title')" :subtitle="__('auth.phone.verify_subtitle')" icon="smartphone">
         <livewire:account.phone-form context="verify" />
 

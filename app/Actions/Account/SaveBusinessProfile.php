@@ -7,6 +7,7 @@ use App\Enums\BusinessType;
 use App\Enums\Role;
 use App\Models\BusinessProfile;
 use App\Models\User;
+use App\Services\Media\ImageSanitizer;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 
@@ -37,6 +38,8 @@ class SaveBusinessProfile
             $profile->save();
 
             if ($logo !== null) {
+                // Re-encoded first: metadata goes, and anything that is not a real image is refused.
+                app(ImageSanitizer::class)->sanitize($logo->getRealPath());
                 $profile->addMedia($logo)->toMediaCollection('logo');
             }
 

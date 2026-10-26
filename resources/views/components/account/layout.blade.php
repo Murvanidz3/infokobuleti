@@ -10,9 +10,8 @@
     $menu = app(\App\Services\Account\AccountMenu::class)->items($user);
 @endphp
 
-<x-layout.app :title="$title">
+<x-layout.app :noindex="true" :title="$title">
     <x-slot:head>
-        <meta name="robots" content="noindex, nofollow">
         {{ $head ?? '' }}
     </x-slot:head>
 

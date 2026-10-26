@@ -7,7 +7,7 @@
 @if ($status || $error)
     <div {{ $attributes->class(['flex flex-col gap-2']) }}>
         @if ($error)
-            <p role="alert" class="flex items-start gap-2.5 rounded-tile bg-coral-tint px-4 py-3 text-[14px] leading-normal font-medium text-coral-pressed">
+            <p role="alert" class="flex items-start gap-2.5 rounded-tile bg-coral-tint px-4 py-3 text-[14px] leading-normal font-medium text-navy">
                 <x-icon name="alert" :size="18" class="mt-px shrink-0" />{{ $error }}
             </p>
         @endif

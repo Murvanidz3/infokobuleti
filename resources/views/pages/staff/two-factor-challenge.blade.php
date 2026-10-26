@@ -1,8 +1,4 @@
-<x-layout.app :title="__('auth.staff.challenge_title')">
-    <x-slot:head>
-        <meta name="robots" content="noindex, nofollow">
-    </x-slot:head>
-
+<x-layout.app :noindex="true" :title="__('auth.staff.challenge_title')">
     <x-auth.card :title="__('auth.staff.challenge_title')" :subtitle="__('auth.staff.challenge_subtitle')" icon="smartphone">
         <form method="POST"
               action="{{ localized_route('staff.two-factor.store') }}"

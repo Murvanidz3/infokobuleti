@@ -9,6 +9,7 @@ use App\Models\Category;
 use App\Models\Event;
 use App\Services\DateFormatter;
 use App\Services\Favorites;
+use App\Services\Seo\StructuredData;
 use App\Support\Listings\CardPresenter;
 use App\Support\Listings\Contact;
 use App\Support\Listings\DetailPresenter;
@@ -85,13 +86,14 @@ class EventController extends Controller
         ]);
     }
 
-    public function show(Event $event, CardPresenter $cards, DetailPresenter $detail, Favorites $favorites): View
+    public function show(Event $event, CardPresenter $cards, DetailPresenter $detail, Favorites $favorites, StructuredData $seo): View
     {
         $preview = $this->visit($event);
         $event->load(['media', 'location', 'category', 'place', 'businessProfile', 'user']);
         $card = $cards->event($event);
 
         return view('pages.events.show', [
+            'seo' => $seo->for($event),
             'event' => $event,
             'card' => $card,
             'preview' => $preview,

@@ -19,9 +19,10 @@
      a sidebar from 1024px, a bottom sheet with a sticky "show N results" button below. --}}
 <div x-data="listingPage" x-on:keydown.escape.window="closeFilters()" {{ $attributes->class(['container-page pt-6 pb-[clamp(56px,6vw,96px)]']) }}>
     <div class="flex flex-wrap items-center justify-between gap-3">
-        <p class="text-[15px] text-secondary" aria-live="polite">
+        {{-- The results count is the heading of the card list (h1 → h2 → card h3). --}}
+        <h2 class="text-[15px] font-normal text-secondary" aria-live="polite">
             {!! trans_choice('site.list.results', $total, ['count' => '<strong class="font-semibold text-navy">'.e(number_format($total, 0, '.', ' ')).'</strong>']) !!}
-        </p>
+        </h2>
 
         <div class="flex w-full items-center gap-2 md:w-auto md:gap-2.5">
             <button type="button" x-on:click="openFilters()" class="relative inline-flex min-h-11 shrink-0 items-center gap-2 rounded-button border border-line bg-white px-3.5 text-[14.5px] font-semibold text-navy hover:border-line-strong lg:hidden">

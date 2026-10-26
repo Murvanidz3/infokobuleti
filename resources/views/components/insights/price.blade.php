@@ -9,7 +9,7 @@
                 'inline-flex items-center rounded-full px-2.5 py-[3px] text-xs font-semibold',
                 'bg-navy text-white' => $insight['verdict'] === 'below',
                 'bg-line text-navy' => $insight['verdict'] === 'fair',
-                'bg-coral-tint text-coral-pressed' => $insight['verdict'] === 'above',
+                'border border-coral bg-white text-navy' => $insight['verdict'] === 'above',
             ])>{{ __('insights.price.verdict.'.$insight['verdict'], ['percent' => $insight['diff']]) }}</span>
         </div>
 

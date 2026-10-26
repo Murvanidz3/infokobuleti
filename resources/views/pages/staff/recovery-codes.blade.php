@@ -1,8 +1,4 @@
-<x-layout.app :title="__('auth.staff.recovery_title')">
-    <x-slot:head>
-        <meta name="robots" content="noindex, nofollow">
-    </x-slot:head>
-
+<x-layout.app :noindex="true" :title="__('auth.staff.recovery_title')">
     <x-auth.card :title="__('auth.staff.recovery_title')" :subtitle="__('auth.staff.recovery_subtitle')" icon="key">
         <x-auth.recovery-codes :codes="$codes" />
 

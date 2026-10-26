@@ -16,12 +16,12 @@
             <h2 id="totals-title" class="sr-only">{{ __('billing.analytics.totals') }}</h2>
             <dl class="grid grid-cols-2 gap-4 md:grid-cols-4">
                 @foreach (['views' => 'eye', 'phone_reveals' => 'phone', 'favorites' => 'heart', 'messages' => 'message'] as $metric => $icon)
-                    <div class="flex items-center gap-3">
-                        <span class="grid size-11 shrink-0 place-items-center rounded-full bg-surface-alt text-navy"><x-icon :name="$icon" :size="20" /></span>
-                        <div>
-                            <dd class="text-[20px] leading-tight font-semibold text-navy">{{ number_format($totals[$metric], 0, '.', ' ') }}</dd>
-                            <dt class="text-[13px] text-secondary">{{ __('account.stats.'.$metric) }}</dt>
-                        </div>
+                    <div class="relative flex min-h-11 flex-col-reverse justify-center pl-14">
+                        <dt class="text-[13px] text-secondary">
+                            <span class="absolute top-1/2 left-0 grid size-11 -translate-y-1/2 place-items-center rounded-full bg-surface-alt text-navy"><x-icon :name="$icon" :size="20" /></span>
+                            {{ __('account.stats.'.$metric) }}
+                        </dt>
+                        <dd class="text-[20px] leading-tight font-semibold text-navy">{{ number_format($totals[$metric], 0, '.', ' ') }}</dd>
                     </div>
                 @endforeach
             </dl>

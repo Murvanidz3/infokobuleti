@@ -3,6 +3,7 @@
 use App\Http\Controllers\Account\AccountSecurityController;
 use App\Http\Controllers\Account\ApplicationCvController;
 use App\Http\Controllers\Account\ConversationController;
+use App\Http\Controllers\Account\DataExportController;
 use App\Http\Controllers\Account\HotelRoomsController;
 use App\Http\Controllers\Account\ListingWizardController;
 use App\Http\Controllers\Account\OnboardingController;
@@ -28,10 +29,12 @@ use App\Http\Controllers\Site\GuideController;
 use App\Http\Controllers\Site\HotelController;
 use App\Http\Controllers\Site\MessageController;
 use App\Http\Controllers\Site\NewsController;
+use App\Http\Controllers\Site\OgImageController;
 use App\Http\Controllers\Site\PageController;
 use App\Http\Controllers\Site\PhoneRevealController;
 use App\Http\Controllers\Site\PropertyController;
 use App\Http\Controllers\Site\ReportController;
+use App\Http\Controllers\Site\RobotsController;
 use App\Http\Controllers\Site\SearchController;
 use App\Http\Controllers\Site\VacancyApplicationController;
 use App\Http\Controllers\Site\VacancyController;
@@ -50,14 +53,20 @@ use Illuminate\Support\Facades\Route;
 
 // Not localized: the OAuth callback must match the URI registered with Google; webhooks are machine-to-machine.
 Route::get('/auth/google/callback', [GoogleController::class, 'callback'])->name('auth.google.callback');
-Route::post('/webhooks/sms/twilio', TwilioStatusController::class)->name('webhooks.sms.twilio');
+Route::post('/webhooks/sms/twilio', TwilioStatusController::class)->middleware('throttle:webhooks')->name('webhooks.sms.twilio');
 Route::post('/webhooks/telegram/{secret}', TelegramWebhookController::class)->middleware('throttle:240,1')->name('webhooks.telegram');
 Route::post('/webhooks/payments/{gateway}', PaymentWebhookController::class)->whereAlpha('gateway')->middleware('throttle:120,1')->name('webhooks.payments');
+
+// Share pictures and robots.txt (one per environment).
+Route::get('/og/{type}/{id}-{locale}.jpg', OgImageController::class)
+    ->whereIn('type', array_keys(OgImageController::TYPES))->whereNumber('id')->where('locale', '[a-z]{2}')
+    ->middleware('throttle:60,1')->name('og.image');
+Route::get('/robots.txt', RobotsController::class)->name('robots');
 
 // Staff support: browse the site as a user (started from the admin), and come back.
 Route::middleware('auth')->group(function (): void {
     Route::post('/admin/impersonate/{user}', [ImpersonationController::class, 'start'])->middleware('staff')->name('impersonation.start');
-    Route::post('/impersonation/leave', [ImpersonationController::class, 'leave'])->name('impersonation.leave');
+    Route::post('/impersonation/leave', [ImpersonationController::class, 'leave'])->middleware('throttle:interactions')->name('impersonation.leave');
 });
 
 app(LocaleRouter::class)->group(function (): void {
@@ -114,18 +123,18 @@ app(LocaleRouter::class)->group(function (): void {
         Route::post('/auth/phone/verify', [PhoneLoginController::class, 'verify'])->middleware('throttle:otp')->name('auth.phone.verify');
 
         Route::get('/staff/login', [StaffLoginController::class, 'create'])->name('staff.login');
-        Route::post('/staff/login', [StaffLoginController::class, 'store'])->name('staff.login.store');
+        Route::post('/staff/login', [StaffLoginController::class, 'store'])->middleware('throttle:otp')->name('staff.login.store');
         Route::get('/staff/two-factor', [TwoFactorChallengeController::class, 'create'])->name('staff.two-factor');
-        Route::post('/staff/two-factor', [TwoFactorChallengeController::class, 'store'])->name('staff.two-factor.store');
+        Route::post('/staff/two-factor', [TwoFactorChallengeController::class, 'store'])->middleware('throttle:otp')->name('staff.two-factor.store');
         Route::get('/staff/two-factor/setup', [TwoFactorSetupController::class, 'create'])->name('staff.two-factor.setup');
-        Route::post('/staff/two-factor/setup', [TwoFactorSetupController::class, 'store'])->name('staff.two-factor.setup.store');
+        Route::post('/staff/two-factor/setup', [TwoFactorSetupController::class, 'store'])->middleware('throttle:otp')->name('staff.two-factor.setup.store');
     });
 
     // Guests sign in with Google here; signed-in users link Google to their account (?intent=link).
     Route::get('/auth/google', [GoogleController::class, 'redirect'])->name('auth.google');
 
     Route::middleware('auth')->group(function (): void {
-        Route::post('/logout', LogoutController::class)->name('logout');
+        Route::post('/logout', LogoutController::class)->middleware('throttle:interactions')->name('logout');
         Route::get('/onboarding', OnboardingController::class)->name('onboarding');
         Route::get('/staff/recovery-codes', RecoveryCodesController::class)->middleware('staff')->name('staff.recovery-codes');
 
@@ -141,12 +150,13 @@ app(LocaleRouter::class)->group(function (): void {
             Route::get('/account/billing/invoices/{order}', InvoiceController::class)->whereNumber('order')->name('account.invoice');
             Route::view('/account/analytics', 'pages.account.analytics')->name('account.analytics');
             Route::post('/account/push', [PushSubscriptionController::class, 'store'])->middleware('throttle:interactions')->name('account.push.store');
-            Route::delete('/account/push', [PushSubscriptionController::class, 'destroy'])->name('account.push.destroy');
+            Route::delete('/account/push', [PushSubscriptionController::class, 'destroy'])->middleware('throttle:interactions')->name('account.push.destroy');
             Route::get('/account/promote/{type}/{id}', PromoteListingController::class)
                 ->whereIn('type', array_keys(OwnerListings::TYPES))->whereNumber('id')->name('account.promote');
             Route::get('/payments/{payment}/return', PaymentReturnController::class)->whereNumber('payment')->name('payments.return');
             Route::get('/account/security', AccountSecurityController::class)->name('account.security');
             Route::get('/account/phone', VerifyPhoneController::class)->name('account.phone');
+            Route::get('/account/privacy/export/{file}', DataExportController::class)->middleware('signed')->name('account.privacy.download');
 
             Route::get('/account/messages', [ConversationController::class, 'index'])->name('account.messages');
             Route::get('/account/messages/{conversation}', [ConversationController::class, 'show'])->whereNumber('conversation')->name('account.messages.show');

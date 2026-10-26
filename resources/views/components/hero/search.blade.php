@@ -37,15 +37,15 @@
 
     <div class="rounded-tile bg-white/97 p-2.5 transition-[opacity,translate] duration-220 ease-out" x-bind:class="{ 'opacity-0 translate-y-1.5': fading }">
         @foreach ($tabs as $key => $tab)
-            <form id="search-panel-{{ $key }}"
-                  role="tabpanel"
-                  aria-labelledby="search-tab-{{ $key }}"
-                  action="{{ $tab['action'] }}"
+            <div id="search-panel-{{ $key }}"
+                 role="tabpanel"
+                 aria-labelledby="search-tab-{{ $key }}"
+                 data-tab="{{ $key }}"
+                 x-bind="tabPanel"
+                 @if ($key !== $initial) style="display: none" @endif>
+            <form action="{{ $tab['action'] }}"
                   method="get"
                   x-on:submit="$event.target.querySelectorAll('input, select').forEach((field) => { if (field.value === '') field.disabled = true })"
-                  data-tab="{{ $key }}"
-                  x-bind="tabPanel"
-                  @if ($key !== $initial) style="display: none" @endif
                   class="flex flex-col gap-2.5 lg:flex-row">
                 <div x-ignore class="grid min-w-0 flex-1 grid-cols-2 gap-2 {{ $tab['columns'] }}">
                     @switch($key)
@@ -159,6 +159,7 @@
                     {{ __('home.search.submit') }}
                 </button>
             </form>
+            </div>
         @endforeach
     </div>
 </div>

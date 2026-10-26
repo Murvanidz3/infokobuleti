@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Controllers\Site\Concerns\ShowsListing;
 use App\Models\Classified;
 use App\Services\Favorites;
+use App\Services\Seo\StructuredData;
 use App\Support\AttributeSchema;
 use App\Support\Listings\CardPresenter;
 use App\Support\Listings\Contact;
@@ -17,7 +18,7 @@ class ClassifiedController extends Controller
 {
     use ShowsListing;
 
-    public function show(Classified $classified, CardPresenter $cards, DetailPresenter $detail, Favorites $favorites): View
+    public function show(Classified $classified, CardPresenter $cards, DetailPresenter $detail, Favorites $favorites, StructuredData $seo): View
     {
         $preview = $this->visit($classified);
         $classified->load(['media', 'location', 'businessProfile', 'user', 'category.parent']);
@@ -57,6 +58,7 @@ class ClassifiedController extends Controller
             ->map(fn (Classified $item): array => $cards->classified($item));
 
         return view('pages.classifieds.show', [
+            'seo' => $seo->for($classified),
             'classified' => $classified,
             'preview' => $preview,
             'gallery' => $detail->gallery($classified),

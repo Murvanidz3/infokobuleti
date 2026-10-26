@@ -1,8 +1,4 @@
-<x-layout.app :title="__('auth.staff.setup_title')">
-    <x-slot:head>
-        <meta name="robots" content="noindex, nofollow">
-    </x-slot:head>
-
+<x-layout.app :noindex="true" :title="__('auth.staff.setup_title')">
     <x-auth.card :title="__('auth.staff.setup_title')" :subtitle="__('auth.staff.setup_subtitle')" icon="shield" wide>
         <ol class="flex flex-col gap-6">
             <li class="flex gap-4">

@@ -1,4 +1,4 @@
-<x-layout.app :title="$query !== '' ? __('site.search.results_for', ['query' => $query]) : __('site.search.title')">
+<x-layout.app :noindex="true" :title="$query !== '' ? __('site.search.results_for', ['query' => $query]) : __('site.search.title')">
     <div class="border-b border-line bg-surface-alt">
         <div class="container-page py-[clamp(24px,3.5vw,44px)]">
             <h1 class="font-serif text-[clamp(26px,3vw,38px)] font-semibold text-navy">{{ __('site.search.title') }}</h1>

@@ -1,11 +1,4 @@
-<x-layout.app :title="$article->title" :description="$description">
-    <x-slot:head>
-        <meta property="og:type" content="article">
-        @if ($image)
-            <meta property="og:image" content="{{ $image }}">
-        @endif
-    </x-slot:head>
-
+<x-layout.app :title="$article->title" :description="$description" :seo="$seo" :noindex="$preview">
     @if ($preview)
         <x-detail.preview-banner :status="$article->status->getLabel()" />
     @endif

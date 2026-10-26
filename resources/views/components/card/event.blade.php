@@ -15,11 +15,11 @@
         <x-image :src="$image" :alt="$title" class="media-zoom absolute inset-0" />
         <div class="absolute top-3 left-3 flex min-w-14 flex-col items-center rounded-tile bg-white/95 px-2.5 py-1.5 text-navy shadow-card">
             <span class="text-[22px] leading-none font-bold">{{ $day }}</span>
-            <span class="mt-0.5 text-[11.5px] font-semibold uppercase tracking-wide text-coral">{{ $month }}</span>
+            <span class="mt-0.5 text-[11.5px] font-semibold uppercase tracking-wide text-coral-pressed">{{ $month }}</span>
         </div>
     </div>
     <div class="flex grow flex-col p-5">
-        <span class="text-[12.5px] font-semibold tracking-wide text-coral uppercase">{{ $tag }}</span>
+        <span class="text-[12.5px] font-semibold tracking-wide text-coral-pressed uppercase">{{ $tag }}</span>
         <h3 class="mt-1.5 text-[17px] leading-[1.4] font-semibold text-navy">
             <a href="{{ $url }}" class="after:absolute after:inset-0">{{ $title }}</a>
         </h3>

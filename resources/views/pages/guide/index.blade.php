@@ -1,4 +1,4 @@
-<x-layout.app :title="__('site.guide.title')" :description="__('site.guide.subtitle')">
+<x-layout.app :title="__('site.guide.title')" :description="__('site.guide.subtitle')" :seo="['page' => 'guide']">
     <x-page-header :title="__('site.guide.title')" :subtitle="__('site.guide.subtitle')"
                    :breadcrumbs="[['label' => __('nav.home'), 'url' => localized_route('home')], ['label' => __('nav.guide')]]">
         <x-button variant="secondary" :href="localized_route('events.index')" icon="calendar">{{ __('nav.events') }}</x-button>

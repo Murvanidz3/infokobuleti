@@ -8,6 +8,7 @@ use App\Models\Hotel;
 use App\Models\RoomType;
 use App\Services\Favorites;
 use App\Services\PriceFormatter;
+use App\Services\Seo\StructuredData;
 use App\Support\Listings\AvailabilityCalendar;
 use App\Support\Listings\CardPresenter;
 use App\Support\Listings\Contact;
@@ -20,7 +21,7 @@ class HotelController extends Controller
 {
     use ShowsListing;
 
-    public function show(Request $request, Hotel $hotel, CardPresenter $cards, DetailPresenter $detail, AvailabilityCalendar $calendar, PriceFormatter $price, Favorites $favorites): View
+    public function show(Request $request, Hotel $hotel, CardPresenter $cards, DetailPresenter $detail, AvailabilityCalendar $calendar, PriceFormatter $price, Favorites $favorites, StructuredData $seo): View
     {
         $preview = $this->visit($hotel);
         $hotel->load(['media', 'location', 'businessProfile', 'user', 'amenities', 'roomTypes.media', 'roomTypes.amenities']);
@@ -45,6 +46,7 @@ class HotelController extends Controller
         ]));
 
         return view('pages.hotels.show', [
+            'seo' => $seo->for($hotel),
             'hotel' => $hotel,
             'preview' => $preview,
             'gallery' => $detail->gallery($hotel),

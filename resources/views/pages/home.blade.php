@@ -1,4 +1,4 @@
-<x-layout.app>
+<x-layout.app :seo="['page' => 'home', 'schema' => $schema]">
     <x-hero :image="$heroImage" :search-options="$searchOptions" />
 
     <x-section spacing="compact" aria-labelledby="categories-title">

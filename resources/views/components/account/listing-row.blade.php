@@ -4,7 +4,7 @@
 @php
     $tone = match ($row['group']) {
         'active' => 'bg-navy text-white',
-        'attention' => 'bg-coral-tint text-coral-pressed',
+        'attention' => 'bg-coral-tint text-navy',
         default => 'bg-line text-navy',
     };
 @endphp
@@ -26,7 +26,7 @@
                 </span>
                 <span class="text-[12.5px] font-medium text-secondary">{{ $row['module'] }}</span>
                 @if ($row['promotion'] ?? null)
-                    <span class="inline-flex items-center gap-1 rounded-full bg-coral-tint px-2.5 py-[3px] text-xs font-semibold text-coral-pressed">
+                    <span class="inline-flex items-center gap-1 rounded-full bg-coral-tint px-2.5 py-[3px] text-xs font-semibold text-navy">
                         <x-icon name="star" :size="12" />{{ $row['promotion'] }}@if ($row['promoted_until']) <span class="font-medium">· {{ $row['promoted_until'] }}</span>@endif
                     </span>
                 @endif
@@ -55,7 +55,7 @@
     </div>
 
     @if ($row['reason'])
-        <p class="mt-4 flex items-start gap-2.5 rounded-tile bg-coral-tint px-4 py-3 text-[14px] leading-normal text-coral-pressed">
+        <p class="mt-4 flex items-start gap-2.5 rounded-tile bg-coral-tint px-4 py-3 text-[14px] leading-normal text-navy">
             <x-icon name="alert" :size="18" class="mt-px shrink-0" />
             <span><span class="font-semibold">{{ __('account.listings.rejection_reason') }}:</span> {{ $row['reason'] }}</span>
         </p>

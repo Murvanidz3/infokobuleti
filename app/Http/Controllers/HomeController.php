@@ -3,11 +3,12 @@
 namespace App\Http\Controllers;
 
 use App\Services\HomepageData;
+use App\Services\Seo\StructuredData;
 use Illuminate\View\View;
 
 class HomeController extends Controller
 {
-    public function __invoke(HomepageData $data): View
+    public function __invoke(HomepageData $data, StructuredData $seo): View
     {
         return view('pages.home', [
             'categories' => $data->categories(),
@@ -22,6 +23,7 @@ class HomeController extends Controller
             'sections' => $data->sections(),
             'heroImage' => $data->heroImage(),
             'searchOptions' => $data->searchOptions(),
+            'schema' => $seo->site(),
         ]);
     }
 }
