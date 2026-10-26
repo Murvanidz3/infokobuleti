@@ -19,6 +19,16 @@ return [
         'ssl' => 'SSL certificate',
     ],
 
+    'backup' => [
+        'failed' => 'Backup failed',
+        'cleanup_failed' => 'Backup cleanup failed',
+        'unhealthy' => 'Backups are too old or too large',
+    ],
+
+    'restore' => [
+        'failed_title' => 'Backup restore test failed',
+    ],
+
     'value' => [
         'running' => 'running',
         'stopped' => 'stopped',

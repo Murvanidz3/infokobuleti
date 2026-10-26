@@ -36,3 +36,11 @@ Schedule::command('privacy:prune-exports')->dailyAt('04:40')->onOneServer();
 
 // Server and application health every five minutes; problems go to the alert channels.
 Schedule::command('monitor:check')->everyFiveMinutes()->withoutOverlapping()->onOneServer()->runInBackground();
+
+// Backups: database + uploads every night onto the backups disk; old ones are thinned out first.
+Schedule::command('backup:clean')->dailyAt('01:30')->withoutOverlapping()->onOneServer();
+Schedule::command('backup:run')->dailyAt('02:00')->withoutOverlapping()->onOneServer();
+Schedule::command('backup:monitor')->dailyAt('06:00')->onOneServer();
+
+// Every Sunday the newest production backup is restored into a scratch database and checked.
+Schedule::command('backup:restore-test')->weeklyOn(0, '05:00')->environments(['production'])->withoutOverlapping()->onOneServer();

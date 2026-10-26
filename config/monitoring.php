@@ -34,4 +34,16 @@ return [
 
     'ssl_min_days' => (int) env('MONITORING_SSL_MIN_DAYS', 14),
 
+    /*
+    |--------------------------------------------------------------------------
+    | Restore test
+    |--------------------------------------------------------------------------
+    |
+    | backup:restore-test loads the newest database backup into this scratch
+    | database every week (never into the live one) and compares row counts.
+    |
+    */
+
+    'restore_database' => env('MONITORING_RESTORE_DATABASE', 'infokobuleti_restore_test'),
+
 ];

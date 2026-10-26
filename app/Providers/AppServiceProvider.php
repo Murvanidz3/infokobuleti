@@ -9,6 +9,7 @@ use App\Contracts\PaymentGateway;
 use App\Contracts\PushSender;
 use App\Contracts\SmsGateway;
 use App\Contracts\TelegramBot;
+use App\Enums\Permission;
 use App\Enums\Role;
 use App\Http\Middleware\SetLocale;
 use App\Models;
@@ -53,6 +54,9 @@ use Illuminate\Support\ServiceProvider;
 use Laravel\Scout\EngineManager;
 use Livewire\Livewire;
 use Minishlink\WebPush\WebPush;
+use Spatie\Backup\Events\BackupHasFailed;
+use Spatie\Backup\Events\CleanupHasFailed;
+use Spatie\Backup\Events\UnhealthyBackupWasFound;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -151,6 +155,10 @@ class AppServiceProvider extends ServiceProvider
         Model::preventLazyLoading(! $this->app->isProduction());
 
         $this->logSlowQueries();
+        $this->reportBackupProblems();
+
+        // Pulse dashboard (/pulse): staff who manage the site settings.
+        Gate::define('viewPulse', fn (Models\User $user): bool => $user->can(Permission::ManageSettings->value));
 
         Features::define();
 
@@ -219,5 +227,15 @@ class AppServiceProvider extends ServiceProvider
                 ]);
             }
         });
+    }
+
+    /**
+     * Backup failures become monitoring alerts (log file, Telegram later): there is no e-mail yet.
+     */
+    private function reportBackupProblems(): void
+    {
+        Event::listen(BackupHasFailed::class, fn (BackupHasFailed $event) => app(Alerts::class)->raise('backup-failed', __('monitoring.backup.failed'), $event->exception->getMessage(), force: true));
+        Event::listen(CleanupHasFailed::class, fn (CleanupHasFailed $event) => app(Alerts::class)->raise('backup-cleanup', __('monitoring.backup.cleanup_failed'), $event->exception->getMessage()));
+        Event::listen(UnhealthyBackupWasFound::class, fn (UnhealthyBackupWasFound $event) => app(Alerts::class)->raise('backup-unhealthy', __('monitoring.backup.unhealthy'), $event->failureMessages->pluck('message')->implode('; ')));
     }
 }

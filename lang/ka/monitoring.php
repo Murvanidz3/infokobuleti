@@ -18,6 +18,16 @@ return [
         'ssl' => 'SSL სერტიფიკატი',
     ],
 
+    'backup' => [
+        'failed' => 'backup ვერ შეიქმნა',
+        'cleanup_failed' => 'ძველი backup-ების წაშლა ვერ მოხერხდა',
+        'unhealthy' => 'backup-ები მოძველებულია ან ზედმეტად დიდია',
+    ],
+
+    'restore' => [
+        'failed_title' => 'backup-ის აღდგენის ტესტი ვერ შესრულდა',
+    ],
+
     'value' => [
         'running' => 'მუშაობს',
         'stopped' => 'გაჩერებულია',

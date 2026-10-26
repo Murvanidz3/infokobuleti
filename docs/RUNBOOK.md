@@ -60,6 +60,9 @@ taken before the deploy (see below) or write a new migration.
   6 months), `backup:monitor` at 06:00.
 - Every Sunday at 05:00 `backup:restore-test` restores the newest database backup into the scratch
   database `infokobuleti_restore_test` and compares row counts; a failure is an alert.
+- Archives are password-protected: `BACKUP_ARCHIVE_PASSWORD` in `shared/.env` (a copy is in
+  `/root/infokobuleti-secrets.env`). Keep that password somewhere outside the server too.
+- `php artisan backup:list` shows every backup and its health.
 - Backups are on the same server for now. Copy them off-site as soon as an account exists (Cloudflare
   R2 or Backblaze B2: add an `s3` disk and put it in `config/backup.php` destinations).
 
@@ -69,10 +72,11 @@ taken before the deploy (see below) or write a new migration.
 cd /var/www/infokobuleti-production/current
 php artisan down                                       # maintenance page for everyone
 ls -lt /var/backups/infokobuleti/production/*/          # pick the archive
-unzip -o <archive>.zip -d /tmp/restore                  # db-dumps/pgsql-*.sql and storage files
+7z x -p"$BACKUP_ARCHIVE_PASSWORD" -o/tmp/restore <archive>.zip   # AES-encrypted: db-dumps/*.sql.gz and app/
+gunzip /tmp/restore/db-dumps/*.gz
 sudo -u postgres psql -d infokobuleti_production -c "DROP SCHEMA public CASCADE; CREATE SCHEMA public AUTHORIZATION infokobuleti_prod; CREATE EXTENSION vector; CREATE EXTENSION pg_trgm;"
 psql -h 127.0.0.1 -U infokobuleti_prod -d infokobuleti_production -f /tmp/restore/db-dumps/<dump>.sql
-rsync -a /tmp/restore/var/www/infokobuleti-production/shared/storage/app/ /var/www/infokobuleti-production/shared/storage/app/
+rsync -a /tmp/restore/app/ /var/www/infokobuleti-production/shared/storage/app/
 php artisan optimize:clear && php artisan optimize && php artisan search:sync
 php artisan up && rm -rf /tmp/restore
 ```

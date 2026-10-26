@@ -13,6 +13,7 @@ use App\Services\Settings;
 use Illuminate\Console\Attributes\Description;
 use Illuminate\Console\Attributes\Signature;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\File;
 
 /**
@@ -59,6 +60,7 @@ class LaunchCheck extends Command
             ['Every staff account has 2FA', $staff->isNotEmpty() && $staff->every(fn (User $user): bool => $user->hasTwoFactorEnabled()), $staff->reject(fn (User $user): bool => $user->hasTwoFactorEnabled())->pluck('email')->implode(', ') ?: 'all'],
             ['Background jobs running', $checks->get('horizon')['ok'] ?? null, $checks->get('horizon')['value'] ?? 'not checked yet'],
             ['Scheduler running', $lastCheck !== null && $lastCheck->greaterThan(now()->subMinutes(15)), $lastCheck?->diffForHumans() ?? 'monitor:check never ran'],
+            ['Backup restore test passed', ($restore = Cache::get(BackupRestoreTest::CACHE_KEY))['ok'] ?? null, isset($restore['at']) ? $restore['at'].' '.$restore['detail'] : 'never ran'],
             ['Recent backup', $checks->get('backup')['ok'] ?? null, $checks->get('backup')['value'] ?? 'not checked yet'],
             ['App icons and share picture', File::exists(public_path('favicon.ico')) && File::exists(public_path('icons/icon-512.png')) && File::exists(public_path('icons/og-default.jpg')), 'favicon, icons, og-default'],
             ['Custom error pages', File::exists(resource_path('views/errors/404.blade.php')) && File::exists(resource_path('views/errors/500.blade.php')), '404, 500, 503'],

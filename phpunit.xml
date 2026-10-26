@@ -37,6 +37,7 @@
         <env name="SMS_DRIVER" value="array"/>
         <env name="TELEGRAM_BOT_TOKEN" value=""/>
         <env name="PAGE_CACHE" value="false"/>
+        <env name="PULSE_ENABLED" value="false"/>
         <env name="VAPID_PUBLIC_KEY" value=""/>
         <env name="GEOCODER_DRIVER" value="fake"/>
         <env name="SMS_REVEAL_CODES" value="false"/>

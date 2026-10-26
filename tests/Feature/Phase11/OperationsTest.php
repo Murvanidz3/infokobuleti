@@ -9,6 +9,7 @@ use App\Services\Settings;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
+use Spatie\Backup\Events\BackupHasFailed;
 
 function recordingChannel(): AlertChannel
 {
@@ -101,4 +102,29 @@ it('closes robots.txt while production is in maintenance', function () {
 it('uses contact@infokobuleti.com as the public address', function () {
     expect(config('site.contact.email'))->toBe('contact@infokobuleti.com');
     $this->get('/contact')->assertSee('contact@infokobuleti.com');
+});
+
+it('turns backup failures into alerts', function () {
+    $channel = recordingChannel();
+    app()->instance(Alerts::class, new Alerts(Cache::store(), [$channel]));
+
+    event(new BackupHasFailed(new Exception('disk full'), 'backups', 'infokobuleti-testing'));
+
+    expect($channel->sent)->toHaveCount(1)
+        ->and($channel->sent[0])->toBe([__('monitoring.backup.failed'), 'disk full']);
+});
+
+it('opens Pulse to super admins only', function () {
+    config(['pulse.enabled' => true]);
+    [$admin] = staffMember(Role::SuperAdmin);
+
+    $this->actingAs(User::factory()->create())->get('/pulse')->assertForbidden();
+    $this->actingAs($admin)->get('/pulse')->assertOk()->assertHeaderMissing('Content-Security-Policy');
+});
+
+it('keeps backups of the database and the uploads on the backups disk', function () {
+    expect(config('backup.backup.destination.disks'))->toBe(['backups'])
+        ->and(config('backup.backup.source.databases'))->toBe(['pgsql'])
+        ->and(config('backup.backup.source.files.include'))->toBe([storage_path('app')])
+        ->and(config('backup.cleanup.default_strategy.keep_monthly_backups_for_months'))->toBe(6);
 });
