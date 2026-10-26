@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\AccountType;
+use App\Enums\NotificationTopic;
 use App\Enums\Permission;
 use App\Enums\Role;
 use App\Models\Concerns\LogsStaffActivity;
@@ -20,6 +21,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\DB;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 use Spatie\Permission\Traits\HasRoles;
@@ -49,6 +51,7 @@ class User extends Authenticatable implements FilamentUser, HasLocalePreference,
             'two_factor_secret' => 'encrypted',
             'two_factor_recovery_codes' => 'encrypted:array',
             'two_factor_confirmed_at' => 'datetime',
+            'notification_preferences' => 'array',
         ];
     }
 
@@ -110,6 +113,14 @@ class User extends Authenticatable implements FilamentUser, HasLocalePreference,
     public function hasTwoFactorEnabled(): bool
     {
         return $this->two_factor_secret !== null && $this->two_factor_confirmed_at !== null;
+    }
+
+    /**
+     * Whether this user also wants notifications of a topic by email (on unless switched off).
+     */
+    public function wantsEmailFor(NotificationTopic $topic): bool
+    {
+        return $this->email !== null && ($this->notification_preferences[$topic->value] ?? true) !== false;
     }
 
     /**
@@ -250,6 +261,35 @@ class User extends Authenticatable implements FilamentUser, HasLocalePreference,
         return $this->belongsToMany(Conversation::class, 'conversation_participants')
             ->withPivot(['last_read_at', 'archived_at'])
             ->withTimestamps();
+    }
+
+    /**
+     * Users this user blocked in messages.
+     *
+     * @return BelongsToMany<User, $this>
+     */
+    public function blockedUsers(): BelongsToMany
+    {
+        return $this->belongsToMany(User::class, 'user_blocks', 'user_id', 'blocked_user_id')->withPivot('created_at');
+    }
+
+    /**
+     * Whether either user blocked the other.
+     */
+    public function isBlockedWith(User $other): bool
+    {
+        return DB::table('user_blocks')
+            ->where(fn ($query) => $query->where('user_id', $this->getKey())->where('blocked_user_id', $other->getKey()))
+            ->orWhere(fn ($query) => $query->where('user_id', $other->getKey())->where('blocked_user_id', $this->getKey()))
+            ->exists();
+    }
+
+    /**
+     * @return HasMany<ListingDraft, $this>
+     */
+    public function listingDrafts(): HasMany
+    {
+        return $this->hasMany(ListingDraft::class);
     }
 
     /**

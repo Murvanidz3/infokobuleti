@@ -119,5 +119,5 @@
         </div>
     </x-section>
 
-    <x-cta-banner id="post" :title="__('home.cta.title')" :text="__('home.cta.text')" :action="__('home.cta.button')" />
+    <x-cta-banner id="post" :href="localized_route('listings.create')" :title="__('home.cta.title')" :text="__('home.cta.text')" :action="__('home.cta.button')" />
 </x-layout.app>

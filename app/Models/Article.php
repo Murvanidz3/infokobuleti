@@ -3,12 +3,12 @@
 namespace App\Models;
 
 use App\Contracts\Listing;
-use App\Search\SearchableListing;
 use App\Models\Concerns\HasMediaGallery;
 use App\Models\Concerns\HasSlug;
 use App\Models\Concerns\HasStatus;
 use App\Models\Concerns\IndexedForSearch;
 use App\Models\Concerns\LogsStaffActivity;
+use App\Search\SearchableListing;
 use Database\Factories\ArticleFactory;
 use Illuminate\Database\Eloquent\Attributes\Guarded;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -28,7 +28,7 @@ use Spatie\Translatable\HasTranslations;
 class Article extends Model implements Listing, SearchableListing
 {
     /** @use HasFactory<ArticleFactory> */
-    use HasFactory, HasMediaGallery, HasSlug, HasStatus, IndexedForSearch, HasTranslations, LogsStaffActivity, SoftDeletes;
+    use HasFactory, HasMediaGallery, HasSlug, HasStatus, HasTranslations, IndexedForSearch, LogsStaffActivity, SoftDeletes;
 
     /** @var list<string> */
     public array $translatable = ['title', 'excerpt', 'body'];

@@ -1,5 +1,5 @@
 <div>
-    <x-listing.page :total="$total" :chips="$chips" :sort-options="$sortOptions" :views="$views" :view="$display" :paginator="$paginator"
+    <x-listing.page :total="$total" :chips="$chips" :editing-search="$editingSearch > 0" :sort-options="$sortOptions" :views="$views" :view="$display" :paginator="$paginator"
                     :has-more="$hasMore" :markers="$markers" :active-count="$activeCount" :targets="$targets" :search-placeholder="__('home.search.placeholders.query')">
         <x-slot:filters>
             <x-filters.group :title="__('home.search.fields.category')">

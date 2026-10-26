@@ -1,12 +1,14 @@
 <?php
 
 use App\Enums\ListingStatus;
+use App\Enums\Role;
 use App\Models\Article;
 use App\Models\BusinessProfile;
 use App\Models\Classified;
 use App\Models\DailyStat;
 use App\Models\Event;
 use App\Models\Hotel;
+use App\Models\Page;
 use App\Models\Place;
 use App\Models\Property;
 use App\Models\Review;
@@ -40,7 +42,7 @@ it('hides unpublished items from visitors but lets the owner and staff preview t
     $this->get($url)->assertNotFound();
     $this->actingAs(User::factory()->create())->get($url)->assertNotFound();
     $this->actingAs(User::query()->find($item->user_id))->get($url)->assertOk()->assertSee(__('site.preview', ['status' => ListingStatus::Pending->getLabel()]));
-    [$staff] = staffMember(App\Enums\Role::Moderator);
+    [$staff] = staffMember(Role::Moderator);
     $this->actingAs($staff)->get($url)->assertOk();
 })->with('modules');
 
@@ -130,8 +132,8 @@ it('shows guide, events and news index pages', function () {
 });
 
 it('renders static pages and hides unpublished ones', function () {
-    App\Models\Page::query()->create(['slug' => 'about', 'title' => ['ka' => 'ჩვენს შესახებ', 'en' => 'About us'], 'body' => ['en' => '<p>Hello <script>alert(1)</script><strong>Kobuleti</strong></p>'], 'is_published' => true]);
-    App\Models\Page::query()->create(['slug' => 'draft', 'title' => ['en' => 'Draft page'], 'is_published' => false]);
+    Page::query()->create(['slug' => 'about', 'title' => ['ka' => 'ჩვენს შესახებ', 'en' => 'About us'], 'body' => ['en' => '<p>Hello <script>alert(1)</script><strong>Kobuleti</strong></p>'], 'is_published' => true]);
+    Page::query()->create(['slug' => 'draft', 'title' => ['en' => 'Draft page'], 'is_published' => false]);
 
     $this->get('/en/info/about')->assertOk()->assertSee('About us')->assertSee('<strong>Kobuleti</strong>', false)->assertDontSee('<script>alert(1)</script>', false);
     $this->get('/en/info/draft')->assertNotFound();

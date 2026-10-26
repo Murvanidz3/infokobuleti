@@ -52,6 +52,10 @@ abstract class ListingIndex extends Component
     #[Url(except: '')]
     public string $bounds = '';
 
+    /** Saved search being edited from the account (?saved=ID): "save" updates it instead. */
+    #[Url(as: 'saved', except: 0)]
+    public int $editingSearch = 0;
+
     /** Pages shown at once: grows as the visitor scrolls (infinite scroll). */
     public int $loaded = 1;
 
@@ -220,6 +224,19 @@ abstract class ListingIndex extends Component
 
         $filters = $this->activeFilters();
         $name = collect($this->chips())->pluck('label')->take(3)->implode(', ');
+
+        if ($this->editingSearch > 0) {
+            $search = SavedSearch::query()->where('user_id', $user->id)->where('module', $this->module())->find($this->editingSearch);
+
+            if ($search !== null) {
+                $search->update(['filters' => $filters, 'name' => mb_substr($name !== '' ? $name : __('nav.'.$this->navKey()), 0, 120)]);
+                $this->dispatch('toast', message: __('site.list.search_updated'), type: 'success');
+
+                return;
+            }
+
+            $this->editingSearch = 0;
+        }
 
         $exists = SavedSearch::query()
             ->where('user_id', $user->id)

@@ -1,4 +1,4 @@
-<div class="mt-8 flex flex-col gap-6">
+<div class="flex flex-col gap-6">
     {{-- Sign-in methods --}}
     <section class="rounded-panel border border-line bg-white p-5 shadow-card md:p-7" aria-labelledby="methods-title">
         <h2 id="methods-title" class="font-serif text-[21px] font-semibold text-navy">{{ __('auth.methods.title') }}</h2>

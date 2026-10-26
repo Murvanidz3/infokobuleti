@@ -105,6 +105,22 @@ return [
         'agency' => 'სააგენტო',
     ],
 
+    'listing_group' => [
+        'active' => 'აქტიური',
+        'pending' => 'მოდერაციაზე',
+        'attention' => 'საჭიროებს ყურადღებას',
+        'paused' => 'დაპაუზებული',
+        'expired' => 'ვადაგასული',
+    ],
+
+    'notification_topic' => [
+        'messages' => 'ახალი მიწერები',
+        'inquiries' => 'ჯავშნები და განაცხადები',
+        'moderation' => 'მოდერაციის შედეგები',
+        'reminders' => 'ვადის შეხსენებები',
+        'saved_searches' => 'შენახული ძიებები',
+    ],
+
     'listing_module' => [
         'hotels' => 'სასტუმროები',
         'properties' => 'უძრავი ქონება',

@@ -47,6 +47,8 @@ return [
         'reset' => 'Reset',
         'save_search' => 'Save this search',
         'search_saved' => 'Search saved. We will let you know about new listings.',
+        'update_search' => 'Update saved search',
+        'search_updated' => 'Saved search updated.',
         'search' => 'Search',
         'search_placeholder' => 'Keyword',
         'load_more' => 'Show more',

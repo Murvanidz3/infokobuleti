@@ -3,7 +3,6 @@
 namespace App\Models;
 
 use App\Contracts\Listing;
-use App\Search\SearchableListing;
 use App\Enums\AmenityScope;
 use App\Enums\BuildingStatus;
 use App\Enums\ListedBy;
@@ -21,6 +20,7 @@ use App\Models\Concerns\LogsStaffActivity;
 use App\Models\Concerns\NormalizesPrice;
 use App\Models\Concerns\Promotable;
 use App\Models\Concerns\Reportable;
+use App\Search\SearchableListing;
 use Database\Factories\PropertyFactory;
 use Illuminate\Database\Eloquent\Attributes\Guarded;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -34,7 +34,6 @@ use Spatie\Translatable\HasTranslations;
  * price_per_m2 is a stored generated column (price / area_m2, in the listing's currency).
  *
  * @property float|null $price_per_m2
- *
  * @property string $title
  * @property string|null $description
  * @property string|null $address
@@ -43,7 +42,7 @@ use Spatie\Translatable\HasTranslations;
 class Property extends Model implements Listing, SearchableListing
 {
     /** @use HasFactory<PropertyFactory> */
-    use Favoritable, HasDailyStats, HasFactory, HasLocation, HasMediaGallery, HasSlug, HasStatus, IndexedForSearch, HasTranslations, LogsStaffActivity, NormalizesPrice, Promotable, Reportable, SoftDeletes;
+    use Favoritable, HasDailyStats, HasFactory, HasLocation, HasMediaGallery, HasSlug, HasStatus, HasTranslations, IndexedForSearch, LogsStaffActivity, NormalizesPrice, Promotable, Reportable, SoftDeletes;
 
     /** @var list<string> */
     public array $translatable = ['title', 'description', 'address'];

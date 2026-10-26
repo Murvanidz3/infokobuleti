@@ -3,7 +3,6 @@
 namespace App\Models;
 
 use App\Contracts\Listing;
-use App\Search\SearchableListing;
 use App\Enums\PlaceType;
 use App\Models\Concerns\Favoritable;
 use App\Models\Concerns\HasDailyStats;
@@ -15,6 +14,7 @@ use App\Models\Concerns\IndexedForSearch;
 use App\Models\Concerns\LogsStaffActivity;
 use App\Models\Concerns\Reportable;
 use App\Models\Concerns\Reviewable;
+use App\Search\SearchableListing;
 use Database\Factories\PlaceFactory;
 use Illuminate\Database\Eloquent\Attributes\Guarded;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -36,7 +36,7 @@ use Spatie\Translatable\HasTranslations;
 class Place extends Model implements Listing, SearchableListing
 {
     /** @use HasFactory<PlaceFactory> */
-    use Favoritable, HasDailyStats, HasFactory, HasLocation, HasMediaGallery, HasSlug, HasStatus, IndexedForSearch, HasTranslations, LogsStaffActivity, Reportable, Reviewable, SoftDeletes;
+    use Favoritable, HasDailyStats, HasFactory, HasLocation, HasMediaGallery, HasSlug, HasStatus, HasTranslations, IndexedForSearch, LogsStaffActivity, Reportable, Reviewable, SoftDeletes;
 
     /** @var list<string> */
     public array $translatable = ['title', 'description', 'address', 'content'];

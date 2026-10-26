@@ -70,7 +70,8 @@ trait HasStatus
             $this->rejection_reason = $reason;
         }
 
-        if ($by !== null && in_array($to, [ListingStatus::Published, ListingStatus::Rejected], true)) {
+        // Owners also publish (resume, renew); only staff decisions count as moderation.
+        if ($by !== null && $by->isStaff() && in_array($to, [ListingStatus::Published, ListingStatus::Rejected], true)) {
             $this->moderated_by = $by->getKey();
             $this->moderated_at = now();
         }
@@ -85,6 +86,11 @@ trait HasStatus
             ->log("status_changed: {$from->value} -> {$to->value}");
 
         return $this;
+    }
+
+    public function listingStatus(): ListingStatus
+    {
+        return $this->status;
     }
 
     public function isPublished(): bool

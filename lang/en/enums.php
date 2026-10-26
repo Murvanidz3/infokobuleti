@@ -103,6 +103,22 @@ return [
         'agency' => 'Agency',
     ],
 
+    'listing_group' => [
+        'active' => 'Active',
+        'pending' => 'In moderation',
+        'attention' => 'Needs attention',
+        'paused' => 'Paused',
+        'expired' => 'Expired',
+    ],
+
+    'notification_topic' => [
+        'messages' => 'New messages',
+        'inquiries' => 'Bookings and applications',
+        'moderation' => 'Moderation results',
+        'reminders' => 'Expiry reminders',
+        'saved_searches' => 'Saved searches',
+    ],
+
     'listing_module' => [
         'hotels' => 'Hotels',
         'properties' => 'Real estate',

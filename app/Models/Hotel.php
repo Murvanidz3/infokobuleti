@@ -3,7 +3,6 @@
 namespace App\Models;
 
 use App\Contracts\Listing;
-use App\Search\SearchableListing;
 use App\Enums\AmenityScope;
 use App\Enums\HotelType;
 use App\Models\Concerns\Favoritable;
@@ -17,6 +16,7 @@ use App\Models\Concerns\LogsStaffActivity;
 use App\Models\Concerns\Promotable;
 use App\Models\Concerns\Reportable;
 use App\Models\Concerns\Reviewable;
+use App\Search\SearchableListing;
 use Database\Factories\HotelFactory;
 use Illuminate\Database\Eloquent\Attributes\Guarded;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -38,7 +38,7 @@ use Spatie\Translatable\HasTranslations;
 class Hotel extends Model implements Listing, SearchableListing
 {
     /** @use HasFactory<HotelFactory> */
-    use Favoritable, HasDailyStats, HasFactory, HasLocation, HasMediaGallery, HasSlug, HasStatus, IndexedForSearch, HasTranslations, LogsStaffActivity, Promotable, Reportable, Reviewable, SoftDeletes;
+    use Favoritable, HasDailyStats, HasFactory, HasLocation, HasMediaGallery, HasSlug, HasStatus, HasTranslations, IndexedForSearch, LogsStaffActivity, Promotable, Reportable, Reviewable, SoftDeletes;
 
     /** @var list<string> */
     public array $translatable = ['title', 'description', 'address'];

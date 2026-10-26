@@ -3,24 +3,28 @@
 namespace App\Providers;
 
 use App\Contracts\ExchangeRates;
+use App\Contracts\Geocoder;
 use App\Contracts\HumanVerifier;
 use App\Contracts\SmsGateway;
 use App\Enums\Role;
 use App\Http\Middleware\SetLocale;
 use App\Models;
+use App\Policies\ListingPolicy;
+use App\Search\PostgresSearchEngine;
+use App\Search\SearchSynonyms;
 use App\Services\Auth\CloudflareTurnstile;
 use App\Services\Auth\FakeHumanVerifier;
 use App\Services\Auth\Impersonation;
 use App\Services\Auth\SessionTracker;
-use App\Search\PostgresSearchEngine;
-use App\Search\SearchSynonyms;
 use App\Services\Currency\FixedExchangeRates;
 use App\Services\Currency\NationalBankExchangeRates;
 use App\Services\Favorites;
-use App\Support\Listings\PublicCache;
+use App\Services\Geo\FakeGeocoder;
+use App\Services\Geo\NominatimGeocoder;
 use App\Services\LocaleRouter;
 use App\Services\Settings;
 use App\Services\Sms\SmsManager;
+use App\Support\Listings\PublicCache;
 use Illuminate\Auth\Events\Login;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Database\Eloquent\Model;
@@ -66,6 +70,7 @@ class AppServiceProvider extends ServiceProvider
         'banner' => Models\Banner::class,
         'price_plan' => Models\PricePlan::class,
         'contact_message' => Models\ContactMessage::class,
+        'listing_draft' => Models\ListingDraft::class,
     ];
 
     /**
@@ -93,6 +98,10 @@ class AppServiceProvider extends ServiceProvider
         $this->app->singleton(Settings::class);
         $this->app->bind(SmsGateway::class, fn ($app) => $app->make(SmsManager::class)->driver());
 
+        $this->app->singleton(Geocoder::class, fn (): Geocoder => config('geo.geocoder.driver') === 'nominatim'
+            ? new NominatimGeocoder(config('geo.geocoder.url'), config('geo.geocoder.user_agent'), config('geo.geocoder.viewbox'))
+            : new FakeGeocoder);
+
         $this->app->singleton(HumanVerifier::class, function (): HumanVerifier {
             $siteKey = config('services.turnstile.site_key');
             $secretKey = config('services.turnstile.secret_key');
@@ -112,6 +121,11 @@ class AppServiceProvider extends ServiceProvider
 
         // super_admin passes every authorization check.
         Gate::before(fn (Models\User $user) => $user->hasRole(Role::SuperAdmin->value) ? true : null);
+
+        // Owners manage their own listings from the account area.
+        foreach ([Models\Hotel::class, Models\Property::class, Models\Classified::class, Models\Vacancy::class] as $listing) {
+            Gate::policy($listing, ListingPolicy::class);
+        }
 
         Event::listen(Login::class, function (Login $event): void {
             if ($event->guard === 'web' && $event->user instanceof Models\User && app()->bound('request') && request()->hasSession() && ! request()->session()->has(Impersonation::SESSION_KEY)) {

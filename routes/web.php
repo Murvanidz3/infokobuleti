@@ -1,6 +1,10 @@
 <?php
 
 use App\Http\Controllers\Account\AccountSecurityController;
+use App\Http\Controllers\Account\ApplicationCvController;
+use App\Http\Controllers\Account\ConversationController;
+use App\Http\Controllers\Account\HotelRoomsController;
+use App\Http\Controllers\Account\ListingWizardController;
 use App\Http\Controllers\Account\OnboardingController;
 use App\Http\Controllers\Account\VerifyPhoneController;
 use App\Http\Controllers\Admin\ImpersonationController;
@@ -32,6 +36,7 @@ use App\Http\Controllers\Staff\TwoFactorChallengeController;
 use App\Http\Controllers\Staff\TwoFactorSetupController;
 use App\Http\Controllers\StyleguideController;
 use App\Http\Controllers\Webhooks\TwilioStatusController;
+use App\Services\Account\OwnerListings;
 use App\Services\LocaleRouter;
 use App\Support\Listings\ListingTypes;
 use Illuminate\Support\Facades\Route;
@@ -110,9 +115,32 @@ app(LocaleRouter::class)->group(function (): void {
         Route::get('/staff/recovery-codes', RecoveryCodesController::class)->middleware('staff')->name('staff.recovery-codes');
 
         Route::middleware('onboarded')->group(function (): void {
-            Route::get('/account', fn () => redirect()->to(localized_route('account.security')))->name('account');
+            // Account area (Phase 7).
+            Route::view('/account', 'pages.account.dashboard')->name('account');
+            Route::view('/account/listings', 'pages.account.listings')->name('account.listings');
+            Route::view('/account/favorites', 'pages.account.favorites')->name('account.favorites');
+            Route::view('/account/searches', 'pages.account.searches')->name('account.searches');
+            Route::view('/account/notifications', 'pages.account.notifications')->name('account.notifications');
+            Route::view('/account/profile', 'pages.account.profile')->name('account.profile');
+            Route::view('/account/billing', 'pages.account.billing')->name('account.billing');
             Route::get('/account/security', AccountSecurityController::class)->name('account.security');
             Route::get('/account/phone', VerifyPhoneController::class)->name('account.phone');
+
+            Route::get('/account/messages', [ConversationController::class, 'index'])->name('account.messages');
+            Route::get('/account/messages/{conversation}', [ConversationController::class, 'show'])->whereNumber('conversation')->name('account.messages.show');
+            Route::get('/account/messages/{conversation}/attachments/{media}', [ConversationController::class, 'attachment'])->whereNumber(['conversation', 'media'])->name('account.messages.attachment');
+
+            Route::view('/account/bookings', 'pages.account.bookings')->name('account.bookings');
+            Route::get('/account/hotels/{hotel}/rooms', HotelRoomsController::class)->whereNumber('hotel')->name('account.hotels.rooms');
+            Route::view('/account/applications', 'pages.account.applications')->name('account.applications');
+            Route::get('/account/applications/{application}/cv', ApplicationCvController::class)->whereNumber('application')->name('account.applications.cv');
+
+            // Add-listing wizard; editing reuses it. Posting needs a verified phone.
+            Route::middleware('phone.verified')->group(function (): void {
+                Route::get('/add', [ListingWizardController::class, 'create'])->name('listings.create');
+                Route::get('/account/listings/{type}/{id}/edit', [ListingWizardController::class, 'edit'])
+                    ->whereIn('type', array_keys(OwnerListings::TYPES))->whereNumber('id')->name('listings.edit');
+            });
         });
     });
 });

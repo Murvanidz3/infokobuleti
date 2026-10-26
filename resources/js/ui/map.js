@@ -6,7 +6,7 @@ const KOBULETI = [41.8214, 41.7792];
 
 let leaflet = null;
 
-async function loadLeaflet() {
+export async function loadLeaflet() {
     leaflet ??= (async () => {
         const [{ default: L }] = await Promise.all([import('leaflet'), import('leaflet/dist/leaflet.css'), import('../../css/map.css')]);
         window.L = L;

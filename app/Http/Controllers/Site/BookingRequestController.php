@@ -12,8 +12,8 @@ use App\Support\GeorgianPhone;
 use App\Support\Listings\Contact;
 use App\Support\Listings\Visibility;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Support\Arr;
 use Illuminate\Http\Request;
+use Illuminate\Support\Arr;
 use Illuminate\Validation\Rule;
 
 /**
@@ -55,7 +55,7 @@ class BookingRequestController extends Controller
             'dates' => $booking->check_in->format('d.m.Y').' – '.$booking->check_out->format('d.m.Y'),
             'guests' => (string) ($booking->adults + $booking->children),
             'text' => $booking->message,
-        ]));
+        ], localized_route('account.bookings', locale: $hotel->user->preferredLocale())));
 
         return redirect()->to(localized_route('hotels.show', [$hotel]).'#booking')
             ->with('toast', ['message' => __('site.booking.sent'), 'type' => 'success']);

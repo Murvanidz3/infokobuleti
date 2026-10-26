@@ -2,8 +2,10 @@
 
 namespace App\Notifications;
 
+use App\Enums\NotificationTopic;
 use App\Filament\Support\Translatable;
 use App\Models\User;
+use App\Notifications\Concerns\ChoosesChannels;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Database\Eloquent\Model;
@@ -16,7 +18,7 @@ use Illuminate\Notifications\Notification;
  */
 class ListingModerated extends Notification implements ShouldQueue
 {
-    use Queueable;
+    use ChoosesChannels, Queueable;
 
     public function __construct(
         public Model $listing,
@@ -29,7 +31,7 @@ class ListingModerated extends Notification implements ShouldQueue
      */
     public function via(User $notifiable): array
     {
-        return $notifiable->email !== null ? ['database', 'mail'] : ['database'];
+        return $this->channelsFor($notifiable, NotificationTopic::Moderation);
     }
 
     public function toMail(User $notifiable): MailMessage
@@ -45,7 +47,7 @@ class ListingModerated extends Notification implements ShouldQueue
             $mail->line(__('moderation.notification.reason', ['reason' => $this->reason]));
         }
 
-        return $mail->action(__('moderation.notification.action'), localized_route('home'));
+        return $mail->action(__('moderation.notification.action'), localized_route('account.listings', $this->approved ? [] : ['group' => 'attention'], $notifiable->preferredLocale()));
     }
 
     /**

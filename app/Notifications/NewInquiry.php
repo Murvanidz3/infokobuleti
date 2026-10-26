@@ -2,8 +2,10 @@
 
 namespace App\Notifications;
 
+use App\Enums\NotificationTopic;
 use App\Filament\Support\Translatable;
 use App\Models\User;
+use App\Notifications\Concerns\ChoosesChannels;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Database\Eloquent\Model;
@@ -17,7 +19,7 @@ use Illuminate\Notifications\Notification;
  */
 class NewInquiry extends Notification implements ShouldQueue
 {
-    use Queueable;
+    use ChoosesChannels, Queueable;
 
     public const array KINDS = ['message', 'booking', 'application'];
 
@@ -28,6 +30,7 @@ class NewInquiry extends Notification implements ShouldQueue
         public string $kind,
         public Model $subject,
         public array $details = [],
+        public ?string $actionUrl = null,
     ) {}
 
     /**
@@ -35,7 +38,7 @@ class NewInquiry extends Notification implements ShouldQueue
      */
     public function via(User $notifiable): array
     {
-        return $notifiable->email !== null ? ['database', 'mail'] : ['database'];
+        return $this->channelsFor($notifiable, $this->kind === 'message' ? NotificationTopic::Messages : NotificationTopic::Inquiries);
     }
 
     public function toMail(User $notifiable): MailMessage
@@ -49,6 +52,10 @@ class NewInquiry extends Notification implements ShouldQueue
             if (filled($value)) {
                 $mail->line(__('site.inquiry.fields.'.$label).': '.$value);
             }
+        }
+
+        if ($this->actionUrl !== null) {
+            $mail->action(__('account.notifications.open'), $this->actionUrl);
         }
 
         return $mail;
@@ -65,6 +72,7 @@ class NewInquiry extends Notification implements ShouldQueue
             'subject_id' => $this->subject->getKey(),
             'title' => $this->title(),
             'details' => $this->details,
+            'url' => $this->actionUrl,
         ];
     }
 

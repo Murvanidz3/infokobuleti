@@ -9,6 +9,8 @@
     'markers' => [],
     'activeCount' => 0,
     'searchPlaceholder' => null,
+    // A saved search from the account is being edited: "save" updates it.
+    'editingSearch' => false,
     // Comma-separated Livewire targets that change the results (dims them while loading).
     'targets' => 'q,sort,display,bounds',
 ])
@@ -68,7 +70,7 @@
             <button type="button" wire:click="resetFilters" class="min-h-9 px-2 text-[13.5px] font-semibold text-coral-pressed hover:underline">{{ __('site.list.clear_all') }}</button>
             <button type="button" wire:click="saveSearch" class="ml-auto inline-flex min-h-9 items-center gap-1.5 rounded-full border border-coral px-3.5 text-[13.5px] font-semibold text-navy transition-colors duration-200 hover:bg-coral-tint">
                 <x-icon name="heart" :size="15" />
-                {{ __('site.list.save_search') }}
+                {{ $editingSearch ? __('site.list.update_search') : __('site.list.save_search') }}
             </button>
         </div>
     @endif

@@ -282,7 +282,7 @@ return [
         'expiry_days' => 'Listing lifetime',
         'expiry_help' => 'How many days a published listing stays live.',
         'free_limits' => 'Free listings per month',
-        'free_limits_help' => 'Limit per account type (enforced from Phase 7).',
+        'free_limits_help' => 'New listings per calendar month, by account type. Empty means no limit.',
         'maintenance' => 'Maintenance mode is on',
         'maintenance_help' => 'Visitors see a notice; staff and the admin keep working.',
         'not_configured' => 'Not configured',

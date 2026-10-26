@@ -1,7 +1,9 @@
 <?php
 
+use App\Contracts\ExchangeRates;
 use App\Enums\BuildingStatus;
 use App\Enums\CategoryModule;
+use App\Enums\Currency;
 use App\Enums\EmploymentType;
 use App\Enums\ItemCondition;
 use App\Enums\ListingStatus;
@@ -49,7 +51,7 @@ it('filters real estate by deal, type, area, rooms, floor and building age', fun
 it('compares real estate prices in GEL or USD', function () {
     namedProperty('Cheap', ['price' => 30000, 'currency' => 'USD']);
     namedProperty('Dear', ['price' => 400000, 'currency' => 'GEL']);
-    $rate = app(App\Contracts\ExchangeRates::class)->rate(App\Enums\Currency::USD);
+    $rate = app(ExchangeRates::class)->rate(Currency::USD);
 
     expect(Property::query()->where('title->en', 'Cheap')->value('price_gel'))->toEqual(round(30000 * $rate, 2))
         ->and(titles(Livewire::test(PropertyIndex::class)->set('currency', 'USD')->set('price_max', '50000')))->toBe(['Cheap'])

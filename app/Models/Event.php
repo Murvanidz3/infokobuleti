@@ -3,7 +3,6 @@
 namespace App\Models;
 
 use App\Contracts\Listing;
-use App\Search\SearchableListing;
 use App\Models\Concerns\Favoritable;
 use App\Models\Concerns\HasLocation;
 use App\Models\Concerns\HasMediaGallery;
@@ -12,6 +11,7 @@ use App\Models\Concerns\HasStatus;
 use App\Models\Concerns\IndexedForSearch;
 use App\Models\Concerns\LogsStaffActivity;
 use App\Models\Concerns\Reportable;
+use App\Search\SearchableListing;
 use Database\Factories\EventFactory;
 use Illuminate\Database\Eloquent\Attributes\Guarded;
 use Illuminate\Database\Eloquent\Builder;
@@ -33,7 +33,7 @@ use Spatie\Translatable\HasTranslations;
 class Event extends Model implements Listing, SearchableListing
 {
     /** @use HasFactory<EventFactory> */
-    use Favoritable, HasFactory, HasLocation, HasMediaGallery, HasSlug, HasStatus, IndexedForSearch, HasTranslations, LogsStaffActivity, Reportable, SoftDeletes;
+    use Favoritable, HasFactory, HasLocation, HasMediaGallery, HasSlug, HasStatus, HasTranslations, IndexedForSearch, LogsStaffActivity, Reportable, SoftDeletes;
 
     /** @var list<string> */
     public array $translatable = ['title', 'description', 'address', 'venue'];

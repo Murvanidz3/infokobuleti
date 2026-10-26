@@ -1,5 +1,13 @@
 <?php
 
+use App\Models\Article;
+use App\Models\Classified;
+use App\Models\Event;
+use App\Models\Hotel;
+use App\Models\Place;
+use App\Models\Property;
+use App\Models\Vacancy;
+
 return [
 
     /*
@@ -119,37 +127,37 @@ return [
         // Titles first (ranked higher), then descriptions; Georgian, English and Russian side by side.
         // Synonyms are pushed separately from the admin settings (php artisan search:sync).
         'index-settings' => [
-            App\Models\Hotel::class => [
+            Hotel::class => [
                 'searchableAttributes' => ['title_ka', 'title_en', 'title_ru', 'description_ka', 'description_en', 'description_ru'],
                 'filterableAttributes' => ['status', 'type', 'stars', 'price', 'distance_to_sea_m', 'rating', '_geo'],
                 'sortableAttributes' => ['published_at', 'promotion_level'],
             ],
-            App\Models\Property::class => [
+            Property::class => [
                 'searchableAttributes' => ['title_ka', 'title_en', 'title_ru', 'description_ka', 'description_en', 'description_ru'],
                 'filterableAttributes' => ['status', 'deal', 'type', 'price', 'area_m2', 'rooms', '_geo'],
                 'sortableAttributes' => ['published_at', 'promotion_level'],
             ],
-            App\Models\Classified::class => [
+            Classified::class => [
                 'searchableAttributes' => ['title_ka', 'title_en', 'title_ru', 'description_ka', 'description_en', 'description_ru'],
                 'filterableAttributes' => ['status', 'category_id', 'price', '_geo'],
                 'sortableAttributes' => ['published_at', 'promotion_level'],
             ],
-            App\Models\Vacancy::class => [
+            Vacancy::class => [
                 'searchableAttributes' => ['title_ka', 'title_en', 'title_ru', 'description_ka', 'description_en', 'description_ru'],
                 'filterableAttributes' => ['status', 'category_id', 'employment_type', 'salary_min', '_geo'],
                 'sortableAttributes' => ['published_at', 'promotion_level'],
             ],
-            App\Models\Place::class => [
+            Place::class => [
                 'searchableAttributes' => ['title_ka', 'title_en', 'title_ru', 'description_ka', 'description_en', 'description_ru'],
                 'filterableAttributes' => ['status', 'type', '_geo'],
                 'sortableAttributes' => ['published_at', 'promotion_level'],
             ],
-            App\Models\Article::class => [
+            Article::class => [
                 'searchableAttributes' => ['title_ka', 'title_en', 'title_ru', 'excerpt_ka', 'excerpt_en', 'excerpt_ru'],
                 'filterableAttributes' => ['status'],
                 'sortableAttributes' => ['published_at', 'promotion_level'],
             ],
-            App\Models\Event::class => [
+            Event::class => [
                 'searchableAttributes' => ['title_ka', 'title_en', 'title_ru', 'description_ka', 'description_en', 'description_ru'],
                 'filterableAttributes' => ['status', 'category_id', 'starts_at', '_geo'],
                 'sortableAttributes' => ['published_at', 'promotion_level'],

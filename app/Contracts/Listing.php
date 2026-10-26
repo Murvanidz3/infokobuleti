@@ -8,6 +8,10 @@ use Spatie\MediaLibrary\HasMedia;
 
 /**
  * Any moderated, publishable module item: hotel, property, classified, vacancy, place, article, event.
+ *
+ * Every implementation uses HasStatus and HasTranslations (spatie/laravel-translatable).
+ *
+ * @method $this setTranslations(string $key, array<string, mixed> $translations)
  */
 interface Listing extends HasMedia
 {
@@ -23,6 +27,8 @@ interface Listing extends HasMedia
     public function transitionTo(ListingStatus $to, ?string $reason = null, ?User $by = null): static;
 
     public function isPublished(): bool;
+
+    public function listingStatus(): ListingStatus;
 
     public function expiryDays(): ?int;
 }

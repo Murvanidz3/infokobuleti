@@ -6,6 +6,7 @@ use App\Models\Hotel;
 use App\Models\RoomAvailability;
 use App\Models\RoomType;
 use App\Models\RoomTypePriceRule;
+use App\Services\DateFormatter;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
 
@@ -39,7 +40,7 @@ class AvailabilityCalendar
             }
 
             $months[] = [
-                'label' => app(\App\Services\DateFormatter::class)->monthYear($month),
+                'label' => app(DateFormatter::class)->monthYear($month),
                 // Monday-first grid: empty cells before the 1st.
                 'offset' => ($month->dayOfWeekIso - 1),
                 'days' => $days,

@@ -103,6 +103,22 @@ return [
         'agency' => 'Агентство',
     ],
 
+    'listing_group' => [
+        'active' => 'Активные',
+        'pending' => 'На модерации',
+        'attention' => 'Требуют внимания',
+        'paused' => 'На паузе',
+        'expired' => 'Истёк срок',
+    ],
+
+    'notification_topic' => [
+        'messages' => 'Новые сообщения',
+        'inquiries' => 'Бронирования и отклики',
+        'moderation' => 'Результаты модерации',
+        'reminders' => 'Напоминания о сроке',
+        'saved_searches' => 'Сохранённые поиски',
+    ],
+
     'listing_module' => [
         'hotels' => 'Гостиницы',
         'properties' => 'Недвижимость',

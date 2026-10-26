@@ -3,7 +3,6 @@
 namespace App\Models;
 
 use App\Contracts\Listing;
-use App\Search\SearchableListing;
 use App\Enums\ItemCondition;
 use App\Models\Concerns\Favoritable;
 use App\Models\Concerns\HasDailyStats;
@@ -16,6 +15,7 @@ use App\Models\Concerns\LogsStaffActivity;
 use App\Models\Concerns\NormalizesPrice;
 use App\Models\Concerns\Promotable;
 use App\Models\Concerns\Reportable;
+use App\Search\SearchableListing;
 use Database\Factories\ClassifiedFactory;
 use Illuminate\Database\Eloquent\Attributes\Guarded;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -35,7 +35,7 @@ use Spatie\Translatable\HasTranslations;
 class Classified extends Model implements Listing, SearchableListing
 {
     /** @use HasFactory<ClassifiedFactory> */
-    use Favoritable, HasDailyStats, HasFactory, HasLocation, HasMediaGallery, HasSlug, HasStatus, IndexedForSearch, HasTranslations, LogsStaffActivity, NormalizesPrice, Promotable, Reportable, SoftDeletes;
+    use Favoritable, HasDailyStats, HasFactory, HasLocation, HasMediaGallery, HasSlug, HasStatus, HasTranslations, IndexedForSearch, LogsStaffActivity, NormalizesPrice, Promotable, Reportable, SoftDeletes;
 
     /** @var list<string> */
     public array $translatable = ['title', 'description', 'address'];

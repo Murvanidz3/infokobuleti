@@ -65,7 +65,7 @@ class VacancyApplicationController extends Controller
             'name' => $user->name,
             'phone' => GeorgianPhone::format($application->contact_phone),
             'text' => $application->cover_note,
-        ]));
+        ], localized_route('account.applications', ['vacancy' => $vacancy->getKey()], $vacancy->user->preferredLocale())));
 
         return redirect()->to($back)->with('toast', ['message' => __('site.apply.sent'), 'type' => 'success']);
     }

@@ -3,7 +3,6 @@
 namespace App\Models;
 
 use App\Contracts\Listing;
-use App\Search\SearchableListing;
 use App\Enums\ApplyMethod;
 use App\Enums\Currency;
 use App\Enums\EmploymentType;
@@ -19,6 +18,7 @@ use App\Models\Concerns\IndexedForSearch;
 use App\Models\Concerns\LogsStaffActivity;
 use App\Models\Concerns\Promotable;
 use App\Models\Concerns\Reportable;
+use App\Search\SearchableListing;
 use Database\Factories\VacancyFactory;
 use Illuminate\Database\Eloquent\Attributes\Guarded;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -40,7 +40,7 @@ use Spatie\Translatable\HasTranslations;
 class Vacancy extends Model implements Listing, SearchableListing
 {
     /** @use HasFactory<VacancyFactory> */
-    use Favoritable, HasDailyStats, HasFactory, HasLocation, HasMediaGallery, HasSlug, HasStatus, IndexedForSearch, HasTranslations, LogsStaffActivity, Promotable, Reportable, SoftDeletes;
+    use Favoritable, HasDailyStats, HasFactory, HasLocation, HasMediaGallery, HasSlug, HasStatus, HasTranslations, IndexedForSearch, LogsStaffActivity, Promotable, Reportable, SoftDeletes;
 
     protected $table = 'vacancies';
 
