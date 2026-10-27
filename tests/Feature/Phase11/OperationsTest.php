@@ -127,3 +127,13 @@ it('keeps backups of the database and the uploads on the backups disk', function
         ->and(config('backup.backup.source.files.include'))->toBe([storage_path('app')])
         ->and(config('backup.cleanup.default_strategy.keep_monthly_backups_for_months'))->toBe(6);
 });
+
+it('opens Horizon to super admins with two-factor authentication only', function () {
+    [$admin] = staffMember(Role::SuperAdmin);
+
+    $this->actingAs(User::factory()->create())->get('/horizon')->assertForbidden();
+    $this->actingAs($admin)->get('/horizon')->assertOk();
+
+    $admin->forceFill(['two_factor_confirmed_at' => null])->save();
+    $this->actingAs($admin->fresh())->get('/horizon')->assertForbidden();
+});

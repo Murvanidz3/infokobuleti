@@ -65,6 +65,9 @@ class AppServiceProvider extends ServiceProvider
      *
      * @var array<string, class-string<Model>>
      */
+    /** Dashboards that stay closed without two-factor authentication, even for super admins. */
+    private const array TWO_FACTOR_ABILITIES = ['viewHorizon', 'viewPulse'];
+
     public const array MORPH_MAP = [
         'user' => Models\User::class,
         'business_profile' => Models\BusinessProfile::class,
@@ -158,14 +161,14 @@ class AppServiceProvider extends ServiceProvider
         $this->reportBackupProblems();
 
         // Pulse dashboard (/pulse): staff who manage the site settings.
-        Gate::define('viewPulse', fn (Models\User $user): bool => $user->can(Permission::ManageSettings->value));
+        Gate::define('viewPulse', fn (Models\User $user): bool => ! $user->is_blocked && $user->hasTwoFactorEnabled() && $user->can(Permission::ManageSettings->value));
 
         Features::define();
 
         Relation::enforceMorphMap(self::MORPH_MAP);
 
         // super_admin passes every authorization check.
-        Gate::before(fn (Models\User $user) => $user->hasRole(Role::SuperAdmin->value) ? true : null);
+        Gate::before(fn (Models\User $user, string $ability) => ! in_array($ability, self::TWO_FACTOR_ABILITIES, true) && $user->hasRole(Role::SuperAdmin->value) ? true : null);
 
         // Owners manage their own listings from the account area.
         foreach ([Models\Hotel::class, Models\Property::class, Models\Classified::class, Models\Vacancy::class] as $listing) {

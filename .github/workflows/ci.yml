@@ -71,6 +71,10 @@ jobs:
           key: composer-${{ hashFiles('composer.lock') }}
 
       - run: composer install --no-interaction --prefer-dist --no-progress
+      - name: Security advisories (Composer, npm)
+        run: |
+          composer audit --no-interaction --locked
+          npm audit --omit=dev --audit-level=high
       - run: npm ci --no-audit --no-fund
       - run: npm run build
 
