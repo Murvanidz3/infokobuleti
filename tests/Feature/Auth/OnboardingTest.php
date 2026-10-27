@@ -25,7 +25,9 @@ it('saves an individual account and returns to the intended page', function () {
     Livewire::actingAs($user)
         ->withQueryParams([])
         ->test(Onboarding::class)
-        ->set('name', '  Giorgi Tsintsadze ')
+        ->assertDontSee(__('auth.onboarding.email_hint'))
+        ->set('firstName', '  Giorgi ')
+        ->set('lastName', 'Tsintsadze ')
         ->call('save')
         ->assertHasNoErrors()
         ->assertRedirect(url('/'));
@@ -41,7 +43,8 @@ it('creates the business profile for business accounts', function () {
 
     Livewire::actingAs($user)
         ->test(Onboarding::class)
-        ->set('name', 'Tamar Khalvashi')
+        ->set('firstName', 'Tamar')
+        ->set('lastName', 'Khalvashi')
         ->set('accountType', 'business')
         ->call('save')
         ->assertHasErrors(['businessType', 'businessName'])
@@ -58,11 +61,12 @@ it('creates the business profile for business accounts', function () {
 });
 
 it('asks Google accounts for a phone after onboarding', function () {
-    $user = User::factory()->google()->notOnboarded()->create();
+    $user = User::factory()->google()->notOnboarded()->create(['name' => 'Nino Beridze']);
 
     Livewire::actingAs($user)
         ->test(Onboarding::class)
-        ->set('name', 'Nino')
+        ->assertSet('firstName', 'Nino')
+        ->assertSet('lastName', 'Beridze')
         ->call('save')
         ->assertRedirect(url('/account/phone'));
 });
@@ -72,9 +76,49 @@ it('validates the name in the page language', function () {
 
     Livewire::actingAs(User::factory()->notOnboarded()->create())
         ->test(Onboarding::class)
-        ->set('name', '')
+        ->set('firstName', '')
+        ->set('lastName', '')
         ->call('save')
-        ->assertHasErrors(['name' => 'required']);
+        ->assertHasErrors(['firstName' => 'required', 'lastName' => 'required']);
 
-    expect(__('validation.required', ['attribute' => __('auth.onboarding.name')]))->toContain('სავალდებულოა');
+    expect(__('validation.required', ['attribute' => __('auth.onboarding.first_name')]))->toContain('სავალდებულოა');
+});
+
+it('asks phone sign-ups for their email and keeps it unverified', function () {
+    $user = User::factory()->phoneOnly()->notOnboarded()->create(['name' => null]);
+    User::factory()->create(['email' => 'taken@example.com']);
+
+    $component = Livewire::actingAs($user)
+        ->test(Onboarding::class)
+        ->assertSee(__('auth.onboarding.email_hint'))
+        ->set('firstName', 'Nino')
+        ->set('lastName', 'Beridze')
+        ->call('save')
+        ->assertHasErrors(['email' => 'required'])
+        ->set('email', 'Taken@Example.com')
+        ->call('save')
+        ->assertHasErrors(['email' => 'unique']);
+
+    expect($component->errors()->first('email'))->toBe(__('auth.onboarding.email_taken'));
+
+    $component->set('email', ' Nino@Example.com ')->call('save')->assertHasNoErrors();
+
+    expect($user->fresh())
+        ->name->toBe('Nino Beridze')
+        ->email->toBe('nino@example.com')
+        ->email_verified_at->toBeNull()
+        ->onboarded_at->not->toBeNull();
+});
+
+it('signs up a new number end to end: code, then onboarding', function () {
+    $this->postJson('/auth/phone/send', ['phone' => '577 11 22 33'])->assertOk();
+
+    $this->postJson('/auth/phone/verify', ['phone' => '577 11 22 33', 'code' => lastSmsCode()])
+        ->assertOk()
+        ->assertJson(['redirect' => url('/onboarding')]);
+
+    $user = User::query()->where('phone', '+995577112233')->sole();
+    expect($user)->onboarded_at->toBeNull()->phone_verified_at->not->toBeNull();
+
+    $this->get('/account/security')->assertRedirect('/onboarding');
 });

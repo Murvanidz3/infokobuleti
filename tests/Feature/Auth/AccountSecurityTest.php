@@ -76,7 +76,7 @@ it('changes the phone only after a code sent to the new number', function () {
         ->and($user->fresh()->phone)->toBe('+995555111111')
         ->and(PhoneVerification::sole()->user_id)->toBe($user->id);
 
-    $component->set('code', lastSmsCode() === '000000' ? '111111' : '000000')->call('confirm')->assertHasErrors('code');
+    $component->set('code', lastSmsCode() === '0000' ? '1111' : '0000')->call('confirm')->assertHasErrors('code');
     expect($user->fresh()->phone)->toBe('+995555111111');
 
     $component->set('code', lastSmsCode())->call('confirm')->assertHasNoErrors()->assertDispatched('phone-updated');

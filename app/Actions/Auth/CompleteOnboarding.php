@@ -10,14 +10,18 @@ use Illuminate\Support\Facades\DB;
 
 class CompleteOnboarding
 {
-    public function handle(User $user, string $name, AccountType $accountType, ?BusinessType $businessType = null, ?string $businessName = null): void
+    /**
+     * @param  string|null  $email  for accounts without one (phone sign-ups); stored unverified
+     */
+    public function handle(User $user, string $name, AccountType $accountType, ?BusinessType $businessType = null, ?string $businessName = null, ?string $email = null): void
     {
-        DB::transaction(function () use ($user, $name, $accountType, $businessType, $businessName): void {
-            $user->forceFill([
+        DB::transaction(function () use ($user, $name, $accountType, $businessType, $businessName, $email): void {
+            $user->forceFill(array_filter([
                 'name' => $name,
                 'account_type' => $accountType,
                 'onboarded_at' => now(),
-            ])->save();
+                'email' => $user->email === null ? $email : null,
+            ], fn ($value) => $value !== null))->save();
 
             if ($accountType === AccountType::Business && $businessType !== null && filled($businessName)) {
                 $user->businessProfiles()->create([

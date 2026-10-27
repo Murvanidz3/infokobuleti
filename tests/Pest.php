@@ -73,11 +73,11 @@ function smsGateway(): ArraySmsGateway
 }
 
 /**
- * The 6-digit code from the last SMS that was sent.
+ * The sign-in code from the last SMS that was sent.
  */
 function lastSmsCode(): string
 {
-    preg_match('/\b(\d{6})\b/', smsGateway()->last()['text'] ?? '', $matches);
+    preg_match('/\b(\d{'.(int) config('otp.length').'})\b/', smsGateway()->last()['text'] ?? '', $matches);
 
     return $matches[1] ?? '';
 }

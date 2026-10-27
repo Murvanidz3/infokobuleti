@@ -1,7 +1,19 @@
 <form wire:submit="save" class="flex flex-col gap-5" novalidate>
-    <x-form.field :label="__('auth.onboarding.name')" name="name">
-        <x-form.input name="name" wire:model="name" autocomplete="name" :placeholder="__('auth.onboarding.name_placeholder')" autofocus />
-    </x-form.field>
+    <div class="grid gap-5 sm:grid-cols-2">
+        <x-form.field :label="__('auth.onboarding.first_name')" name="firstName">
+            <x-form.input name="firstName" wire:model="firstName" autocomplete="given-name" :placeholder="__('auth.onboarding.first_name_placeholder')" autofocus />
+        </x-form.field>
+
+        <x-form.field :label="__('auth.onboarding.last_name')" name="lastName">
+            <x-form.input name="lastName" wire:model="lastName" autocomplete="family-name" :placeholder="__('auth.onboarding.last_name_placeholder')" />
+        </x-form.field>
+    </div>
+
+    @if ($needsEmail)
+        <x-form.field :label="__('auth.onboarding.email')" name="email" :hint="__('auth.onboarding.email_hint')">
+            <x-form.input name="email" type="email" wire:model="email" autocomplete="email" inputmode="email" placeholder="name@example.com" />
+        </x-form.field>
+    @endif
 
     <x-form.field :label="__('auth.onboarding.account_type')" name="accountType">
         <div role="radiogroup" aria-label="{{ __('auth.onboarding.account_type') }}" class="grid grid-cols-2 gap-2.5">

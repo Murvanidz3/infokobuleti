@@ -10,7 +10,7 @@ return [
     'captcha_failed' => 'The security check failed. Please try again.',
     'login' => [
         'title' => 'Sign in',
-        'subtitle' => 'Use Google or your mobile number. No password needed.',
+        'subtitle' => 'Sign in or sign up with Google or your mobile number. No password needed.',
         'google' => 'Continue with Google',
         'or' => 'or',
         'remember' => 'Keep me signed in for 30 days',
@@ -34,17 +34,17 @@ return [
     'otp' => [
         'send' => 'Send code',
         'sent' => 'We sent a code to :phone.',
-        'sent_to' => 'We sent a 6-digit code to',
+        'sent_to' => 'We sent a :length-digit code to',
         'change_number' => 'Change',
         'dev_code' => 'Test mode, code:',
         'code_label' => 'SMS code',
         'verify' => 'Sign in',
         'resend' => 'Resend code',
         'resend_in' => 'Resend in :time',
-        'code_format' => 'The code has 6 digits.',
+        'code_format' => 'The code has :length digits.',
     ],
     'sms' => [
-        'code' => 'infokobuleti: your code is :code. Valid for :minutes minutes. Do not share it with anyone.',
+        'code' => 'One-time code :code',
     ],
     'google' => [
         'not_configured' => 'Sign-in with Google is not set up yet.',
@@ -64,9 +64,16 @@ return [
     'onboarding' => [
         'required' => 'Please finish setting up your account first.',
         'title' => 'Welcome to infokobuleti',
-        'subtitle' => 'Two quick details and your account is ready.',
+        'subtitle' => 'A few details and your account is ready.',
         'name' => 'Full name',
         'name_placeholder' => 'e.g. Nino Beridze',
+        'first_name' => 'First name',
+        'first_name_placeholder' => 'e.g. Nino',
+        'last_name' => 'Last name',
+        'last_name_placeholder' => 'e.g. Beridze',
+        'email' => 'Email',
+        'email_hint' => 'For notifications and receipts. Not shown to others.',
+        'email_taken' => 'This email belongs to another account. If it is yours, sign in with Google.',
         'account_type' => 'Account type',
         'account_type_hint' => [
             'individual' => 'For personal listings',

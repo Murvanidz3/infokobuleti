@@ -9,8 +9,12 @@ use App\Models\User;
 use Laravel\Socialite\Contracts\User as GoogleUser;
 
 /**
- * Signs in with Google in one step: an account with this Google id, else the account with the same
- * verified email (which gets linked), else a new account.
+ * Signs in with Google in one step: an account with this Google id, else the account whose email
+ * is verified and the same as Google's verified email (which gets linked), else a new account.
+ *
+ * An email typed on a phone account is unverified: anyone could type someone else's address, so it
+ * never links a Google account. The verified Google owner wins the address instead (it is removed
+ * from the phone account, which keeps signing in by phone).
  */
 class LoginWithGoogle
 {
@@ -22,8 +26,14 @@ class LoginWithGoogle
         $user = User::query()->where('google_id', $google->getId())->first();
         $email = self::verifiedEmail($google);
 
-        if ($user === null && $email !== null) {
-            $user = User::query()->where('email', $email)->first();
+        if ($user === null && $email !== null && ($match = User::query()->where('email', $email)->first()) !== null) {
+            if ($match->email_verified_at !== null) {
+                $user = $match;
+            } elseif ($match->phone !== null && ! $match->isStaff()) {
+                $match->forceFill(['email' => null, 'email_verified_at' => null])->save();
+            } else {
+                throw new AuthFlowException('auth.google.failed');
+            }
         }
 
         if ($user === null) {

@@ -15,7 +15,7 @@ class VerifyLoginCodeRequest extends FormRequest
     {
         return [
             'phone' => ['required', 'string', 'max:32', new GeorgianMobile],
-            'code' => ['required', 'string', 'regex:/^\s*\d{6}\s*$/'],
+            'code' => ['required', 'string', 'regex:/^\s*\d{'.(int) config('otp.length').'}\s*$/'],
             'remember' => ['sometimes', 'boolean'],
             'return_to' => ['nullable', 'string', 'max:2048'],
         ];
@@ -26,7 +26,7 @@ class VerifyLoginCodeRequest extends FormRequest
      */
     public function messages(): array
     {
-        return ['code.regex' => __('auth.otp.code_format')];
+        return ['code.regex' => __('auth.otp.code_format', ['length' => (int) config('otp.length')])];
     }
 
     public function phone(): string

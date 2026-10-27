@@ -11,6 +11,7 @@
         'returnTo' => $returnTo,
         'turnstile' => $captcha->enabled() ? $captcha->siteKey() : null,
         'locale' => app()->getLocale(),
+        'codeLength' => (int) config('otp.length'),
         'messages' => [
             'resend' => __('auth.otp.resend'),
             'resendIn' => __('auth.otp.resend_in'),
@@ -73,7 +74,7 @@
     {{-- Step 2: the SMS code --}}
     <form x-show="step === 'code'" x-cloak x-on:submit.prevent="verify" class="flex flex-col gap-4" novalidate>
         <p class="text-[15px] leading-[1.6] text-secondary">
-            {{ __('auth.otp.sent_to') }}
+            {{ __('auth.otp.sent_to', ['length' => config('otp.length')]) }}
             <strong class="font-semibold whitespace-nowrap text-navy" x-text="sentTo"></strong>
             <button type="button" x-on:click="back" class="ml-1 font-semibold text-coral-pressed underline-offset-4 hover:underline">{{ __('auth.otp.change_number') }}</button>
         </p>
@@ -92,15 +93,15 @@
                    type="text"
                    inputmode="numeric"
                    autocomplete="one-time-code"
-                   pattern="\d{6}"
-                   maxlength="6"
-                   placeholder="••••••"
+                   pattern="{{ '\d{'.config('otp.length').'}' }}"
+                   maxlength="{{ config('otp.length') }}"
+                   placeholder="{{ str_repeat('•', (int) config('otp.length')) }}"
                    aria-describedby="login-error"
                    class="block min-h-14 w-full rounded-field border border-line bg-white px-4 text-center text-[24px] font-semibold tracking-[0.5em] text-navy transition-colors duration-200 placeholder:text-secondary/40 hover:border-line-strong focus:border-navy"
                    x-bind:class="error && step === 'code' ? 'border-coral-pressed' : ''">
         </x-form.field>
 
-        <x-button type="submit" size="lg" class="w-full" x-bind:disabled="busy || code.length !== 6">
+        <x-button type="submit" size="lg" class="w-full" x-bind:disabled="busy || code.length !== config.codeLength">
             <span x-show="!busy">{{ __('auth.otp.verify') }}</span>
             <span x-show="busy" x-cloak>{{ __('components.loading') }}</span>
         </x-button>

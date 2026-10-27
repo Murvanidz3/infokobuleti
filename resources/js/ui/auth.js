@@ -119,10 +119,10 @@ export function registerAuth(Alpine) {
         },
 
         onCodeInput() {
-            this.code = this.code.replace(/\D/g, '').slice(0, 6);
+            this.code = this.code.replace(/\D/g, '').slice(0, config.codeLength);
             this.error = '';
 
-            if (this.code.length === 6) {
+            if (this.code.length === config.codeLength) {
                 this.verify();
             }
         },
@@ -168,7 +168,7 @@ export function registerAuth(Alpine) {
         },
 
         async verify() {
-            if (this.busy || this.code.length !== 6) {
+            if (this.busy || this.code.length !== config.codeLength) {
                 return;
             }
 

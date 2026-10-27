@@ -23,7 +23,7 @@
     @else
         <form wire:submit="confirm" class="flex flex-col gap-4" novalidate>
             <p class="text-[15px] leading-[1.6] text-secondary">
-                {{ __('auth.otp.sent_to') }} <strong class="font-semibold whitespace-nowrap text-navy">{{ $pendingFormatted }}</strong>
+                {{ __('auth.otp.sent_to', ['length' => config('otp.length')]) }} <strong class="font-semibold whitespace-nowrap text-navy">{{ $pendingFormatted }}</strong>
             </p>
 
             @if ($devCode)
@@ -33,7 +33,7 @@
             @endif
 
             <x-form.field :label="__('auth.otp.code_label')" name="code">
-                <input id="code" type="text" inputmode="numeric" autocomplete="one-time-code" pattern="\d{6}" maxlength="6" placeholder="••••••"
+                <input id="code" type="text" inputmode="numeric" autocomplete="one-time-code" pattern="{{ '\d{'.config('otp.length').'}' }}" maxlength="{{ config('otp.length') }}" placeholder="{{ str_repeat('•', (int) config('otp.length')) }}"
                        wire:model="code" autofocus
                        @class([
                            'block min-h-14 w-full max-w-[280px] rounded-field border bg-white px-4 text-center text-[24px] font-semibold tracking-[0.5em] text-navy transition-colors duration-200 placeholder:text-secondary/40 hover:border-line-strong focus:border-navy',

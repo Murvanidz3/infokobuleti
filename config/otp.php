@@ -7,14 +7,15 @@ return [
     | SMS login codes
     |--------------------------------------------------------------------------
     |
-    | Codes are stored only as an HMAC, expire after "ttl" seconds and allow
+    | Codes ("length" digits) are stored only as an HMAC, expire after "ttl"
+    | seconds (five minutes) and allow
     | "max_attempts" guesses. A new code can be requested after "resend_after"
     | seconds. The limits below cap how many codes one number or one IP
     | address can request; "decay" is the window in seconds.
     |
     */
 
-    'length' => 6,
+    'length' => 4,
 
     'ttl' => 300,
 

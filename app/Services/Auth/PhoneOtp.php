@@ -12,7 +12,7 @@ use Illuminate\Cache\RateLimiter;
 use Illuminate\Support\Facades\DB;
 
 /**
- * Sends and checks 6-digit SMS codes. Codes are stored as an HMAC, expire after five minutes and
+ * Sends and checks SMS codes (config otp.length digits). Codes are stored as an HMAC, expire after five minutes and
  * allow five guesses; sending is limited per phone (cooldown, hourly, daily) and per IP address.
  */
 class PhoneOtp
@@ -152,14 +152,11 @@ class PhoneOtp
     }
 
     /**
-     * SMS text in the current locale. The last line follows the WebOTP format so Android browsers
-     * can offer to fill the code in automatically.
+     * SMS text in the current locale, kept as short as possible ("One-time code 1234").
      */
     private function message(string $code): string
     {
-        $host = parse_url((string) config('app.url'), PHP_URL_HOST) ?: 'infokobuleti.com';
-
-        return __('auth.sms.code', ['code' => $code, 'minutes' => (int) ceil(config('otp.ttl') / 60)])."\n\n@{$host} #{$code}";
+        return __('auth.sms.code', ['code' => $code]);
     }
 
     private function shouldReveal(): bool

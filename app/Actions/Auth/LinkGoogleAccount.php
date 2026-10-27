@@ -26,11 +26,14 @@ class LinkGoogleAccount
         $email = LoginWithGoogle::verifiedEmail($google);
         $emailIsFree = $email !== null && ! User::query()->where('email', $email)->whereKeyNot($user->id)->exists();
 
+        // The account's email counts as verified only when it is the one Google verified.
+        $newEmail = $user->email ?? ($emailIsFree ? $email : null);
+
         $user->forceFill(array_filter([
             'google_id' => $google->getId(),
             'avatar' => $user->avatar ?? $google->getAvatar(),
-            'email' => $user->email ?? ($emailIsFree ? $email : null),
-            'email_verified_at' => $user->email_verified_at ?? ($emailIsFree ? now() : null),
+            'email' => $newEmail,
+            'email_verified_at' => $user->email_verified_at ?? ($email !== null && $newEmail === $email ? now() : null),
         ], fn ($value) => $value !== null))->save();
     }
 }

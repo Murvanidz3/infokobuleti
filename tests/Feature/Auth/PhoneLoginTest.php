@@ -22,7 +22,7 @@ function verifyCode(string $code, array $extra = [], string $phone = '555 12 34 
     return test()->postJson('/auth/phone/verify', ['phone' => $phone, 'code' => $code, ...$extra]);
 }
 
-it('sends a 6-digit code and logs the SMS without storing the code', function () {
+it('sends a 4-digit code in a short SMS and logs it without storing the code', function () {
     sendCode()
         ->assertOk()
         ->assertJson(['phone' => '+995 555 12 34 56', 'resend_in' => 60, 'expires_in' => 300])
@@ -31,10 +31,11 @@ it('sends a 6-digit code and logs the SMS without storing the code', function ()
     $code = lastSmsCode();
     $verification = PhoneVerification::sole();
 
-    expect($code)->toMatch('/^\d{6}$/')
+    expect($code)->toMatch('/^\d{4}$/')
         ->and(smsGateway()->last()['to'])->toBe('+995555123456')
-        ->and(smsGateway()->last()['text'])->toContain(__('auth.sms.code', ['code' => $code, 'minutes' => 5], 'ka'))
-        ->and(smsGateway()->last()['text'])->toEndWith('#'.$code)
+        ->and(smsGateway()->last()['text'])->toBe(__('auth.sms.code', ['code' => $code], 'ka'))
+        ->and(smsGateway()->last()['text'])->toBe('ერთჯერადი კოდი '.$code)
+        ->and(smsGateway()->last()['otp'])->toBeTrue()
         ->and($verification->code_hash)->not->toContain($code)
         ->and($verification->expires_at->diffInSeconds(now(), true))->toBeGreaterThan(295)
         ->and(SmsMessage::sole()->status)->toBe(SmsStatus::Sent);
@@ -43,7 +44,7 @@ it('sends a 6-digit code and logs the SMS without storing the code', function ()
 it('writes the SMS in the language of the page', function () {
     sendCode(prefix: '/ru')->assertOk();
 
-    expect(smsGateway()->last()['text'])->toContain('ваш код '.lastSmsCode());
+    expect(smsGateway()->last()['text'])->toBe('Одноразовый код '.lastSmsCode());
 });
 
 it('creates an account for a new number and sends it to onboarding', function () {
@@ -82,7 +83,7 @@ it('ignores return addresses on other sites', function () {
 
 it('rejects a wrong code and reports the attempts left', function () {
     sendCode();
-    $wrong = lastSmsCode() === '000000' ? '111111' : '000000';
+    $wrong = lastSmsCode() === '0000' ? '1111' : '0000';
 
     verifyCode($wrong)
         ->assertUnprocessable()
@@ -104,7 +105,7 @@ it('expires codes after five minutes', function () {
 it('locks a code after five wrong attempts, even for the right code', function () {
     sendCode();
     $code = lastSmsCode();
-    $wrong = $code === '000000' ? '111111' : '000000';
+    $wrong = $code === '0000' ? '1111' : '0000';
 
     foreach (range(1, 4) as $attempt) {
         verifyCode($wrong)->assertUnprocessable();
@@ -206,7 +207,7 @@ it('shows the code on screen only while testing with the log driver', function (
 
     config(['sms.default' => 'log']);
     $this->travel(61)->seconds();
-    sendCode()->assertJsonPath('dev_code', fn ($code) => preg_match('/^\d{6}$/', $code) === 1);
+    sendCode()->assertJsonPath('dev_code', fn ($code) => preg_match('/^\d{4}$/', $code) === 1);
 
     app()->detectEnvironment(fn () => 'production');
     $this->travel(61)->seconds();

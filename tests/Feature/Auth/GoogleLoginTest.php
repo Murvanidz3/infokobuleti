@@ -58,7 +58,7 @@ it('registers a new user in one step', function () {
 });
 
 it('links Google to the account with the same verified email', function () {
-    $user = User::factory()->phoneOnly()->create(['email' => 'nino@example.com', 'onboarded_at' => now()]);
+    $user = User::factory()->phoneOnly()->create(['email' => 'nino@example.com', 'email_verified_at' => now(), 'onboarded_at' => now()]);
     fakeGoogle();
 
     $this->get('/auth/google/callback?code=abc')->assertRedirect('/');
@@ -66,6 +66,23 @@ it('links Google to the account with the same verified email', function () {
     expect($user->fresh()->google_id)->toBe('109876543210')
         ->and(User::count())->toBe(1);
     $this->assertAuthenticatedAs($user);
+});
+
+it('never links Google through an email someone only typed in', function () {
+    // Anyone could type another person's address on a phone account.
+    $phoneAccount = User::factory()->phoneOnly()->create(['email' => 'nino@example.com', 'onboarded_at' => now()]);
+    fakeGoogle();
+
+    $this->get('/auth/google/callback?code=abc');
+
+    $google = User::query()->where('google_id', '109876543210')->sole();
+
+    expect($google->id)->not->toBe($phoneAccount->id)
+        ->and($google->email)->toBe('nino@example.com')
+        ->and($google->email_verified_at)->not->toBeNull()
+        ->and($phoneAccount->fresh()->email)->toBeNull()
+        ->and($phoneAccount->fresh()->google_id)->toBeNull();
+    $this->assertAuthenticatedAs($google);
 });
 
 it('does not link by an unverified email', function () {
