@@ -16,6 +16,7 @@ return [
         'backlog' => 'რიგში მყოფი დავალებები',
         'backup' => 'ბოლო backup',
         'ssl' => 'SSL სერტიფიკატი',
+        'sms' => 'SMS ბალანსი (UBill)',
     ],
 
     'backup' => [
@@ -34,6 +35,7 @@ return [
         'none' => 'არ არის',
         'hours_ago' => ':hours სთ წინ',
         'days' => ':days დღე',
+        'sms' => ':count SMS',
     ],
 
     'detail' => [

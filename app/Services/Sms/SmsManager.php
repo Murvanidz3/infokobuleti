@@ -7,8 +7,8 @@ use Illuminate\Support\Manager;
 use InvalidArgumentException;
 
 /**
- * Resolves SMS drivers by name (config/sms.php). A Georgian provider is added here as another
- * create{Name}Driver method once its API documentation is available.
+ * Resolves SMS drivers by name (config/sms.php): log and array for development and tests, ubill
+ * (Georgian provider, production) and twilio (fallback).
  *
  * @method SmsGateway driver(string|null $driver = null)
  */
@@ -27,6 +27,23 @@ class SmsManager extends Manager
     protected function createArrayDriver(): SmsGateway
     {
         return new ArraySmsGateway;
+    }
+
+    protected function createUbillDriver(): UbillSmsGateway
+    {
+        $config = $this->config->get('sms.drivers.ubill');
+
+        if (blank($config['api_key'] ?? null)) {
+            throw new InvalidArgumentException('UBill needs UBILL_API_KEY.');
+        }
+
+        return new UbillSmsGateway(
+            apiKey: (string) $config['api_key'],
+            brandName: (string) ($config['brand_name'] ?? $this->config->get('sms.sender')),
+            brandId: filled($config['brand_id'] ?? null) ? (int) $config['brand_id'] : null,
+            cache: $this->container->make('cache.store'),
+            baseUrl: (string) ($config['base_url'] ?? 'https://api.ubill.dev/v1/sms'),
+        );
     }
 
     protected function createTwilioDriver(): SmsGateway

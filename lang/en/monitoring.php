@@ -17,6 +17,7 @@ return [
         'backlog' => 'Queued jobs',
         'backup' => 'Last backup',
         'ssl' => 'SSL certificate',
+        'sms' => 'SMS balance (UBill)',
     ],
 
     'backup' => [
@@ -35,6 +36,7 @@ return [
         'none' => 'none',
         'hours_ago' => ':hours h ago',
         'days' => ':days days',
+        'sms' => ':count SMS',
     ],
 
     'detail' => [

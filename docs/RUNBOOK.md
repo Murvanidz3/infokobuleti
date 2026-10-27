@@ -84,7 +84,7 @@ php artisan up && rm -rf /tmp/restore
 ## Monitoring and alerts
 
 - `monitor:check` every five minutes: free disk, free memory, Horizon, failed jobs (last hour),
-  queue backlog, age of the last backup, SSL certificate. Results show on the admin dashboard
+  queue backlog, age of the last backup, SSL certificate, UBill SMS balance. Results show on the admin dashboard
   ("System health"); problems are alerts.
 - Alerts are written to `shared/storage/logs/alerts-*.log`. Telegram: once the bot exists, set
   `TELEGRAM_BOT_TOKEN` and `MONITORING_TELEGRAM_CHAT_ID` in `shared/.env`, run `php artisan
@@ -96,12 +96,24 @@ php artisan up && rm -rf /tmp/restore
 - Outside checks (server down, network): add https://infokobuleti.com/up to an uptime service
   (e.g. UptimeRobot, free) once the site is public.
 
+## SMS (UBill)
+
+- Production sends sign-in codes through UBill (`SMS_DRIVER=ubill`, brand name `SMS_SENDER=KOBULETI`,
+  `UBILL_API_KEY` in `shared/.env`). Staging keeps `SMS_DRIVER=log` and shows codes on screen.
+- The UBill API app only accepts calls from the server's IP, so check the account on the server:
+  `php artisan sms:ubill-status` (brands, brandID, balance), `--send=995XXXXXXXXX` (test SMS),
+  `--report=<smsID>` (delivery status).
+- Delivery reports: in the UBill API app set the callback URL
+  `https://infokobuleti.com/webhooks/sms/ubill` and the callback key from `UBILL_CALLBACK_KEY`.
+- The health check alerts when fewer than `UBILL_MIN_BALANCE` (200) SMS are left: top up at ubill.ge.
+- Every message is recorded in the `sms_messages` table (status, UBill smsID, error).
+
 ## Keys and passwords
 
 - **APP_KEY:** never change it on a live site (encrypted 2FA secrets and sessions depend on it).
 - **Database password:** `ALTER ROLE ... PASSWORD`, update `shared/.env` and `/root/infokobuleti-secrets.env`, then
   `php artisan optimize` and `sudo systemctl reload php8.4-fpm`.
-- **Any other key** (Google, Twilio, banks, Turnstile, VAPID): edit `shared/.env`, then
+- **Any other key** (Google, UBill, Twilio, banks, Turnstile, VAPID): edit `shared/.env`, then
   `php artisan optimize`, `sudo systemctl reload php8.4-fpm`, `php artisan horizon:terminate`.
 - **GitHub deploy key:** `/home/deploy/.ssh/github_actions.pub` is in `authorized_keys` with a
   forced command (it can only run the deploy entry point). To replace it: delete both files and the

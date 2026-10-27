@@ -7,10 +7,10 @@ return [
     | SMS gateway
     |--------------------------------------------------------------------------
     |
-    | "log" writes messages to the log (local and tests), "twilio" sends them
-    | through Twilio. The Georgian provider driver is added once its API docs
-    | are available. Sending is queued; every message is recorded in
-    | sms_messages with its delivery status.
+    | "log" writes messages to the log (local and tests), "ubill" sends them
+    | through UBill (Georgian provider, production), "twilio" is a fallback.
+    | Sending is queued; every message is recorded in sms_messages with its
+    | delivery status.
     |
     */
 
@@ -30,6 +30,22 @@ return [
 
         'log' => [
             'channel' => env('SMS_LOG_CHANNEL'),
+        ],
+
+        /*
+        | SMS_SENDER is the brand name approved in the UBill dashboard; its
+        | numeric id is looked up by name unless UBILL_BRAND_ID is set. The
+        | API app is restricted to the server's IP address. Delivery reports:
+        | set the callback URL https://<site>/webhooks/sms/ubill and the
+        | callback key (UBILL_CALLBACK_KEY) in the UBill API app settings.
+        */
+        'ubill' => [
+            'api_key' => env('UBILL_API_KEY'),
+            'brand_id' => env('UBILL_BRAND_ID'),
+            'brand_name' => env('UBILL_BRAND_NAME', env('SMS_SENDER', 'INFOKOBULETI')),
+            'callback_key' => env('UBILL_CALLBACK_KEY'),
+            'base_url' => env('UBILL_BASE_URL', 'https://api.ubill.dev/v1/sms'),
+            'min_balance' => (int) env('UBILL_MIN_BALANCE', 200),
         ],
 
         'twilio' => [

@@ -2,6 +2,8 @@
 
 namespace App\Services\Monitoring;
 
+use App\Services\Sms\SmsManager;
+use App\Services\Sms\UbillSmsGateway;
 use Illuminate\Contracts\Cache\Repository as Cache;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -12,7 +14,7 @@ use Throwable;
 
 /**
  * Server and application health: disk, memory, queue worker, failed jobs, backlog, last backup and
- * the SSL certificate. monitor:check runs these every five minutes, raises alerts for failures and
+ * the SSL certificate and the SMS balance. monitor:check runs these every five minutes, raises alerts for failures and
  * keeps the last result for the admin dashboard.
  *
  * @phpstan-type Check array{key: string, ok: bool|null, value: string, detail: string}
@@ -36,6 +38,7 @@ class HealthChecks
             $this->backlog(),
             $this->backup(),
             $this->certificate(),
+            $this->smsBalance(),
         ];
 
         $this->cache->forever(self::CACHE_KEY, ['at' => now()->toIso8601String(), 'checks' => $checks]);
@@ -182,6 +185,31 @@ class HealthChecks
         $days = is_array($certificate) ? (int) floor(($certificate['validTo_time_t'] - time()) / 86400) : -1;
 
         return $this->result('ssl', $days >= (int) config('monitoring.ssl_min_days'), __('monitoring.value.days', ['days' => $days]));
+    }
+
+    /**
+     * SMS left on the UBill balance (sign-in codes stop when it runs out).
+     *
+     * @return Check
+     */
+    private function smsBalance(): array
+    {
+        if (config('sms.default') !== 'ubill') {
+            return $this->result('sms', null, (string) config('sms.default'));
+        }
+
+        try {
+            $gateway = app(SmsManager::class)->driver('ubill');
+            $balance = $gateway instanceof UbillSmsGateway ? $gateway->balance() : null;
+        } catch (Throwable $exception) {
+            return $this->result('sms', false, '—', $exception->getMessage());
+        }
+
+        if ($balance === null) {
+            return $this->result('sms', null, '—');
+        }
+
+        return $this->result('sms', $balance >= (int) config('sms.drivers.ubill.min_balance'), __('monitoring.value.sms', ['count' => $balance]));
     }
 
     /**

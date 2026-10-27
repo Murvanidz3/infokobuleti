@@ -46,6 +46,8 @@ use App\Http\Controllers\StyleguideController;
 use App\Http\Controllers\Webhooks\PaymentWebhookController;
 use App\Http\Controllers\Webhooks\TelegramWebhookController;
 use App\Http\Controllers\Webhooks\TwilioStatusController;
+use App\Http\Controllers\Webhooks\UbillStatusController;
+use App\Http\Middleware\CachePublicPages;
 use App\Services\Account\OwnerListings;
 use App\Services\LocaleRouter;
 use App\Support\Listings\ListingTypes;
@@ -54,6 +56,7 @@ use Illuminate\Support\Facades\Route;
 // Not localized: the OAuth callback must match the URI registered with Google; webhooks are machine-to-machine.
 Route::get('/auth/google/callback', [GoogleController::class, 'callback'])->name('auth.google.callback');
 Route::post('/webhooks/sms/twilio', TwilioStatusController::class)->middleware('throttle:webhooks')->name('webhooks.sms.twilio');
+Route::get('/webhooks/sms/ubill', UbillStatusController::class)->withoutMiddleware(CachePublicPages::class)->middleware('throttle:webhooks')->name('webhooks.sms.ubill');
 Route::post('/webhooks/telegram/{secret}', TelegramWebhookController::class)->middleware('throttle:240,1')->name('webhooks.telegram');
 Route::post('/webhooks/payments/{gateway}', PaymentWebhookController::class)->whereAlpha('gateway')->middleware('throttle:120,1')->name('webhooks.payments');
 

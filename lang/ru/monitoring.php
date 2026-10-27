@@ -17,6 +17,7 @@ return [
         'backlog' => 'Задачи в очереди',
         'backup' => 'Последний бэкап',
         'ssl' => 'SSL-сертификат',
+        'sms' => 'Баланс SMS (UBill)',
     ],
 
     'backup' => [
@@ -35,6 +36,7 @@ return [
         'none' => 'нет',
         'hours_ago' => ':hours ч назад',
         'days' => ':days дн.',
+        'sms' => ':count SMS',
     ],
 
     'detail' => [
