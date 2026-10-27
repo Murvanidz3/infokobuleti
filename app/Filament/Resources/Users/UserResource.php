@@ -10,6 +10,7 @@ use App\Exceptions\InsufficientBalance;
 use App\Filament\NavigationGroup;
 use App\Filament\RelationManagers\ActivitiesRelationManager;
 use App\Filament\Support\ChecksPermission;
+use App\Filament\Support\SmsFields;
 use App\Models\User;
 use App\Services\Auth\Impersonation;
 use App\Services\Billing\Wallet;
@@ -188,6 +189,7 @@ class UserResource extends Resource
                     self::impersonateAction(),
                     self::resetTwoFactorAction(),
                     self::adjustBalanceAction(),
+                    SmsFields::sendAction(),
                 ]),
             ])
             ->defaultSort('created_at', 'desc');

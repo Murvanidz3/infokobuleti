@@ -3,6 +3,7 @@
 namespace App\Contracts;
 
 use App\Exceptions\SmsDeliveryFailed;
+use App\Services\Sms\SmsOptions;
 
 interface SmsGateway
 {
@@ -13,5 +14,5 @@ interface SmsGateway
      *
      * @throws SmsDeliveryFailed
      */
-    public function send(string $to, string $text): ?string;
+    public function send(string $to, string $text, SmsOptions $options = new SmsOptions): ?string;
 }

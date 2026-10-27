@@ -11,6 +11,7 @@ return [
         'users' => 'Пользователи',
         'catalog' => 'Справочники',
         'finance' => 'Финансы',
+        'sms' => 'SMS',
         'system' => 'Система',
     ],
     'menu' => [
@@ -281,6 +282,9 @@ return [
         'contact_message' => 'Сообщение с сайта',
         'order' => 'Заказ',
         'business_subscription' => 'Бизнес-пакет',
+        'sms_campaign' => 'SMS-рассылка',
+        'sms_template' => 'Шаблон SMS',
+        'sms_opt_out' => 'Отписавшийся номер',
     ],
     'settings' => [
         'title' => 'Настройки',

@@ -26,6 +26,13 @@ return [
 
     'queue' => env('SMS_QUEUE', 'default'),
 
+    /*
+    | SMS manager (admin): the largest campaign (recipients).
+    */
+    'manager' => [
+        'max_recipients' => (int) env('SMS_MAX_RECIPIENTS', 20000),
+    ],
+
     'drivers' => [
 
         'log' => [

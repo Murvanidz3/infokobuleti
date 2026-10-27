@@ -261,6 +261,25 @@ return [
         'login' => 'Вход',
         'change_phone' => 'Смена номера',
     ],
+    'sms_campaign_status' => [
+        'draft' => 'Черновик',
+        'scheduled' => 'Запланирована',
+        'sending' => 'Отправляется',
+        'sent' => 'Отправлена',
+        'failed' => 'Не отправлена',
+        'cancelled' => 'Отменена',
+    ],
+    'sms_audience' => [
+        'manual' => 'Ввести номера',
+        'csv' => 'CSV-файл',
+        'users' => 'Зарегистрированные пользователи',
+    ],
+    'sms_kind' => [
+        'code' => 'Код входа',
+        'single' => 'Одиночное',
+        'campaign' => 'Рассылка',
+        'test' => 'Тест',
+    ],
     'sms_status' => [
         'queued' => 'В очереди',
         'sent' => 'Отправлено',
@@ -274,6 +293,7 @@ return [
         'manage_users' => 'Управление пользователями',
         'manage_payments' => 'Управление платежами',
         'manage_settings' => 'Системные настройки',
+        'manage_sms' => 'SMS-менеджер',
     ],
     'otp_error' => [
         'cooldown' => 'Новый код можно запросить через :seconds сек.',

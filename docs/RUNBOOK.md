@@ -106,7 +106,15 @@ php artisan up && rm -rf /tmp/restore
 - Delivery reports: in the UBill API app set the callback URL
   `https://infokobuleti.com/webhooks/sms/ubill` and the callback key from `UBILL_CALLBACK_KEY`.
 - The health check alerts when fewer than `UBILL_MIN_BALANCE` (200) SMS are left: top up at ubill.ge.
-- Every message is recorded in the `sms_messages` table (status, UBill smsID, error).
+- Admin → SMS (super admins): **SMS manager** (balance, delivery figures, sender names, single
+  send, campaign footer and test number), **Campaigns** (typed numbers, CSV import or registered
+  users → checked draft → test SMS → send now or schedule; delivery figures, CSV export, "send
+  again to failed numbers"), **History** (every SMS with status; sign-in code texts are never
+  stored), **Templates**, **Opt-out list** (skipped by campaigns, not by sign-in codes).
+- Scheduler: `sms:send-scheduled` every minute starts scheduled campaigns; `sms:sync-reports`
+  every 10 minutes fetches delivery reports that never arrived by callback.
+- Advertising SMS only to people who agreed to receive them, with an unsubscribe text (campaign
+  footer setting).
 
 ## Keys and passwords
 

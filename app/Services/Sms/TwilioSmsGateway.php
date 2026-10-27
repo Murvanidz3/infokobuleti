@@ -22,7 +22,7 @@ class TwilioSmsGateway implements SmsGateway
         private ?string $statusCallback = null,
     ) {}
 
-    public function send(string $to, string $text): ?string
+    public function send(string $to, string $text, SmsOptions $options = new SmsOptions): ?string
     {
         $payload = array_filter([
             'To' => $to,

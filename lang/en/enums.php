@@ -261,6 +261,25 @@ return [
         'login' => 'Sign-in',
         'change_phone' => 'Phone change',
     ],
+    'sms_campaign_status' => [
+        'draft' => 'Draft',
+        'scheduled' => 'Scheduled',
+        'sending' => 'Sending',
+        'sent' => 'Sent',
+        'failed' => 'Failed',
+        'cancelled' => 'Cancelled',
+    ],
+    'sms_audience' => [
+        'manual' => 'Typed numbers',
+        'csv' => 'CSV file',
+        'users' => 'Registered users',
+    ],
+    'sms_kind' => [
+        'code' => 'Sign-in code',
+        'single' => 'Single',
+        'campaign' => 'Campaign',
+        'test' => 'Test',
+    ],
     'sms_status' => [
         'queued' => 'Queued',
         'sent' => 'Sent',
@@ -274,6 +293,7 @@ return [
         'manage_users' => 'Manage users',
         'manage_payments' => 'Manage payments',
         'manage_settings' => 'System settings',
+        'manage_sms' => 'SMS manager',
     ],
     'otp_error' => [
         'cooldown' => 'You can request a new code in :seconds seconds.',

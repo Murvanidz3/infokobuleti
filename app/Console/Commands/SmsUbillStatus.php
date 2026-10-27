@@ -44,7 +44,7 @@ class SmsUbillStatus extends Command
             }
 
             if (filled($number = $this->option('send'))) {
-                $smsId = $gateway->deliver((string) $number, 'infokobuleti.com: SMS test '.now()->format('H:i'), otp: false);
+                $smsId = $gateway->send((string) $number, 'infokobuleti.com: SMS test '.now()->format('H:i'));
                 $this->info("Test SMS sent to {$number}, smsID {$smsId}. Check it later with --report={$smsId}");
             }
         } catch (SmsDeliveryFailed $exception) {

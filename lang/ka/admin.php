@@ -11,6 +11,7 @@ return [
         'users' => 'მომხმარებლები',
         'catalog' => 'კატალოგი',
         'finance' => 'ფინანსები',
+        'sms' => 'SMS',
         'system' => 'სისტემა',
     ],
     'menu' => [
@@ -281,6 +282,9 @@ return [
         'contact_message' => 'საკონტაქტო შეტყობინება',
         'order' => 'შეკვეთა',
         'business_subscription' => 'ბიზნეს პაკეტი',
+        'sms_campaign' => 'SMS კამპანია',
+        'sms_template' => 'SMS შაბლონი',
+        'sms_opt_out' => 'გაუქმებული ნომერი',
     ],
     'settings' => [
         'title' => 'პარამეტრები',

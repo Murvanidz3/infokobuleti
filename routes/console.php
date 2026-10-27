@@ -44,3 +44,7 @@ Schedule::command('backup:monitor')->dailyAt('06:00')->onOneServer();
 
 // Every Sunday the newest production backup is restored into a scratch database and checked.
 Schedule::command('backup:restore-test')->weeklyOn(0, '05:00')->environments(['production'])->withoutOverlapping()->onOneServer();
+
+// SMS manager: scheduled campaigns start on time; delivery reports that never came are fetched.
+Schedule::command('sms:send-scheduled')->everyMinute()->withoutOverlapping()->onOneServer();
+Schedule::command('sms:sync-reports')->everyTenMinutes()->withoutOverlapping()->onOneServer()->runInBackground();

@@ -18,6 +18,7 @@ enum Permission: string implements FilamentLabel
     case ManageUsers = 'manage_users';
     case ManagePayments = 'manage_payments';
     case ManageSettings = 'manage_settings';
+    case ManageSms = 'manage_sms';
 
     /**
      * @return list<self>

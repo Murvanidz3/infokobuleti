@@ -15,6 +15,7 @@ enum NavigationGroup: string implements HasLabel
     case Users = 'users';
     case Catalog = 'catalog';
     case Finance = 'finance';
+    case Sms = 'sms';
     case System = 'system';
 
     public function getLabel(): string

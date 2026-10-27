@@ -263,6 +263,25 @@ return [
         'login' => 'შესვლა',
         'change_phone' => 'ნომრის შეცვლა',
     ],
+    'sms_campaign_status' => [
+        'draft' => 'მონახაზი',
+        'scheduled' => 'დაგეგმილი',
+        'sending' => 'იგზავნება',
+        'sent' => 'გაგზავნილი',
+        'failed' => 'ვერ გაიგზავნა',
+        'cancelled' => 'გაუქმებული',
+    ],
+    'sms_audience' => [
+        'manual' => 'ნომრების ჩაწერა',
+        'csv' => 'CSV ფაილი',
+        'users' => 'რეგისტრირებული მომხმარებლები',
+    ],
+    'sms_kind' => [
+        'code' => 'შესვლის კოდი',
+        'single' => 'ერთეული',
+        'campaign' => 'კამპანია',
+        'test' => 'ტესტი',
+    ],
     'sms_status' => [
         'queued' => 'რიგშია',
         'sent' => 'გაგზავნილია',
@@ -276,6 +295,7 @@ return [
         'manage_users' => 'მომხმარებლების მართვა',
         'manage_payments' => 'გადახდების მართვა',
         'manage_settings' => 'სისტემის პარამეტრები',
+        'manage_sms' => 'SMS მენეჯერი',
     ],
     'otp_error' => [
         'cooldown' => 'ახალი კოდის მოთხოვნა შეგიძლიათ :seconds წამში.',

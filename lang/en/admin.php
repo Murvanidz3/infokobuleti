@@ -11,6 +11,7 @@ return [
         'users' => 'Users',
         'catalog' => 'Catalog',
         'finance' => 'Finance',
+        'sms' => 'SMS',
         'system' => 'System',
     ],
     'menu' => [
@@ -281,6 +282,9 @@ return [
         'contact_message' => 'Contact message',
         'order' => 'Order',
         'business_subscription' => 'Business package',
+        'sms_campaign' => 'SMS campaign',
+        'sms_template' => 'SMS template',
+        'sms_opt_out' => 'Opted-out number',
     ],
     'settings' => [
         'title' => 'Settings',

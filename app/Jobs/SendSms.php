@@ -6,13 +6,14 @@ use App\Enums\SmsStatus;
 use App\Exceptions\SmsDeliveryFailed;
 use App\Models\SmsMessage;
 use App\Services\Sms\SmsManager;
+use App\Services\Sms\SmsOptions;
 use Illuminate\Contracts\Queue\ShouldBeEncrypted;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 use Throwable;
 
 /**
- * Sends one logged SMS. The payload is encrypted on the queue because the text holds a login code.
+ * Sends one logged SMS. The payload is encrypted on the queue because the text may hold a login code.
  */
 class SendSms implements ShouldBeEncrypted, ShouldQueue
 {
@@ -34,7 +35,9 @@ class SendSms implements ShouldBeEncrypted, ShouldQueue
         }
 
         try {
-            $providerId = $sms->driver($message->driver)->send($message->phone, $this->text);
+            // Sign-in codes go with the provider's OTP priority; other messages never do.
+            $options = $message->isOneTimeCode() ? SmsOptions::otp() : new SmsOptions;
+            $providerId = $sms->driver($message->driver)->send($message->phone, $this->text, $options);
         } catch (SmsDeliveryFailed $exception) {
             $message->update(['error' => $exception->getMessage()]);
 

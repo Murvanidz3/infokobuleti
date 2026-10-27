@@ -219,7 +219,11 @@ class SiteSettings extends Page
 
         return [
             TextEntry::make('sms')->label(__('admin.settings.integration.sms'))
-                ->state(fn (): string => config('sms.default').(config('sms.default') === 'twilio' ? ' · '.$mask(config('sms.drivers.twilio.account_sid')) : '')),
+                ->state(fn (): string => config('sms.default').match (config('sms.default')) {
+                    'twilio' => ' · '.$mask(config('sms.drivers.twilio.account_sid')),
+                    'ubill' => ' · '.config('sms.sender').' · '.$mask(config('sms.drivers.ubill.api_key')),
+                    default => '',
+                }),
             TextEntry::make('google')->label(__('admin.settings.integration.google'))
                 ->state(fn (): string => $mask(config('services.google.client_id'))),
             TextEntry::make('turnstile')->label('Cloudflare Turnstile')

@@ -97,6 +97,9 @@ class AppServiceProvider extends ServiceProvider
         'listing_draft' => Models\ListingDraft::class,
         'order' => Models\Order::class,
         'business_subscription' => Models\BusinessSubscription::class,
+        'sms_campaign' => Models\SmsCampaign::class,
+        'sms_template' => Models\SmsTemplate::class,
+        'sms_opt_out' => Models\SmsOptOut::class,
     ];
 
     /**
