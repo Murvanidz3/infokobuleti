@@ -34,6 +34,7 @@ class UserFactory extends Factory
             'phone_verified_at' => now(),
             'locale' => 'ka',
             'account_type' => AccountType::Individual,
+            'onboarded_at' => now(),
             'remember_token' => Str::random(10),
         ];
     }
@@ -61,6 +62,14 @@ class UserFactory extends Factory
             'phone' => null,
             'phone_verified_at' => null,
         ]);
+    }
+
+    /**
+     * A freshly registered account that has not been through onboarding yet.
+     */
+    public function notOnboarded(): static
+    {
+        return $this->state(fn (array $attributes) => ['name' => null, 'onboarded_at' => null]);
     }
 
     public function business(): static

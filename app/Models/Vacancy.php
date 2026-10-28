@@ -14,8 +14,11 @@ use App\Models\Concerns\HasLocation;
 use App\Models\Concerns\HasMediaGallery;
 use App\Models\Concerns\HasSlug;
 use App\Models\Concerns\HasStatus;
+use App\Models\Concerns\IndexedForSearch;
+use App\Models\Concerns\LogsStaffActivity;
 use App\Models\Concerns\Promotable;
 use App\Models\Concerns\Reportable;
+use App\Search\SearchableListing;
 use Database\Factories\VacancyFactory;
 use Illuminate\Database\Eloquent\Attributes\Guarded;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -28,12 +31,16 @@ use Spatie\Translatable\HasTranslations;
 /**
  * A job vacancy. Named Vacancy because "jobs" is Laravel's queue table and App\Jobs its namespace;
  * public URLs and UI copy still say "jobs".
+ *
+ * @property string $title
+ * @property string|null $description
+ * @property string|null $address
  */
 #[Guarded(Listing::SYSTEM_COLUMNS)]
-class Vacancy extends Model implements Listing
+class Vacancy extends Model implements Listing, SearchableListing
 {
     /** @use HasFactory<VacancyFactory> */
-    use Favoritable, HasDailyStats, HasFactory, HasLocation, HasMediaGallery, HasSlug, HasStatus, HasTranslations, Promotable, Reportable, SoftDeletes;
+    use Favoritable, HasDailyStats, HasFactory, HasLocation, HasMediaGallery, HasSlug, HasStatus, HasTranslations, IndexedForSearch, LogsStaffActivity, Promotable, Reportable, SoftDeletes;
 
     protected $table = 'vacancies';
 
@@ -86,5 +93,13 @@ class Vacancy extends Model implements Listing
     public function applications(): HasMany
     {
         return $this->hasMany(VacancyApplication::class);
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    protected function searchableFilters(): array
+    {
+        return ['category_id' => $this->category_id, 'employment_type' => $this->employment_type->value, 'salary_min' => $this->salary_min];
     }
 }

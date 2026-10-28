@@ -83,6 +83,34 @@ final readonly class AttributeSchema
     }
 
     /**
+     * Option labels of a select field in the current language: value => label.
+     *
+     * @param  Field  $field
+     * @return array<string, string>
+     */
+    public static function choices(array $field): array
+    {
+        $locale = app()->getLocale();
+        $choices = [];
+
+        foreach ($field['options'] ?? [] as $option) {
+            $choices[$option['value']] = $option['label'][$locale] ?? $option['label']['ka'] ?? $option['value'];
+        }
+
+        return $choices;
+    }
+
+    /**
+     * Label of a field in the current language.
+     *
+     * @param  Field  $field
+     */
+    public static function label(array $field): string
+    {
+        return $field['label'][app()->getLocale()] ?? $field['label']['ka'] ?? $field['key'];
+    }
+
+    /**
      * @param  Field  $field
      * @return list<string>
      */

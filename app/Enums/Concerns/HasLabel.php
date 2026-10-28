@@ -14,6 +14,14 @@ trait HasLabel
         return __('enums.'.self::langKey().'.'.$this->value);
     }
 
+    /**
+     * Filament reads enum labels through this method.
+     */
+    public function getLabel(): string
+    {
+        return $this->label();
+    }
+
     public static function langKey(): string
     {
         return Str::snake(class_basename(self::class));

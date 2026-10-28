@@ -21,11 +21,7 @@
     ];
 @endphp
 
-<x-layout.app :title="__('styleguide.title')">
-    <x-slot:head>
-        <meta name="robots" content="noindex, nofollow">
-    </x-slot:head>
-
+<x-layout.app :noindex="true" :title="__('styleguide.title')">
     <x-section spacing="compact" background="alt" class="border-b border-line" :reveal="false">
         <x-breadcrumbs class="mb-4" :items="[['label' => __('nav.home'), 'url' => localized_route('home')], ['label' => __('styleguide.title'), 'url' => null]]" />
         <h1 class="font-serif text-[clamp(32px,4vw,48px)] leading-[1.15] font-semibold text-navy">{{ __('styleguide.title') }}</h1>

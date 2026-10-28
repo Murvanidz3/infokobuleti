@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Enums\Currency;
 use App\Enums\PaymentGateway;
 use App\Enums\PaymentStatus;
+use App\Models\Concerns\LogsStaffActivity;
 use Database\Factories\PaymentFactory;
 use Illuminate\Database\Eloquent\Attributes\Guarded;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -18,7 +19,7 @@ use Illuminate\Support\Str;
 class Payment extends Model
 {
     /** @use HasFactory<PaymentFactory> */
-    use HasFactory;
+    use HasFactory, LogsStaffActivity;
 
     /** @var array<string, mixed> */
     protected $attributes = ['status' => 'pending'];
@@ -66,5 +67,28 @@ class Payment extends Model
     public function promotions(): HasMany
     {
         return $this->hasMany(Promotion::class);
+    }
+
+    /**
+     * @return HasMany<PaymentEvent, $this>
+     */
+    public function events(): HasMany
+    {
+        return $this->hasMany(PaymentEvent::class)->latest('id');
+    }
+
+    /**
+     * The order this card payment pays for (payments made before Phase 8 have none).
+     */
+    public function order(): ?Order
+    {
+        $payable = $this->payable;
+
+        return $payable instanceof Order ? $payable : null;
+    }
+
+    public function refundableAmount(): float
+    {
+        return round((float) $this->amount - (float) $this->refunded_amount, 2);
     }
 }

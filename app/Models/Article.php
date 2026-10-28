@@ -6,6 +6,9 @@ use App\Contracts\Listing;
 use App\Models\Concerns\HasMediaGallery;
 use App\Models\Concerns\HasSlug;
 use App\Models\Concerns\HasStatus;
+use App\Models\Concerns\IndexedForSearch;
+use App\Models\Concerns\LogsStaffActivity;
+use App\Search\SearchableListing;
 use Database\Factories\ArticleFactory;
 use Illuminate\Database\Eloquent\Attributes\Guarded;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -16,12 +19,16 @@ use Spatie\Translatable\HasTranslations;
 
 /**
  * A news article. user_id is the author.
+ *
+ * @property string $title
+ * @property string|null $excerpt
+ * @property string|null $body
  */
 #[Guarded(Listing::SYSTEM_COLUMNS)]
-class Article extends Model implements Listing
+class Article extends Model implements Listing, SearchableListing
 {
     /** @use HasFactory<ArticleFactory> */
-    use HasFactory, HasMediaGallery, HasSlug, HasStatus, HasTranslations, SoftDeletes;
+    use HasFactory, HasMediaGallery, HasSlug, HasStatus, HasTranslations, IndexedForSearch, LogsStaffActivity, SoftDeletes;
 
     /** @var list<string> */
     public array $translatable = ['title', 'excerpt', 'body'];
@@ -31,6 +38,16 @@ class Article extends Model implements Listing
         return [
             'is_featured' => 'boolean',
         ];
+    }
+
+    /**
+     * Same as author(); every listing module exposes its owner as user().
+     *
+     * @return BelongsTo<User, $this>
+     */
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'user_id');
     }
 
     /**
@@ -47,5 +64,13 @@ class Article extends Model implements Listing
     public function category(): BelongsTo
     {
         return $this->belongsTo(Category::class);
+    }
+
+    /**
+     * @return list<string>
+     */
+    public static function searchColumns(): array
+    {
+        return ['title', 'excerpt'];
     }
 }

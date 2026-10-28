@@ -557,3 +557,16 @@ Content lives in `database/seeders/data/*.php`.
 - No photos are seeded; cards show placeholders until owners upload images.
 - Staff passwords come from `DEMO_PASSWORD` in `.env` (never committed). Without it the seeder
   generates a one-off password and prints it once.
+
+## Phase 8: monetization
+
+| Table / column | Purpose |
+| --- | --- |
+| `orders` | One purchase: product (`PricePlanProduct`: VIP, Super VIP, bump, auto-bump, business package, featured hotel, banner, wallet top-up, custom staff invoice), optional `purchasable` (listing or banner), fixed `amount`, `method` (card / balance), `status` (pending → paid → fulfilled; refunded / partially refunded; failed / cancelled), invoice `number` (IK-YYYY-000001 from the `invoice_number_seq` sequence, given when paid), `issued_by` for staff invoices. |
+| `payments` (Phase 3) + `redirect_url` | One card payment of an order at a bank (`gateway` fake / bog / tbc), with the bank's order id and the page the payer is sent to. |
+| `payment_events` | The payment log: every request to and message from a bank, with the signature check result and the sender address. Tokens are masked. |
+| `wallet_transactions` + `users.balance` | Prepaid balance ledger. Rows are only added; a partial unique index allows one top-up credit and one purchase debit per order. `balance` has a `>= 0` check. |
+| `business_subscriptions` + `business_profiles.package_until` | Paid business packages (active-listing limit, verified badge, logo on cards, analytics). `package_until` caches the end of the running package on the owner's profiles. |
+| `promotions` + `order_id`, `next_run_at`, `expiry_notified_at` | The order that bought a promotion, the next run of an auto-bump, and the one-time "ends tomorrow" reminder. |
+
+Flow: order → `StartCardPayment` (bank page) → callback `/webhooks/payments/{gateway}` → signature / sender check → status read back from the bank → `SyncPaymentStatus` (row lock, forward-only transitions, amount check) → `FulfillOrder` job → `ActivatePurchase` (once per order) → receipt email with the invoice. `payments:reconcile` re-checks payments whose callback was lost; `promotions:run` handles auto-bumps, expiry and reminders.

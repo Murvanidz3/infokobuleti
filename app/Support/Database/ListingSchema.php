@@ -17,7 +17,7 @@ final class ListingSchema
     public const int EMBEDDING_DIMENSIONS = 1024;
 
     /** Fixed rather than read from config so the index expression never drifts from the migrations. */
-    private const array LOCALES = ['ka', 'en', 'ru'];
+    public const array LOCALES = ['ka', 'en', 'ru'];
 
     public static function columns(
         Blueprint $table,

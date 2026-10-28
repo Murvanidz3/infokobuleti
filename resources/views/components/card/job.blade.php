@@ -7,12 +7,18 @@
     'seasonal' => false,
     'posted',
     'url' => '#',
+    'promotion' => null,
+    'logo' => null,
 ])
 
 <a href="{{ $url }}" {{ $attributes->class(['flex items-start gap-4 border-t border-line px-5 py-4 transition-colors duration-200 first:border-t-0 hover:bg-surface-alt']) }}>
-    <span class="grid size-12 shrink-0 place-items-center rounded-button bg-line text-navy"><x-icon name="briefcase" :size="22" /></span>
+    @if ($logo)
+        <img src="{{ $logo }}" alt="" loading="lazy" class="size-12 shrink-0 rounded-button border border-line bg-white object-contain p-1">
+    @else
+        <span class="grid size-12 shrink-0 place-items-center rounded-button bg-line text-navy"><x-icon name="briefcase" :size="22" /></span>
+    @endif
     <span class="min-w-0 flex-1">
-        <span class="block truncate text-[15px] font-semibold text-navy">{{ $title }}</span>
+        <span class="flex min-w-0 items-center gap-2"><span class="truncate text-[15px] font-semibold text-navy">{{ $title }}</span><x-card.promotion-badge :promotion="$promotion" /></span>
         <span class="mt-[3px] block truncate text-[13px] text-secondary">{{ $employer }}</span>
         <span class="mt-2 flex flex-wrap items-center gap-2.5">
             <x-badge :variant="$seasonal ? 'outline' : 'outline-tint'">{{ $type }}</x-badge>

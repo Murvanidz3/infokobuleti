@@ -2,19 +2,41 @@
 
 namespace App\Services;
 
-use Illuminate\Support\Carbon;
+use App\Enums\CategoryModule;
+use App\Enums\PlaceType;
+use App\Enums\PropertyType;
+use App\Enums\SiteFeature;
+use App\Models\Article;
+use App\Models\Category;
+use App\Models\Classified;
+use App\Models\Event;
+use App\Models\Hotel;
+use App\Models\Place;
+use App\Models\Property;
+use App\Models\Vacancy;
+use App\Services\Info\UsefulInfo;
+use App\Support\Features;
+use App\Support\Listings\CardPresenter;
+use App\Support\Listings\ListingQuery;
+use App\Support\Listings\PublicCache;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Storage;
 
 /**
- * Static placeholder content for the homepage until real listings arrive (Phase 6).
- *
- * Every method returns display-ready arrays in the shape the card components expect. Texts come
- * from lang/{locale}/demo.php; numbers, prices and dates are formatted for the current locale.
+ * Homepage blocks from real listings: curated and promoted items first, cached for five minutes
+ * (and dropped as soon as a listing changes, see PublicCache). The per-visitor "saved" state is
+ * applied after the cache.
  */
 class HomepageData
 {
     public function __construct(
+        private CardPresenter $cards,
         private PriceFormatter $price,
-        private DateFormatter $dates,
+        private Settings $settings,
+        private Favorites $favorites,
+        private UsefulInfo $info,
     ) {}
 
     /**
@@ -22,208 +44,257 @@ class HomepageData
      */
     public function categories(): array
     {
-        $categories = [
-            ['key' => 'hotels', 'count' => 1248, 'unit' => 'listings', 'icon' => 'bed'],
-            ['key' => 'apartments', 'count' => 3420, 'unit' => 'listings', 'icon' => 'building'],
-            ['key' => 'houses', 'count' => 865, 'unit' => 'listings', 'icon' => 'house'],
-            ['key' => 'cars', 'count' => 1102, 'unit' => 'listings', 'icon' => 'car'],
-            ['key' => 'services', 'count' => 740, 'unit' => 'listings', 'icon' => 'wrench'],
-            ['key' => 'jobs', 'count' => 312, 'unit' => 'vacancies', 'icon' => 'briefcase'],
-            ['key' => 'restaurants', 'count' => 186, 'unit' => 'places', 'icon' => 'fork'],
-            ['key' => 'events', 'count' => 48, 'unit' => 'events', 'icon' => 'calendar'],
+        $counts = PublicCache::remember('home.counts', fn (): array => [
+            'hotels' => ListingQuery::public(Hotel::query())->count(),
+            'apartments' => ListingQuery::public(Property::query())->where('type', PropertyType::Apartment)->count(),
+            'houses' => ListingQuery::public(Property::query())->where('type', PropertyType::House)->count(),
+            'cars' => ListingQuery::public(Classified::query())->whereIn('category_id', $this->categoryTree('cars'))->count(),
+            'services' => ListingQuery::public(Classified::query())->whereIn('category_id', $this->categoryTree('services'))->count(),
+            'jobs' => ListingQuery::public(Vacancy::query())->count(),
+            'restaurants' => ListingQuery::public(Place::query())->whereIn('type', [PlaceType::Restaurant, PlaceType::Cafe])->count(),
+            'events' => ListingQuery::public(Event::query())->upcoming()->count(),
+        ], 'all');
+
+        $tiles = [
+            'hotels' => ['listings', 'bed', localized_route('hotels.index')],
+            'apartments' => ['listings', 'building', localized_route('real-estate.index', ['type' => ['apartment']])],
+            'houses' => ['listings', 'house', localized_route('real-estate.index', ['type' => ['house']])],
+            'cars' => ['listings', 'car', localized_route('classifieds.index', ['category' => 'cars'])],
+            'services' => ['listings', 'wrench', localized_route('classifieds.index', ['category' => 'services'])],
+            'jobs' => ['vacancies', 'briefcase', localized_route('jobs.index')],
+            'restaurants' => ['places', 'fork', localized_route('guide.index', ['type' => 'restaurant'])],
+            'events' => ['events', 'calendar', localized_route('events.index')],
         ];
 
-        return array_map(fn (array $category): array => [
-            'name' => __('demo.categories.'.$category['key']),
-            'count' => $this->count($category['unit'], $category['count']),
-            'icon' => $category['icon'],
-            'url' => '#',
-        ], $categories);
+        if (Features::active(SiteFeature::SeasonalHome) && $this->season() === 'winter') {
+            $tiles = array_merge(array_intersect_key($tiles, array_flip(['apartments', 'houses', 'jobs', 'services', 'cars'])), $tiles);
+        }
+
+        return array_map(fn (string $key, array $tile): array => [
+            'name' => __('site.home.categories.'.$key),
+            'count' => trans_choice('ui.counts.'.$tile[0], $counts[$key], ['count' => $this->price->number($counts[$key])]),
+            'icon' => $tile[1],
+            'url' => $tile[2],
+        ], array_keys($tiles), $tiles);
     }
 
     /**
-     * @return list<array{id: string, name: string, address: string, sea: string, rating: string, reviews: string, price: string, url: string, image: ?string, saved: bool}>
+     * @return list<array<string, mixed>>
      */
     public function hotels(): array
     {
-        $hotels = [
-            ['id' => 'h1', 'sea' => 30, 'rating' => 9.4, 'reviews' => 312, 'price' => 220],
-            ['id' => 'h2', 'sea' => 120, 'rating' => 9.1, 'reviews' => 487, 'price' => 185],
-            ['id' => 'h3', 'sea' => 250, 'rating' => 9.6, 'reviews' => 158, 'price' => 95, 'saved' => true],
-            ['id' => 'h4', 'sea' => 50, 'rating' => 8.9, 'reviews' => 226, 'price' => 160],
-            ['id' => 'h5', 'sea' => 400, 'rating' => 9.0, 'reviews' => 94, 'price' => 70],
-            ['id' => 'h6', 'sea' => 80, 'rating' => 9.3, 'reviews' => 141, 'price' => 260],
-        ];
-
-        return array_map(fn (array $hotel): array => [
-            'id' => $hotel['id'],
-            'name' => __("demo.hotels.{$hotel['id']}.name"),
-            'address' => __("demo.hotels.{$hotel['id']}.address"),
-            'sea' => __('listing.to_sea', ['distance' => $this->price->number($hotel['sea'])]),
-            'rating' => number_format($hotel['rating'], 1),
-            'reviews' => $this->count('reviews', $hotel['reviews']),
-            'price' => $this->price->format($hotel['price']),
-            'url' => '#',
-            'image' => null,
-            'saved' => $hotel['saved'] ?? false,
-        ], $hotels);
+        return $this->withSaved(PublicCache::remember('home.hotels.'.Hotel::rotationSeed(), fn (): array => $this->curated(
+            Hotel::query(), 'homepage.featured_hotels', 8, withPaidSlots: true,
+        )->map(fn (Hotel $hotel): array => $this->cards->hotel($hotel))->all()));
     }
 
     /**
-     * @return list<array{id: string, deal: string, badge: string, price: string, converted: string, title: string, location: string, features: list<array{icon: string, text: string}>, url: string, image: ?string, saved: bool}>
+     * @return list<array<string, mixed>>
      */
     public function properties(): array
     {
-        $area = fn (int $value): array => ['icon' => 'area', 'text' => __('listing.area', ['value' => $this->price->number($value)])];
-        $rooms = fn (int $value): array => ['icon' => 'door', 'text' => trans_choice('listing.rooms', $value, ['count' => $value])];
-        $floor = fn (int $floor, int $total): array => ['icon' => 'layers', 'text' => __('listing.floor', ['floor' => $floor, 'total' => $total])];
-
-        $properties = [
-            ['id' => 'r1', 'deal' => 'sale', 'price' => $this->price->format(58000, 'USD'), 'converted' => $this->price->format(157000),
-                'features' => [$area(64), $rooms(2), $floor(7, 12)]],
-            ['id' => 'r2', 'deal' => 'rent', 'price' => $this->price->format(1400).' '.__('listing.per_month'), 'converted' => $this->price->format(520, 'USD'),
-                'features' => [$area(38), $rooms(1), $floor(4, 9)]],
-            ['id' => 'r3', 'deal' => 'sale', 'price' => $this->price->format(135000, 'USD'), 'converted' => $this->price->format(365000),
-                'features' => [$area(180), $rooms(5), ['icon' => 'house', 'text' => __('listing.yard', ['value' => $this->price->number(600)])]]],
-            ['id' => 'r4', 'deal' => 'rent', 'price' => $this->price->format(180).' '.__('listing.per_day'), 'converted' => $this->price->format(67, 'USD'),
-                'features' => [$area(92), $rooms(3), $floor(2, 5)]],
-            ['id' => 'r5', 'deal' => 'sale', 'price' => $this->price->format(42000, 'USD'), 'converted' => $this->price->format(113000),
-                'features' => [$area(1200), ['icon' => 'tag', 'text' => __('listing.attributes.buildable')], ['icon' => 'pin', 'text' => __('listing.attributes.road_access')]]],
-            ['id' => 'r6', 'deal' => 'sale', 'price' => $this->price->format(210000, 'USD'), 'converted' => $this->price->format(568000),
-                'features' => [$area(120), ['icon' => 'building', 'text' => __('listing.attributes.commercial')], $floor(1, 3)]],
-        ];
-
-        return array_map(fn (array $property): array => [
-            'id' => $property['id'],
-            'deal' => $property['deal'],
-            'badge' => __('listing.deal.'.$property['deal']),
-            'price' => $property['price'],
-            'converted' => __('listing.approx', ['price' => $property['converted']]),
-            'title' => __("demo.properties.{$property['id']}.title"),
-            'location' => __("demo.properties.{$property['id']}.location"),
-            'features' => $property['features'],
-            'url' => '#',
-            'image' => null,
-            'saved' => false,
-        ], $properties);
+        return $this->withSaved(PublicCache::remember('home.properties.'.Property::rotationSeed(), fn (): array => $this->curated(
+            Property::query(), 'homepage.featured_properties', 6,
+        )->map(fn (Property $property): array => $this->cards->property($property))->all()));
     }
 
     /**
-     * @return list<array{title: string, meta: string, price: string, time: string, icon: string, isNew: bool, url: string}>
+     * @return list<array<string, mixed>>
      */
     public function classifieds(): array
     {
-        $now = Carbon::now();
-
-        $classifieds = [
-            ['id' => 'c1', 'price' => $this->price->format(950), 'posted' => $now->copy()->subHours(2), 'icon' => 'bike', 'new' => true],
-            ['id' => 'c2', 'price' => $this->price->format(9800, 'USD'), 'posted' => $now->copy()->subHours(5), 'icon' => 'car', 'new' => true],
-            ['id' => 'c3', 'price' => __('listing.price_from', ['price' => $this->price->format(60)]), 'posted' => $now->copy()->subDay(), 'icon' => 'wrench'],
-            ['id' => 'c4', 'price' => $this->price->format(450), 'posted' => $now->copy()->subDay(), 'icon' => 'sofa'],
-            ['id' => 'c5', 'price' => $this->price->format(320), 'posted' => $now->copy()->subDays(2), 'icon' => 'tag'],
-        ];
-
-        return array_map(fn (array $classified): array => [
-            'title' => __("demo.classifieds.{$classified['id']}.title"),
-            'meta' => __("demo.classifieds.{$classified['id']}.category").' · '.__("demo.classifieds.{$classified['id']}.location"),
-            'price' => $classified['price'],
-            'time' => $this->dates->relative($classified['posted'], $now),
-            'icon' => $classified['icon'],
-            'isNew' => $classified['new'] ?? false,
-            'url' => '#',
-        ], $classifieds);
+        return PublicCache::remember('home.classifieds.'.Classified::rotationSeed(), fn (): array => ListingQuery::public(Classified::query())
+            ->with(['media', 'location', 'category.parent'])
+            ->orderByPromotionRotating()
+            ->limit(5)
+            ->get()
+            ->map(fn (Classified $classified): array => $this->cards->classified($classified))
+            ->all());
     }
 
     /**
-     * @return list<array{title: string, employer: string, salary: string, period: string, type: string, seasonal: bool, posted: string, url: string}>
+     * @return list<array<string, mixed>>
      */
     public function jobs(): array
     {
-        $now = Carbon::now();
-
-        $jobs = [
-            ['id' => 'j1', 'salary' => $this->price->range(1500, 2000), 'type' => 'seasonal', 'posted' => $now->copy()],
-            ['id' => 'j2', 'salary' => $this->price->format(1800), 'type' => 'full_time', 'posted' => $now->copy()],
-            ['id' => 'j3', 'salary' => $this->price->range(2200, 2800), 'type' => 'full_time', 'posted' => $now->copy()->subDay()],
-            ['id' => 'j4', 'salary' => $this->price->format(1400), 'type' => 'seasonal', 'posted' => $now->copy()->subDays(2)],
-            ['id' => 'j5', 'salary' => __('listing.plus_commission', ['salary' => $this->price->format(1200)]), 'type' => 'full_time', 'posted' => $now->copy()->subDays(3)],
-        ];
-
-        return array_map(fn (array $job): array => [
-            'title' => __("demo.jobs.{$job['id']}.title"),
-            'employer' => __("demo.jobs.{$job['id']}.employer"),
-            'salary' => $job['salary'],
-            'period' => __('listing.per_month_word'),
-            'type' => __('listing.employment.'.$job['type']),
-            'seasonal' => $job['type'] === 'seasonal',
-            'posted' => $this->dates->relativeDay($job['posted'], $now),
-            'url' => '#',
-        ], $jobs);
+        return PublicCache::remember('home.jobs.'.Vacancy::rotationSeed(), fn (): array => ListingQuery::public(Vacancy::query())
+            ->with(['location', 'businessProfile.media'])
+            ->orderByPromotionRotating()
+            ->limit(5)
+            ->get()
+            ->map(fn (Vacancy $vacancy): array => $this->cards->job($vacancy))
+            ->all());
     }
 
     /**
-     * @return list<array{tag: string, title: string, description: ?string, meta: string, url: string, image: ?string}>
+     * @return list<array<string, mixed>>
      */
     public function guide(): array
     {
-        return array_map(fn (string $id): array => [
-            'tag' => __("demo.guide.{$id}.tag"),
-            'title' => __("demo.guide.{$id}.title"),
-            'description' => $id === 'g1' ? __("demo.guide.{$id}.description") : null,
-            'meta' => __("demo.guide.{$id}.meta"),
-            'url' => '#',
-            'image' => null,
-        ], ['g1', 'g2', 'g3', 'g4', 'g5']);
+        return PublicCache::remember('home.guide', fn (): array => ListingQuery::public(Place::query())
+            ->with(['media', 'location'])
+            ->whereIn('type', [PlaceType::Beach, PlaceType::Sight, PlaceType::Nature, PlaceType::Museum])
+            ->orderByRaw('rating_avg desc nulls last')
+            ->limit(5)
+            ->get()
+            ->map(fn (Place $place): array => $this->cards->guide($place))
+            ->all());
     }
 
     /**
-     * @return array{updated: string, weather: array{air: string, condition: string, sea: string}, rates: array<string, string>, airport: array{distance: string, note: string}, railway: array{value: string, note: string}}
+     * @return array<string, mixed>
      */
     public function usefulInfo(): array
     {
-        $updatedAt = Carbon::now()->setTime(10, 30);
-
-        return [
-            'updated' => $this->dates->weekdayDate($updatedAt).' · '.__('home.info.updated_at', ['time' => $this->dates->time($updatedAt)]),
-            'weather' => [
-                'air' => '+17°',
-                'condition' => __('demo.info.weather_condition', ['speed' => 3]),
-                'sea' => '+19°',
-            ],
-            'rates' => ['USD' => '2.71', 'EUR' => '3.14', 'TRY' => '0.065'],
-            'airport' => [
-                'distance' => __('home.info.km', ['value' => 30]),
-                'note' => __('home.info.airport_note', ['minutes' => 35]),
-            ],
-            'railway' => [
-                'value' => __('demo.info.railway_value'),
-                'note' => __('demo.info.railway_note'),
-            ],
-        ];
+        return $this->info->data();
     }
 
     /**
-     * @return list<array{tag: string, date: string, title: string, url: string, image: ?string}>
+     * @return list<array<string, mixed>>
      */
     public function news(): array
     {
-        $news = [
-            ['id' => 'n1', 'date' => '2026-11-02'],
-            ['id' => 'n2', 'date' => '2026-10-22'],
-            ['id' => 'n3', 'date' => '2026-10-18'],
-        ];
-
-        return array_map(fn (array $item): array => [
-            'tag' => __("demo.news.{$item['id']}.tag"),
-            'date' => $this->dates->date(Carbon::parse($item['date'])),
-            'title' => __("demo.news.{$item['id']}.title"),
-            'url' => '#',
-            'image' => null,
-        ], $news);
+        return PublicCache::remember('home.news', fn (): array => ListingQuery::public(Article::query())
+            ->with(['media', 'category'])
+            ->orderByDesc('is_featured')
+            ->latest('published_at')
+            ->limit(3)
+            ->get()
+            ->map(fn (Article $article): array => $this->cards->news($article))
+            ->all());
     }
 
-    private function count(string $unit, int $count): string
+    /**
+     * Top-level categories for the hero search selects, by module.
+     *
+     * @return array{classifieds: array<string, string>, jobs: array<string, string>}
+     */
+    public function searchOptions(): array
     {
-        return trans_choice('ui.counts.'.$unit, $count, ['count' => $this->price->number($count)]);
+        return PublicCache::remember('home.search-options', fn (): array => [
+            'classifieds' => $this->topCategories(CategoryModule::Classifieds),
+            'jobs' => $this->topCategories(CategoryModule::Vacancies),
+        ]);
+    }
+
+    /**
+     * "summer" (May-September) or "winter", unless the admin fixed one in Homepage settings.
+     */
+    public function season(): string
+    {
+        $season = $this->settings->get('homepage.season', 'auto');
+
+        return in_array($season, ['summer', 'winter'], true) ? $season : (in_array(now()->month, [5, 6, 7, 8, 9], true) ? 'summer' : 'winter');
+    }
+
+    /**
+     * Homepage blocks in order. Summer puts the resort first (hotels, sea and weather, guide,
+     * events); winter puts real estate, classifieds and jobs first. Without the seasonal switch
+     * the original order stays.
+     *
+     * @return list<string>
+     */
+    public function sections(): array
+    {
+        if (! Features::active(SiteFeature::SeasonalHome)) {
+            return ['hotels', 'real-estate', 'market', 'guide', 'info', 'news'];
+        }
+
+        return $this->season() === 'summer'
+            ? ['hotels', 'info', 'guide', 'events', 'real-estate', 'market', 'news']
+            : ['real-estate', 'market', 'hotels', 'events', 'guide', 'info', 'news'];
+    }
+
+    /**
+     * @return list<array<string, mixed>>
+     */
+    public function events(): array
+    {
+        return PublicCache::remember('home.events', fn (): array => ListingQuery::public(Event::query())
+            ->with(['media', 'location', 'category', 'place'])
+            ->upcoming()
+            ->limit(4)
+            ->get()
+            ->map(fn (Event $event): array => $this->cards->event($event))
+            ->all());
+    }
+
+    public function heroImage(): ?string
+    {
+        $season = $this->season();
+
+        $path = $this->settings->get("homepage.hero.{$season}") ?? $this->settings->get('homepage.hero.summer');
+
+        return is_string($path) && $path !== '' ? Storage::disk('public')->url($path) : null;
+    }
+
+    /**
+     * Admin-picked items in their order, then paid homepage slots (hotels), then promoted ones
+     * taking turns, up to $limit.
+     *
+     * @template TModel of Hotel|Property
+     *
+     * @param  Builder<TModel>  $query
+     * @return Collection<int, TModel>
+     */
+    private function curated(Builder $query, string $setting, int $limit, bool $withPaidSlots = false): Collection
+    {
+        $picked = array_values(array_filter(array_map('intval', (array) $this->settings->get($setting, []))));
+        $relations = ['media', 'location', 'businessProfile.media'];
+
+        $featured = $picked === [] ? new Collection : ListingQuery::public(clone $query)->with($relations)->whereKey($picked)->get()
+            ->sortBy(fn (Model $model): int|false => array_search($model->getKey(), $picked, true))
+            ->values();
+
+        if ($withPaidSlots && $featured->count() < $limit) {
+            $featured = $featured->merge(
+                ListingQuery::public(clone $query)->with($relations)
+                    ->whereKeyNot($featured->modelKeys())
+                    ->featuredOnHome()
+                    ->orderByRaw('md5(id::text || ?)', [(string) Hotel::rotationSeed()])
+                    ->limit($limit - $featured->count())
+                    ->get(),
+            );
+        }
+
+        $rest = ListingQuery::public($query)->with($relations)
+            ->whereKeyNot($featured->modelKeys())
+            ->orderByPromotionRotating()
+            ->limit(max(0, $limit - $featured->count()))
+            ->get();
+
+        /** @var Collection<int, TModel> $items */
+        $items = $featured->merge($rest)->take($limit)->values();
+
+        return $items;
+    }
+
+    /**
+     * @param  list<array<string, mixed>>  $cards
+     * @return list<array<string, mixed>>
+     */
+    private function withSaved(array $cards): array
+    {
+        return array_map(fn (array $card): array => [...$card, 'saved' => $this->favorites->isSavedKey((string) $card['favorite'])], $cards);
+    }
+
+    /**
+     * @return list<int>
+     */
+    private function categoryTree(string $slug): array
+    {
+        $root = Category::query()->where('module', CategoryModule::Classifieds)->where('slug', $slug)->first();
+
+        return $root === null ? [] : [$root->id, ...$root->children()->pluck('id')->all()];
+    }
+
+    /**
+     * @return array<string, string> slug => name
+     */
+    private function topCategories(CategoryModule $module): array
+    {
+        return Category::query()->forModule($module)->whereNull('parent_id')->where('is_active', true)->orderBy('sort')->get()
+            ->mapWithKeys(fn (Category $category): array => [$category->slug => (string) $category->name])
+            ->all();
     }
 }

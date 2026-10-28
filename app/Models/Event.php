@@ -8,7 +8,10 @@ use App\Models\Concerns\HasLocation;
 use App\Models\Concerns\HasMediaGallery;
 use App\Models\Concerns\HasSlug;
 use App\Models\Concerns\HasStatus;
+use App\Models\Concerns\IndexedForSearch;
+use App\Models\Concerns\LogsStaffActivity;
 use App\Models\Concerns\Reportable;
+use App\Search\SearchableListing;
 use Database\Factories\EventFactory;
 use Illuminate\Database\Eloquent\Attributes\Guarded;
 use Illuminate\Database\Eloquent\Builder;
@@ -18,11 +21,19 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Spatie\Translatable\HasTranslations;
 
+/**
+ * Translatable attributes read in the current locale (spatie/laravel-translatable).
+ *
+ * @property string $title
+ * @property string|null $description
+ * @property string|null $address
+ * @property string|null $venue
+ */
 #[Guarded(Listing::SYSTEM_COLUMNS)]
-class Event extends Model implements Listing
+class Event extends Model implements Listing, SearchableListing
 {
     /** @use HasFactory<EventFactory> */
-    use Favoritable, HasFactory, HasLocation, HasMediaGallery, HasSlug, HasStatus, HasTranslations, Reportable, SoftDeletes;
+    use Favoritable, HasFactory, HasLocation, HasMediaGallery, HasSlug, HasStatus, HasTranslations, IndexedForSearch, LogsStaffActivity, Reportable, SoftDeletes;
 
     /** @var list<string> */
     public array $translatable = ['title', 'description', 'address', 'venue'];
@@ -60,6 +71,14 @@ class Event extends Model implements Listing
     }
 
     /**
+     * @return BelongsTo<BusinessProfile, $this>
+     */
+    public function businessProfile(): BelongsTo
+    {
+        return $this->belongsTo(BusinessProfile::class);
+    }
+
+    /**
      * @return BelongsTo<Category, $this>
      */
     public function category(): BelongsTo
@@ -73,5 +92,13 @@ class Event extends Model implements Listing
     public function place(): BelongsTo
     {
         return $this->belongsTo(Place::class);
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    protected function searchableFilters(): array
+    {
+        return ['starts_at' => $this->starts_at->getTimestamp(), 'category_id' => $this->category_id];
     }
 }
