@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Enums\LocationType;
 use App\Models\Concerns\HasSlug;
+use App\Models\Concerns\LogsStaffActivity;
 use Database\Factories\LocationFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Builder;
@@ -17,7 +18,7 @@ use Spatie\Translatable\HasTranslations;
 class Location extends Model
 {
     /** @use HasFactory<LocationFactory> */
-    use HasFactory, HasSlug, HasTranslations;
+    use HasFactory, HasSlug, HasTranslations, LogsStaffActivity;
 
     /** @var list<string> */
     public array $translatable = ['name'];

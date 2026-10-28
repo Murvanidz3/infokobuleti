@@ -27,7 +27,8 @@ class Message extends Model implements HasMedia
 
     public function registerMediaCollections(): void
     {
-        $this->addMediaCollection('attachments')->acceptsMimeTypes(['image/jpeg', 'image/png', 'image/webp']);
+        // Private: served only to the participants (ConversationController::attachment).
+        $this->addMediaCollection('attachments')->useDisk('local')->acceptsMimeTypes(['image/jpeg', 'image/png', 'image/webp']);
     }
 
     /**

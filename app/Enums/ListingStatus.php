@@ -3,8 +3,10 @@
 namespace App\Enums;
 
 use App\Enums\Concerns\HasLabel;
+use Filament\Support\Contracts\HasColor;
+use Filament\Support\Contracts\HasLabel as FilamentLabel;
 
-enum ListingStatus: string
+enum ListingStatus: string implements FilamentLabel, HasColor
 {
     use HasLabel;
 
@@ -28,8 +30,8 @@ enum ListingStatus: string
             self::Pending => [self::Published, self::Rejected, self::Draft],
             self::Rejected => [self::Pending],
             self::Published => [self::Paused, self::Expired, self::Archived, self::Pending],
-            self::Paused => [self::Published, self::Archived],
-            self::Expired => [self::Pending, self::Archived],
+            self::Paused => [self::Published, self::Pending, self::Archived],
+            self::Expired => [self::Pending, self::Published, self::Archived],
             self::Archived => [self::Draft],
         };
     }
@@ -42,5 +44,18 @@ enum ListingStatus: string
     public function isPublic(): bool
     {
         return $this === self::Published;
+    }
+
+    public function getColor(): string
+    {
+        return match ($this) {
+            self::Draft => 'gray',
+            self::Pending => 'warning',
+            self::Published => 'success',
+            self::Rejected => 'danger',
+            self::Paused => 'gray',
+            self::Expired => 'gray',
+            self::Archived => 'gray',
+        };
     }
 }

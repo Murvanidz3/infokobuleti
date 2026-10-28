@@ -3,21 +3,31 @@
 return [
 
     /*
-    | Main sections in header, drawer and footer order: lang key in nav.php => homepage anchor.
-    | They become real routes in Phase 6.
+    | Main sections in header, drawer and footer order: lang key in nav.php => route name.
     */
     'nav' => [
-        'hotels' => 'hotels',
-        'real_estate' => 'real-estate',
-        'classifieds' => 'classifieds',
-        'jobs' => 'jobs',
-        'guide' => 'guide',
-        'news' => 'news',
+        'hotels' => 'hotels.index',
+        'real_estate' => 'real-estate.index',
+        'classifieds' => 'classifieds.index',
+        'jobs' => 'jobs.index',
+        'guide' => 'guide.index',
+        'news' => 'news.index',
+    ],
+
+    /*
+    | Footer "information" links: lang key in footer.php => [route name, parameters].
+    */
+    'info_links' => [
+        'about' => ['pages.show', ['page' => 'about']],
+        'advertising' => ['contact', ['topic' => 'advertising']],
+        'terms' => ['pages.show', ['page' => 'terms']],
+        'privacy' => ['pages.show', ['page' => 'privacy']],
+        'help' => ['contact', []],
     ],
 
     'contact' => [
         'phone' => '+995 422 29 00 00',
-        'email' => 'info@infokobuleti.com',
+        'email' => 'contact@infokobuleti.com',
     ],
 
     'social' => [

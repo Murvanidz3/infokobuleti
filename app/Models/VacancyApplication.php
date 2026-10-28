@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\ApplicationStatus;
+use App\Models\Concerns\LogsStaffActivity;
 use Database\Factories\VacancyApplicationFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -15,7 +16,7 @@ use Spatie\MediaLibrary\InteractsWithMedia;
 class VacancyApplication extends Model implements HasMedia
 {
     /** @use HasFactory<VacancyApplicationFactory> */
-    use HasFactory, InteractsWithMedia;
+    use HasFactory, InteractsWithMedia, LogsStaffActivity;
 
     /** @var array<string, mixed> */
     protected $attributes = ['status' => 'new'];

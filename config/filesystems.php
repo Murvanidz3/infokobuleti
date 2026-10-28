@@ -38,6 +38,15 @@ return [
             'report' => false,
         ],
 
+        // Backups (spatie/laravel-backup). On the server this is outside the app folder, e.g.
+        // /var/backups/infokobuleti/production, so a deploy or a deleted release never touches it.
+        'backups' => [
+            'driver' => 'local',
+            'root' => env('BACKUP_PATH', storage_path('app/backups')),
+            'throw' => false,
+            'report' => false,
+        ],
+
         'public' => [
             'driver' => 'local',
             'root' => storage_path('app/public'),

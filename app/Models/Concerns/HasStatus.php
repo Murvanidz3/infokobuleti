@@ -5,6 +5,7 @@ namespace App\Models\Concerns;
 use App\Enums\ListingStatus;
 use App\Exceptions\InvalidStatusTransition;
 use App\Models\User;
+use App\Services\Settings;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Carbon;
 
@@ -69,7 +70,8 @@ trait HasStatus
             $this->rejection_reason = $reason;
         }
 
-        if ($by !== null && in_array($to, [ListingStatus::Published, ListingStatus::Rejected], true)) {
+        // Owners also publish (resume, renew); only staff decisions count as moderation.
+        if ($by !== null && $by->isStaff() && in_array($to, [ListingStatus::Published, ListingStatus::Rejected], true)) {
             $this->moderated_by = $by->getKey();
             $this->moderated_at = now();
         }
@@ -86,6 +88,11 @@ trait HasStatus
         return $this;
     }
 
+    public function listingStatus(): ListingStatus
+    {
+        return $this->status;
+    }
+
     public function isPublished(): bool
     {
         return $this->status === ListingStatus::Published;
@@ -96,9 +103,7 @@ trait HasStatus
      */
     public function expiryDays(): ?int
     {
-        $days = config('listings.expiry_days.'.$this->getMorphClass());
-
-        return is_numeric($days) ? (int) $days : null;
+        return app(Settings::class)->expiryDays($this->getMorphClass());
     }
 
     /**

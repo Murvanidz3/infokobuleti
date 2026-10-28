@@ -306,3 +306,76 @@
         transition-duration: 0.01ms !important;
     }
 }
+
+/* Rich text written in the admin (articles, place descriptions, static pages), cleaned by App\Support\SafeHtml. */
+@utility prose-site {
+    font-size: 16.5px;
+    line-height: 1.75;
+    color: var(--color-secondary);
+
+    & > * + * {
+        margin-top: 1.1em;
+    }
+
+    & h2,
+    & h3,
+    & h4 {
+        margin-top: 1.6em;
+        font-family: var(--font-serif);
+        font-weight: 600;
+        line-height: 1.3;
+        color: var(--color-navy);
+    }
+
+    & h2 {
+        font-size: 1.45em;
+    }
+
+    & h3 {
+        font-size: 1.22em;
+    }
+
+    & a {
+        color: var(--color-coral-pressed);
+        text-decoration: underline;
+        text-underline-offset: 3px;
+    }
+
+    & strong,
+    & b {
+        color: var(--color-navy);
+        font-weight: 600;
+    }
+
+    & ul,
+    & ol {
+        padding-left: 1.4em;
+    }
+
+    & ul {
+        list-style: disc;
+    }
+
+    & ol {
+        list-style: decimal;
+    }
+
+    & li + li {
+        margin-top: 0.4em;
+    }
+
+    & blockquote {
+        border-left: 3px solid var(--color-coral);
+        padding-left: 1em;
+        font-style: italic;
+        color: var(--color-navy);
+    }
+
+    & img {
+        border-radius: var(--radius-card);
+    }
+
+    & hr {
+        border-color: var(--color-line);
+    }
+}

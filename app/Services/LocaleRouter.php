@@ -75,7 +75,7 @@ class LocaleRouter
     /**
      * URL of a named localized route in the given (or current) locale.
      *
-     * @param  array<string, mixed>  $parameters
+     * @param  array<array-key, mixed>  $parameters  named values, or models in route-parameter order
      */
     public function route(string $name, array $parameters = [], ?string $locale = null, bool $absolute = true): string
     {

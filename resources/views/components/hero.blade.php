@@ -1,6 +1,7 @@
 @props([
     'image' => null,
     'overlay' => 0.7,
+    'searchOptions' => ['classifieds' => [], 'jobs' => []],
 ])
 
 @php
@@ -24,7 +25,7 @@
         <h1 class="max-w-[880px] font-serif text-[clamp(34px,4.5vw,66px)] leading-[1.18] font-semibold tracking-[-0.01em] text-balance text-white">{{ __('home.hero.title') }}</h1>
         <p class="mt-5 max-w-[620px] text-[clamp(16px,1.3vw,19px)] leading-[1.65] text-pretty text-white/84">{{ __('home.hero.subtitle') }}</p>
 
-        <x-hero.search class="mt-[clamp(28px,3.5vw,44px)] hidden md:block" />
+        <x-hero.search :options="$searchOptions" class="mt-[clamp(28px,3.5vw,44px)] hidden md:block" />
         <x-hero.compact-search class="mt-7 md:hidden" />
     </div>
 </section>

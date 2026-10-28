@@ -1,0 +1,113 @@
+/* Map pins and popups (loaded with the map code from resources/js/ui/map.js). Plain CSS on purpose:
+   Leaflet builds these elements itself, so Tailwind classes cannot reach them. */
+
+.leaflet-container {
+    font-family: var(--font-sans, system-ui, sans-serif);
+    background: #eef2f6;
+}
+
+.map-price-pin {
+    background: none;
+    border: 0;
+}
+
+.map-price-pin span {
+    display: inline-block;
+    transform: translate(-50%, -100%);
+    padding: 5px 10px;
+    border-radius: 999px;
+    background: #fff;
+    color: #0a1a2f;
+    font-size: 13px;
+    font-weight: 700;
+    white-space: nowrap;
+    box-shadow: 0 6px 16px -6px rgba(10, 26, 47, 0.45), 0 0 0 1px rgba(10, 26, 47, 0.08);
+    transition: background-color 0.15s, color 0.15s;
+}
+
+.map-price-pin:hover span,
+.map-price-pin:focus span {
+    background: #0a1a2f;
+    color: #fff;
+}
+
+.map-dot-pin span,
+.map-main-pin span {
+    display: block;
+    width: 100%;
+    height: 100%;
+    border-radius: 999px;
+    background: #2f6f9f;
+    border: 3px solid #fff;
+    box-shadow: 0 4px 12px -4px rgba(10, 26, 47, 0.6);
+}
+
+.map-main-pin span {
+    background: #d4602a;
+    border-radius: 50% 50% 50% 0;
+    transform: rotate(-45deg);
+}
+
+.marker-cluster-small,
+.marker-cluster-medium,
+.marker-cluster-large {
+    background: rgba(212, 96, 42, 0.25);
+}
+
+.marker-cluster-small div,
+.marker-cluster-medium div,
+.marker-cluster-large div {
+    background: #d4602a;
+    color: #fff;
+    font-weight: 700;
+}
+
+.leaflet-popup-content-wrapper {
+    border-radius: 14px;
+    padding: 0;
+    overflow: hidden;
+}
+
+.leaflet-popup-content {
+    margin: 0;
+    width: auto !important;
+}
+
+.map-popup {
+    display: block;
+    color: #0a1a2f;
+    text-decoration: none;
+}
+
+.map-popup__image {
+    display: block;
+    width: 100%;
+    height: 120px;
+    object-fit: cover;
+}
+
+.map-popup__body {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 12px 14px 14px;
+}
+
+.map-popup__title {
+    font-size: 14.5px;
+    font-weight: 600;
+    line-height: 1.35;
+}
+
+.map-popup__meta {
+    font-size: 14px;
+    font-weight: 700;
+    color: #b44f1e;
+}
+
+.map-popup__link {
+    margin-top: 2px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #bf5323;
+}

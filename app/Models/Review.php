@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\ReviewStatus;
+use App\Models\Concerns\LogsStaffActivity;
 use App\Models\Concerns\Reportable;
 use Database\Factories\ReviewFactory;
 use Illuminate\Database\Eloquent\Attributes\Guarded;
@@ -20,7 +21,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class Review extends Model
 {
     /** @use HasFactory<ReviewFactory> */
-    use HasFactory, Reportable, SoftDeletes;
+    use HasFactory, LogsStaffActivity, Reportable, SoftDeletes;
 
     /** @var array<string, mixed> */
     protected $attributes = ['status' => 'pending'];

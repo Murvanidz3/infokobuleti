@@ -11,9 +11,12 @@ use App\Models\Concerns\HasLocation;
 use App\Models\Concerns\HasMediaGallery;
 use App\Models\Concerns\HasSlug;
 use App\Models\Concerns\HasStatus;
+use App\Models\Concerns\IndexedForSearch;
+use App\Models\Concerns\LogsStaffActivity;
 use App\Models\Concerns\Promotable;
 use App\Models\Concerns\Reportable;
 use App\Models\Concerns\Reviewable;
+use App\Search\SearchableListing;
 use Database\Factories\HotelFactory;
 use Illuminate\Database\Eloquent\Attributes\Guarded;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -24,11 +27,18 @@ use Illuminate\Database\Eloquent\Relations\MorphToMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Spatie\Translatable\HasTranslations;
 
+/**
+ * Translatable attributes read in the current locale (spatie/laravel-translatable).
+ *
+ * @property string $title
+ * @property string|null $description
+ * @property string|null $address
+ */
 #[Guarded(Listing::SYSTEM_COLUMNS)]
-class Hotel extends Model implements Listing
+class Hotel extends Model implements Listing, SearchableListing
 {
     /** @use HasFactory<HotelFactory> */
-    use Favoritable, HasDailyStats, HasFactory, HasLocation, HasMediaGallery, HasSlug, HasStatus, HasTranslations, Promotable, Reportable, Reviewable, SoftDeletes;
+    use Favoritable, HasDailyStats, HasFactory, HasLocation, HasMediaGallery, HasSlug, HasStatus, HasTranslations, IndexedForSearch, LogsStaffActivity, Promotable, Reportable, Reviewable, SoftDeletes;
 
     /** @var list<string> */
     public array $translatable = ['title', 'description', 'address'];
@@ -100,5 +110,13 @@ class Hotel extends Model implements Listing
     public function amenities(): MorphToMany
     {
         return $this->morphToMany(Amenity::class, 'amenityable')->where('amenities.scope', AmenityScope::Hotel);
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    protected function searchableFilters(): array
+    {
+        return ['type' => $this->type->value, 'stars' => $this->stars, 'price' => $this->price_from, 'distance_to_sea_m' => $this->distance_to_sea_m, 'rating' => $this->rating_avg];
     }
 }

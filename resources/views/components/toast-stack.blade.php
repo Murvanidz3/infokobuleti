@@ -18,7 +18,10 @@
                         <x-icon name="alert" :size="20" x-show="toast.type === 'error'" />
                         <x-icon name="info" :size="20" x-show="toast.type !== 'success' && toast.type !== 'error'" />
                     </span>
-                    <p class="flex-1 py-0.5 text-sm leading-normal" x-text="toast.message"></p>
+                    <div class="flex-1 py-0.5 text-sm leading-normal">
+                        <p x-text="toast.message"></p>
+                        <a x-show="toast.action" x-cloak x-bind:href="toast.action?.url" x-text="toast.action?.label" class="mt-1 inline-block font-semibold text-white underline decoration-coral decoration-2 underline-offset-4 hover:text-white"></a>
+                    </div>
                     <button type="button" x-on:click="$store.toasts.dismiss(toast.id)" aria-label="{{ __('components.toast.dismiss') }}" class="-my-1.5 grid size-9 shrink-0 place-items-center rounded-full text-white/75 transition-colors hover:bg-white/8 hover:text-white">
                         <x-icon name="close" :size="18" />
                     </button>

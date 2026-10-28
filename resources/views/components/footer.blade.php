@@ -1,7 +1,5 @@
 @php
-    $home = localized_route('home');
     $socials = ['facebook' => 'Facebook', 'instagram' => 'Instagram', 'youtube' => 'YouTube', 'telegram' => 'Telegram'];
-    $infoLinks = ['about', 'advertising', 'terms', 'privacy', 'help'];
 @endphp
 
 <footer class="border-t border-white/8 bg-navy pt-[clamp(56px,5vw,72px)] pb-8 text-line-strong">
@@ -13,7 +11,7 @@
                 <ul class="mt-5 flex gap-2.5" aria-label="{{ __('footer.social') }}">
                     @foreach ($socials as $network => $label)
                         <li>
-                            <a href="{{ config('site.social.'.$network) }}" aria-label="{{ $label }}" class="grid size-10 place-items-center rounded-full border border-white/18 text-white transition-colors duration-200 hover:border-coral hover:bg-coral hover:text-white">
+                            <a href="{{ site_setting('social.'.$network, config('site.social.'.$network)) }}" aria-label="{{ $label }}" class="grid size-10 place-items-center rounded-full border border-white/18 text-white transition-colors duration-200 hover:border-coral hover:bg-coral hover:text-white">
                                 <x-icon :name="$network" :size="18" />
                             </a>
                         </li>
@@ -24,8 +22,8 @@
             <nav aria-labelledby="footer-portal">
                 <h2 id="footer-portal" class="mb-4 text-[13px] font-semibold tracking-[0.02em] text-white">{{ __('footer.portal') }}</h2>
                 <ul class="flex flex-col gap-[11px] text-sm">
-                    @foreach (config('site.nav') as $key => $anchor)
-                        <li><a href="{{ $home }}#{{ $anchor }}" class="text-line-strong transition-colors hover:text-white">{{ __('nav.'.$key) }}</a></li>
+                    @foreach (config('site.nav') as $key => $route)
+                        <li><a href="{{ localized_route($route) }}" class="text-line-strong transition-colors hover:text-white">{{ __('nav.'.$key) }}</a></li>
                     @endforeach
                 </ul>
             </nav>
@@ -33,9 +31,10 @@
             <nav aria-labelledby="footer-information">
                 <h2 id="footer-information" class="mb-4 text-[13px] font-semibold tracking-[0.02em] text-white">{{ __('footer.information') }}</h2>
                 <ul class="flex flex-col gap-[11px] text-sm">
-                    @foreach ($infoLinks as $link)
-                        <li><a href="#" class="text-line-strong transition-colors hover:text-white">{{ __('footer.links.'.$link) }}</a></li>
+                    @foreach (config('site.info_links') as $link => [$route, $parameters])
+                        <li><a href="{{ localized_route($route, $parameters) }}" class="text-line-strong transition-colors hover:text-white">{{ __('footer.links.'.$link) }}</a></li>
                     @endforeach
+                    <li><button type="button" x-data x-on:click="$dispatch('cookie-settings')" class="cursor-pointer text-left text-line-strong transition-colors hover:text-white">{{ __('privacy.cookies.settings') }}</button></li>
                 </ul>
             </nav>
 
@@ -43,8 +42,8 @@
                 <h2 class="mb-4 text-[13px] font-semibold tracking-[0.02em] text-white">{{ __('footer.contact') }}</h2>
                 <address class="flex flex-col gap-3 text-sm not-italic">
                     <span class="flex items-start gap-2.5"><x-icon name="pin" :size="16" class="mt-[3px]" />{{ __('footer.address') }}</span>
-                    <a href="tel:{{ str_replace(' ', '', config('site.contact.phone')) }}" class="flex items-center gap-2.5 text-line-strong transition-colors hover:text-white"><x-icon name="phone" :size="16" />{{ config('site.contact.phone') }}</a>
-                    <a href="mailto:{{ config('site.contact.email') }}" class="flex items-center gap-2.5 text-line-strong transition-colors hover:text-white"><x-icon name="mail" :size="16" />{{ config('site.contact.email') }}</a>
+                    <a href="tel:{{ str_replace(' ', '', site_setting('contacts.phone', config('site.contact.phone'))) }}" class="flex items-center gap-2.5 text-line-strong transition-colors hover:text-white"><x-icon name="phone" :size="16" />{{ site_setting('contacts.phone', config('site.contact.phone')) }}</a>
+                    <a href="mailto:{{ site_setting('contacts.email', config('site.contact.email')) }}" class="flex items-center gap-2.5 text-line-strong transition-colors hover:text-white"><x-icon name="mail" :size="16" />{{ site_setting('contacts.email', config('site.contact.email')) }}</a>
                 </address>
             </div>
 

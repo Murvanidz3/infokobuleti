@@ -211,7 +211,7 @@ export function registerComponents(Alpine) {
         items: [],
         nextId: 1,
 
-        push({ message, type = 'info', timeout = 4500 }) {
+        push({ message, type = 'info', timeout = 4500, action = null }) {
             const id = this.nextId++;
             const mount = document.querySelector('template[data-toast-stack]');
 
@@ -219,8 +219,8 @@ export function registerComponents(Alpine) {
                 mount.replaceWith(mount.content.cloneNode(true));
             }
 
-            this.items.push({ id, message, type });
-            setTimeout(() => this.dismiss(id), timeout);
+            this.items.push({ id, message, type, action });
+            setTimeout(() => this.dismiss(id), action ? Math.max(timeout, 8000) : timeout);
         },
 
         dismiss(id) {

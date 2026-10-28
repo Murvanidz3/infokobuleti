@@ -1,0 +1,84 @@
+@import '../../../../vendor/filament/filament/resources/css/theme.css';
+
+/* Self-hosted fonts, same as the public site (no external font requests). */
+@import '@fontsource-variable/noto-sans-georgian/wght.css';
+@import '@fontsource-variable/noto-sans/wght.css';
+@import '@fontsource/outfit/300.css';
+@import '@fontsource/outfit/700.css';
+
+@source '../../../../app/Filament/**/*';
+@source '../../../../resources/views/filament/**/*';
+
+/* Brand tokens (see .cursor/rules): navy surfaces, coral as the only action accent. */
+:root {
+    --ik-navy: #0a1a2f;
+    --ik-coral: #d4602a;
+}
+
+.fi-body {
+    font-family: 'Noto Sans Georgian Variable', 'Noto Sans Variable', system-ui, sans-serif;
+}
+
+.ik-admin-brand {
+    display: inline-flex;
+    align-items: baseline;
+    font-family: 'Outfit', sans-serif;
+    font-size: 1.375rem;
+    letter-spacing: -0.01em;
+    color: var(--ik-navy);
+}
+
+.dark .ik-admin-brand {
+    color: #fff;
+}
+
+.ik-admin-brand-dot {
+    width: 0.4em;
+    height: 0.4em;
+    margin-left: 0.12em;
+    border-radius: 999px;
+    background: var(--ik-coral);
+    box-shadow: 0 0 10px 2px rgba(212, 96, 42, 0.55);
+}
+
+/* Cards and sections follow the site radius (16px). */
+.fi-section,
+.fi-wi-stats-overview-stat,
+.fi-ta-ctn {
+    border-radius: 16px;
+}
+
+/* The navy sidebar of the brand. */
+.fi-sidebar {
+    background-color: var(--ik-navy);
+}
+
+.fi-sidebar .fi-sidebar-item-btn,
+.fi-sidebar .fi-sidebar-group-label,
+.fi-sidebar .fi-sidebar-group-btn,
+.fi-sidebar .fi-icon {
+    color: rgba(255, 255, 255, 0.78);
+}
+
+.fi-sidebar .fi-sidebar-item.fi-active .fi-sidebar-item-btn {
+    background-color: rgba(255, 255, 255, 0.08);
+}
+
+.fi-sidebar .fi-sidebar-item.fi-active .fi-sidebar-item-label,
+.fi-sidebar .fi-sidebar-item.fi-active .fi-icon {
+    color: #fff;
+}
+
+.fi-sidebar .fi-sidebar-item-btn:hover {
+    background-color: rgba(255, 255, 255, 0.06);
+}
+
+.fi-sidebar-header,
+.fi-sidebar .ik-admin-brand {
+    color: #fff;
+}
+
+.fi-sidebar-header {
+    background-color: var(--ik-navy);
+    box-shadow: none;
+}

@@ -1,14 +1,16 @@
-@props(['initial' => 'hotels'])
+@props(['initial' => 'hotels', 'options' => ['classifieds' => [], 'jobs' => []]])
 
 @php
     $tabs = [
-        'hotels' => ['icon' => 'bed', 'hue' => 'var(--color-tab-hotels)', 'columns' => 'lg:grid-cols-4'],
-        'real_estate' => ['icon' => 'house', 'hue' => 'var(--color-tab-realestate)', 'columns' => 'lg:grid-cols-4'],
-        'classifieds' => ['icon' => 'tag', 'hue' => 'var(--color-tab-classifieds)', 'columns' => 'lg:grid-cols-3'],
-        'jobs' => ['icon' => 'briefcase', 'hue' => 'var(--color-tab-jobs)', 'columns' => 'lg:grid-cols-3'],
+        'hotels' => ['icon' => 'bed', 'hue' => 'var(--color-tab-hotels)', 'columns' => 'lg:grid-cols-4', 'action' => localized_route('hotels.index')],
+        'real_estate' => ['icon' => 'house', 'hue' => 'var(--color-tab-realestate)', 'columns' => 'lg:grid-cols-4', 'action' => localized_route('real-estate.index')],
+        'classifieds' => ['icon' => 'tag', 'hue' => 'var(--color-tab-classifieds)', 'columns' => 'lg:grid-cols-3', 'action' => localized_route('classifieds.index')],
+        'jobs' => ['icon' => 'briefcase', 'hue' => 'var(--color-tab-jobs)', 'columns' => 'lg:grid-cols-3', 'action' => localized_route('jobs.index')],
     ];
+    $locations = \App\Models\Location::query()->active()->whereNotNull('parent_id')->orderBy('sort')->get()->mapWithKeys(fn ($location) => [$location->slug => (string) $location->name])->all();
     $control = 'block w-full min-w-0 cursor-pointer appearance-none truncate bg-transparent p-0 text-[15px] font-semibold text-navy outline-none placeholder:text-secondary focus-visible:outline-none';
-    $options = fn (string $set) => __('home.search.options.'.$set);
+    $options = $options + ['classifieds' => [], 'jobs' => []];
+    $preset = fn (string $set) => __('home.search.options.'.$set);
 @endphp
 
 <div x-data="heroSearch(@js($initial))" {{ $attributes->class(['rounded-panel border border-white/28 bg-white/14 p-2 shadow-overlay backdrop-blur-[18px] backdrop-saturate-[1.4]']) }}>
@@ -35,29 +37,39 @@
 
     <div class="rounded-tile bg-white/97 p-2.5 transition-[opacity,translate] duration-220 ease-out" x-bind:class="{ 'opacity-0 translate-y-1.5': fading }">
         @foreach ($tabs as $key => $tab)
-            <form id="search-panel-{{ $key }}"
-                  role="tabpanel"
-                  aria-labelledby="search-tab-{{ $key }}"
-                  action="#"
+            <div id="search-panel-{{ $key }}"
+                 role="tabpanel"
+                 aria-labelledby="search-tab-{{ $key }}"
+                 data-tab="{{ $key }}"
+                 x-bind="tabPanel"
+                 @if ($key !== $initial) style="display: none" @endif>
+            <form action="{{ $tab['action'] }}"
                   method="get"
-                  data-tab="{{ $key }}"
-                  x-bind="tabPanel"
-                  @if ($key !== $initial) style="display: none" @endif
+                  x-on:submit="$event.target.querySelectorAll('input, select').forEach((field) => { if (field.value === '') field.disabled = true })"
                   class="flex flex-col gap-2.5 lg:flex-row">
                 <div x-ignore class="grid min-w-0 flex-1 grid-cols-2 gap-2 {{ $tab['columns'] }}">
                     @switch($key)
                         @case('hotels')
                             <x-hero.field icon="pin" :label="__('home.search.fields.destination')">
-                                <input type="text" name="destination" value="{{ __('demo.search.destination') }}" class="{{ $control }}">
+                                <select name="location" class="{{ $control }}">
+                                    <option value="">{{ __('site.kobuleti_all') }}</option>
+                                    @foreach ($locations as $value => $text)
+                                        <option value="{{ $value }}">{{ $text }}</option>
+                                    @endforeach
+                                </select>
                             </x-hero.field>
                             <x-hero.field icon="calendar" :label="__('home.search.fields.check_in')">
-                                <input type="text" name="check_in" value="{{ __('demo.search.check_in') }}" class="{{ $control }}">
+                                <input type="date" name="check_in" min="{{ today()->toDateString() }}" class="{{ $control }}">
                             </x-hero.field>
                             <x-hero.field icon="calendar" :label="__('home.search.fields.check_out')">
-                                <input type="text" name="check_out" value="{{ __('demo.search.check_out') }}" class="{{ $control }}">
+                                <input type="date" name="check_out" min="{{ today()->addDay()->toDateString() }}" class="{{ $control }}">
                             </x-hero.field>
                             <x-hero.field icon="users" :label="__('home.search.fields.guests')">
-                                <input type="text" name="guests" value="{{ __('demo.search.guests') }}" class="{{ $control }}">
+                                <select name="guests" class="{{ $control }}">
+                                    @foreach (range(1, 6) as $guests)
+                                        <option value="{{ $guests }}" @selected($guests === 2)>{{ trans_choice('site.filters.guests_count', $guests, ['count' => $guests === 6 ? '6+' : $guests]) }}</option>
+                                    @endforeach
+                                </select>
                             </x-hero.field>
                             @break
 
@@ -67,7 +79,7 @@
                                 <div class="min-w-0 flex-1">
                                     <span id="search-deal-label" class="mb-[3px] block text-xs font-medium text-secondary">{{ __('home.search.fields.deal') }}</span>
                                     <div role="radiogroup" aria-labelledby="search-deal-label" class="flex gap-1">
-                                        @foreach (__('home.search.deal') as $deal => $dealLabel)
+                                        @foreach (['sale' => __('home.search.deal.buy'), 'rent' => __('home.search.deal.rent')] as $deal => $dealLabel)
                                             <label class="cursor-pointer">
                                                 <input type="radio" name="deal" value="{{ $deal }}" class="peer sr-only" @checked($loop->first)>
                                                 <span class="block rounded-full px-3.5 py-1 text-[13px] font-semibold text-secondary transition-colors duration-200 peer-checked:bg-navy peer-checked:text-white peer-focus-visible:outline-2 peer-focus-visible:outline-coral">{{ $dealLabel }}</span>
@@ -77,19 +89,21 @@
                                 </div>
                             </div>
                             <x-hero.field icon="building" :label="__('home.search.fields.type')">
-                                <select name="type" class="{{ $control }}">
-                                    @foreach ($options('property_types') as $value => $text)
+                                <select name="type[]" class="{{ $control }}">
+                                    <option value="">{{ __('site.filters.any') }}</option>
+                                    @foreach ($preset('property_types') as $value => $text)
                                         <option value="{{ $value }}">{{ $text }}</option>
                                     @endforeach
                                 </select>
                             </x-hero.field>
-                            <x-hero.field icon="tag" :label="__('home.search.fields.price')">
-                                <input type="text" name="price" value="{{ __('demo.search.price') }}" class="{{ $control }}">
+                            <x-hero.field icon="tag" :label="__('site.filters.price_up_to')">
+                                <input type="number" name="price_max" min="0" step="1000" inputmode="numeric" placeholder="₾" class="{{ $control }}">
                             </x-hero.field>
                             <x-hero.field icon="door" :label="__('home.search.fields.rooms')">
-                                <select name="rooms" class="{{ $control }}">
-                                    @foreach ($options('rooms') as $value => $text)
-                                        <option value="{{ $value }}" @selected($value === 2)>{{ $text }}</option>
+                                <select name="rooms[]" class="{{ $control }}">
+                                    <option value="">{{ __('site.filters.any') }}</option>
+                                    @foreach (['1' => '1', '2' => '2', '3' => '3', '4' => '4+'] as $value => $text)
+                                        <option value="{{ $value }}">{{ $text }}</option>
                                     @endforeach
                                 </select>
                             </x-hero.field>
@@ -101,13 +115,19 @@
                             </x-hero.field>
                             <x-hero.field icon="grid" :label="__('home.search.fields.category')">
                                 <select name="category" class="{{ $control }}">
-                                    @foreach ($options('classified_categories') as $value => $text)
+                                    <option value="">{{ __('site.filters.all_categories') }}</option>
+                                    @foreach ($options['classifieds'] as $value => $text)
                                         <option value="{{ $value }}">{{ $text }}</option>
                                     @endforeach
                                 </select>
                             </x-hero.field>
                             <x-hero.field icon="pin" :label="__('home.search.fields.location')">
-                                <input type="text" name="location" value="{{ __('demo.search.location') }}" class="{{ $control }}">
+                                <select name="location" class="{{ $control }}">
+                                    <option value="">{{ __('site.kobuleti_all') }}</option>
+                                    @foreach ($locations as $value => $text)
+                                        <option value="{{ $value }}">{{ $text }}</option>
+                                    @endforeach
+                                </select>
                             </x-hero.field>
                             @break
 
@@ -117,14 +137,16 @@
                             </x-hero.field>
                             <x-hero.field icon="briefcase" :label="__('home.search.fields.category')">
                                 <select name="category" class="{{ $control }}">
-                                    @foreach ($options('job_categories') as $value => $text)
-                                        <option value="{{ $value }}" @selected($value === 'tourism')>{{ $text }}</option>
+                                    <option value="">{{ __('site.filters.all_categories') }}</option>
+                                    @foreach ($options['jobs'] as $value => $text)
+                                        <option value="{{ $value }}">{{ $text }}</option>
                                     @endforeach
                                 </select>
                             </x-hero.field>
                             <x-hero.field icon="clock" :label="__('home.search.fields.employment')">
-                                <select name="employment" class="{{ $control }}">
-                                    @foreach ($options('employment') as $value => $text)
+                                <select name="employment[]" class="{{ $control }}">
+                                    <option value="">{{ __('site.filters.any') }}</option>
+                                    @foreach (\App\Enums\EmploymentType::options() as $value => $text)
                                         <option value="{{ $value }}">{{ $text }}</option>
                                     @endforeach
                                 </select>
@@ -137,6 +159,7 @@
                     {{ __('home.search.submit') }}
                 </button>
             </form>
+            </div>
         @endforeach
     </div>
 </div>

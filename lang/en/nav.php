@@ -8,6 +8,7 @@ return [
     'real_estate' => 'Real estate',
     'classifieds' => 'Classifieds',
     'jobs' => 'Jobs',
+    'events' => 'Events',
     'guide' => 'City guide',
     'news' => 'News',
     'add_listing' => 'Add a listing',

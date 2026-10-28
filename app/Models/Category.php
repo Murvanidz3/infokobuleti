@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Enums\CategoryModule;
 use App\Models\Concerns\HasSlug;
+use App\Models\Concerns\LogsStaffActivity;
 use App\Support\AttributeSchema;
 use Database\Factories\CategoryFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
@@ -18,7 +19,7 @@ use Spatie\Translatable\HasTranslations;
 class Category extends Model
 {
     /** @use HasFactory<CategoryFactory> */
-    use HasFactory, HasSlug, HasTranslations;
+    use HasFactory, HasSlug, HasTranslations, LogsStaffActivity;
 
     /** @var list<string> */
     public array $translatable = ['name'];

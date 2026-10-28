@@ -6,6 +6,7 @@ use App\Enums\BusinessType;
 use App\Models\Concerns\HasDailyStats;
 use App\Models\Concerns\HasLocation;
 use App\Models\Concerns\HasSlug;
+use App\Models\Concerns\LogsStaffActivity;
 use App\Models\Concerns\Reportable;
 use App\Models\Concerns\Reviewable;
 use Database\Factories\BusinessProfileFactory;
@@ -19,11 +20,11 @@ use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 use Spatie\Translatable\HasTranslations;
 
-#[Guarded(['id', 'verified_at', 'rating_avg', 'reviews_count'])]
+#[Guarded(['id', 'verified_at', 'package_until', 'rating_avg', 'reviews_count'])]
 class BusinessProfile extends Model implements HasMedia
 {
     /** @use HasFactory<BusinessProfileFactory> */
-    use HasDailyStats, HasFactory, HasLocation, HasSlug, HasTranslations, InteractsWithMedia, Reportable, Reviewable, SoftDeletes;
+    use HasDailyStats, HasFactory, HasLocation, HasSlug, HasTranslations, InteractsWithMedia, LogsStaffActivity, Reportable, Reviewable, SoftDeletes;
 
     /** @var list<string> */
     public array $translatable = ['description', 'address'];
@@ -34,12 +35,21 @@ class BusinessProfile extends Model implements HasMedia
             'type' => BusinessType::class,
             'socials' => 'array',
             'verified_at' => 'datetime',
+            'package_until' => 'datetime',
         ];
     }
 
+    /**
+     * Verified by staff, or covered by a paid business package (which includes the badge).
+     */
     public function isVerified(): bool
     {
-        return $this->verified_at !== null;
+        return $this->verified_at !== null || $this->hasPackage();
+    }
+
+    public function hasPackage(): bool
+    {
+        return $this->package_until !== null && $this->package_until->isFuture();
     }
 
     public function registerMediaCollections(): void

@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Services\HomepageData;
+use App\Services\StyleguideData;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\View\View;
@@ -12,7 +12,7 @@ class StyleguideController extends Controller
     /**
      * Every design-system component and variant on one page. Not available in production.
      */
-    public function __invoke(Request $request, HomepageData $data): View
+    public function __invoke(Request $request, StyleguideData $data): View
     {
         abort_if(app()->isProduction(), 404);
 

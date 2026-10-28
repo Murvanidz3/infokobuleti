@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\BookingStatus;
+use App\Models\Concerns\LogsStaffActivity;
 use Database\Factories\BookingRequestFactory;
 use Illuminate\Database\Eloquent\Attributes\Guarded;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -13,7 +14,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class BookingRequest extends Model
 {
     /** @use HasFactory<BookingRequestFactory> */
-    use HasFactory;
+    use HasFactory, LogsStaffActivity;
 
     /** @var array<string, mixed> */
     protected $attributes = ['status' => 'pending'];

@@ -44,6 +44,22 @@ class DateFormatter
         return Str::ucfirst(Lang::has($key) ? __($key) : $date->locale(app()->getLocale())->dayName);
     }
 
+    /**
+     * "Oct" style month label for date badges, from lang/{locale}/time.php.
+     */
+    public function monthShort(CarbonInterface $date): string
+    {
+        return (string) __('time.months_short.'.$date->month);
+    }
+
+    /**
+     * "October 2026" (nominative) for calendar headings.
+     */
+    public function monthYear(CarbonInterface $date): string
+    {
+        return __('time.months.'.$date->month).' '.$date->year;
+    }
+
     public function time(CarbonInterface $date): string
     {
         return $date->format('H:i');

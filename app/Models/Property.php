@@ -15,9 +15,12 @@ use App\Models\Concerns\HasLocation;
 use App\Models\Concerns\HasMediaGallery;
 use App\Models\Concerns\HasSlug;
 use App\Models\Concerns\HasStatus;
+use App\Models\Concerns\IndexedForSearch;
+use App\Models\Concerns\LogsStaffActivity;
 use App\Models\Concerns\NormalizesPrice;
 use App\Models\Concerns\Promotable;
 use App\Models\Concerns\Reportable;
+use App\Search\SearchableListing;
 use Database\Factories\PropertyFactory;
 use Illuminate\Database\Eloquent\Attributes\Guarded;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -31,12 +34,15 @@ use Spatie\Translatable\HasTranslations;
  * price_per_m2 is a stored generated column (price / area_m2, in the listing's currency).
  *
  * @property float|null $price_per_m2
+ * @property string $title
+ * @property string|null $description
+ * @property string|null $address
  */
 #[Guarded(Listing::SYSTEM_COLUMNS)]
-class Property extends Model implements Listing
+class Property extends Model implements Listing, SearchableListing
 {
     /** @use HasFactory<PropertyFactory> */
-    use Favoritable, HasDailyStats, HasFactory, HasLocation, HasMediaGallery, HasSlug, HasStatus, HasTranslations, NormalizesPrice, Promotable, Reportable, SoftDeletes;
+    use Favoritable, HasDailyStats, HasFactory, HasLocation, HasMediaGallery, HasSlug, HasStatus, HasTranslations, IndexedForSearch, LogsStaffActivity, NormalizesPrice, Promotable, Reportable, SoftDeletes;
 
     /** @var list<string> */
     public array $translatable = ['title', 'description', 'address'];
@@ -48,6 +54,7 @@ class Property extends Model implements Listing
             'type' => PropertyType::class,
             'condition' => PropertyCondition::class,
             'building_status' => BuildingStatus::class,
+            'owner_verified_at' => 'datetime',
             'listed_by' => ListedBy::class,
             'area_m2' => 'float',
             'land_area_m2' => 'float',
@@ -77,5 +84,13 @@ class Property extends Model implements Listing
     public function features(): MorphToMany
     {
         return $this->morphToMany(Amenity::class, 'amenityable')->where('amenities.scope', AmenityScope::Property);
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    protected function searchableFilters(): array
+    {
+        return ['deal' => $this->deal->value, 'type' => $this->type->value, 'price' => $this->price_gel, 'area_m2' => $this->area_m2, 'rooms' => $this->rooms];
     }
 }

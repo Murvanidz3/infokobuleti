@@ -6,6 +6,7 @@
     'icon' => 'tag',
     'isNew' => false,
     'url' => '#',
+    'promotion' => null,
 ])
 
 <a href="{{ $url }}" {{ $attributes->class(['flex items-center gap-4 border-t border-line px-5 py-4 transition-colors duration-200 first:border-t-0 hover:bg-surface-alt']) }}>
@@ -13,7 +14,8 @@
     <span class="min-w-0 flex-1">
         <span class="flex min-w-0 items-center gap-2">
             <span class="truncate text-[15px] font-semibold text-navy">{{ $title }}</span>
-            @if ($isNew)
+            <x-card.promotion-badge :promotion="$promotion" />
+            @if ($isNew && ! $promotion)
                 <x-badge variant="new">{{ __('ui.new') }}</x-badge>
             @endif
         </span>
