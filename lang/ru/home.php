@@ -49,9 +49,11 @@ return [
         'options' => [
             'property_types' => [
                 'apartment' => 'Квартира',
-                'house' => 'Дом',
-                'land' => 'Участок',
-                'commercial' => 'Коммерческое помещение',
+                'house' => 'Частный дом',
+                'country_house' => 'Дача',
+                'land' => 'Земельный участок',
+                'commercial' => 'Коммерческая площадь',
+                'hotel' => 'Гостиница',
             ],
             'rooms' => [
                 '1' => '1 и более',

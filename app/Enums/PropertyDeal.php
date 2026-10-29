@@ -11,5 +11,6 @@ enum PropertyDeal: string implements FilamentLabel
 
     case Sale = 'sale';
     case Rent = 'rent';
+    case Pledge = 'pledge';
     case DailyRent = 'daily_rent';
 }

@@ -49,9 +49,11 @@ return [
         'options' => [
             'property_types' => [
                 'apartment' => 'Apartment',
-                'house' => 'House',
+                'house' => 'Private house',
+                'country_house' => 'Country house',
                 'land' => 'Land plot',
                 'commercial' => 'Commercial space',
+                'hotel' => 'Hotel',
             ],
             'rooms' => [
                 '1' => '1 or more',

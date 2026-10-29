@@ -6,6 +6,7 @@ use App\Enums\AmenityScope;
 use App\Enums\BuildingStatus;
 use App\Enums\Currency;
 use App\Enums\ListedBy;
+use App\Enums\NearbyPlace;
 use App\Enums\PropertyCondition;
 use App\Enums\PropertyDeal;
 use App\Enums\PropertyType;
@@ -66,6 +67,7 @@ class PropertyResource extends ListingResource
                     Select::make('building_status')->options(BuildingStatus::class),
                     Select::make('listed_by')->options(ListedBy::class)->default(ListedBy::Owner->value)->required(),
                     TextInput::make('cadastral_code')->maxLength(32),
+                    CheckboxList::make('nearby')->options(NearbyPlace::options())->columns(4)->columnSpanFull(),
                 ])
                 ->columns(4),
             Section::make(__('admin.sections.contacts'))

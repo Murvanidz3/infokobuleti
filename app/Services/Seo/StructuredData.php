@@ -153,9 +153,10 @@ final class StructuredData
         $home = array_filter([
             '@type' => match ($property->type) {
                 PropertyType::Apartment => 'Apartment',
-                PropertyType::House => 'House',
+                PropertyType::House, PropertyType::CountryHouse => 'House',
                 PropertyType::Land => 'Landform',
-                default => 'Accommodation',
+                PropertyType::Hotel => 'Hotel',
+                PropertyType::Commercial => 'Accommodation',
             },
             'name' => (string) $property->title,
             'floorSize' => $property->area_m2 ? ['@type' => 'QuantitativeValue', 'value' => $property->area_m2, 'unitCode' => 'MTK'] : null,
@@ -181,7 +182,10 @@ final class StructuredData
                 'price' => round($price, 2),
                 'priceCurrency' => $currency,
                 'availability' => 'https://schema.org/InStock',
-                'businessFunction' => $property->deal === PropertyDeal::Sale ? 'https://purl.org/goodrelations/v1#Sell' : 'https://purl.org/goodrelations/v1#LeaseOut',
+                'businessFunction' => match ($property->deal) {
+                    PropertyDeal::Sale, PropertyDeal::Pledge => 'https://purl.org/goodrelations/v1#Sell',
+                    PropertyDeal::Rent, PropertyDeal::DailyRent => 'https://purl.org/goodrelations/v1#LeaseOut',
+                },
             ] : null,
         ];
 

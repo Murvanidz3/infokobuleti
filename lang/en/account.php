@@ -254,6 +254,8 @@ return [
             'amenities' => 'Amenities',
             'area_m2' => 'Area, m²',
             'land_area_m2' => 'Land area, m²',
+            'yard_area' => 'Yard area, m²',
+            'nearby' => 'Nearby',
             'rooms' => 'Rooms',
             'bedrooms' => 'Bedrooms',
             'bathrooms' => 'Bathrooms',

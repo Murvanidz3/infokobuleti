@@ -184,27 +184,40 @@ return [
         'auto_bump' => 'Auto-bump',
     ],
 
+    'nearby_place' => [
+        'school' => 'School',
+        'kindergarten' => 'Kindergarten',
+        'pharmacy' => 'Pharmacy',
+        'supermarket' => 'Supermarket',
+        'bus_stop' => 'Bus stop',
+        'park' => 'Park',
+        'boulevard' => 'Boulevard',
+        'beach' => 'Beach',
+    ],
+
     'property_condition' => [
         'newly_renovated' => 'Newly renovated',
+        'renovated' => 'Renovated',
         'old_renovation' => 'Old renovation',
-        'needs_renovation' => 'Needs renovation',
+        'green_frame' => 'Green frame',
         'white_frame' => 'White frame',
         'black_frame' => 'Black frame',
-        'green_frame' => 'Green frame',
     ],
 
     'property_deal' => [
         'sale' => 'For sale',
         'rent' => 'For rent',
+        'pledge' => 'For pledge',
         'daily_rent' => 'Daily rent',
     ],
 
     'property_type' => [
         'apartment' => 'Apartment',
-        'house' => 'House',
-        'land' => 'Land',
+        'house' => 'Private house',
+        'country_house' => 'Country house',
+        'land' => 'Land plot',
         'commercial' => 'Commercial space',
-        'hotel_business' => 'Hotel (business)',
+        'hotel' => 'Hotel',
     ],
 
     'report_reason' => [

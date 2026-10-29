@@ -41,20 +41,28 @@
     </section>
 
     @php
+        $propertyType = $type === 'property' ? \App\Enums\PropertyType::tryFrom((string) ($form['property_type'] ?? '')) : null;
+        $show = fn (string $field): bool => $propertyType === null || $propertyType->allows($field);
+        $yardLabel = $propertyType === \App\Enums\PropertyType::Land
+            ? __('account.wizard.fields.land_area_m2')
+            : __('account.wizard.fields.yard_area');
+        $roomsLabel = $propertyType === \App\Enums\PropertyType::Hotel
+            ? __('account.wizard.fields.rooms_count')
+            : __('account.wizard.fields.rooms');
         $numbers = match ($type) {
             'hotel' => [
                 $number('stars', __('account.wizard.fields.stars'), ['min' => 1, 'max' => 5]),
                 $number('rooms_count', __('account.wizard.fields.rooms_count'), ['min' => 1, 'max' => 1000]),
             ],
-            'property' => [
-                $number('area_m2', __('account.wizard.fields.area_m2'), ['min' => 1, 'step' => '0.1'], ($form['property_type'] ?? '') === 'land'),
-                $number('land_area_m2', __('account.wizard.fields.land_area_m2'), ['min' => 1], ($form['property_type'] ?? '') !== 'land'),
-                $number('rooms', __('account.wizard.fields.rooms'), ['min' => 1, 'max' => 50]),
-                $number('bedrooms', __('account.wizard.fields.bedrooms'), ['min' => 0, 'max' => 50]),
-                $number('bathrooms', __('account.wizard.fields.bathrooms'), ['min' => 0, 'max' => 20]),
-                $number('floor', __('account.wizard.fields.floor'), ['min' => -3, 'max' => 100]),
-                $number('total_floors', __('account.wizard.fields.total_floors'), ['min' => 1, 'max' => 100]),
-            ],
+            'property' => array_values(array_filter([
+                $show('area_m2') ? $number('area_m2', __('account.wizard.fields.area_m2'), ['min' => 1, 'step' => '0.1'], ! ($propertyType?->requires('area_m2') ?? false)) : null,
+                $show('land_area_m2') ? $number('land_area_m2', $yardLabel, ['min' => 1], ! ($propertyType?->requires('land_area_m2') ?? false)) : null,
+                $show('rooms') ? $number('rooms', $roomsLabel, ['min' => 1, 'max' => 50], ! ($propertyType?->requires('rooms') ?? false)) : null,
+                $show('bedrooms') ? $number('bedrooms', __('account.wizard.fields.bedrooms'), ['min' => 0, 'max' => 50]) : null,
+                $show('bathrooms') ? $number('bathrooms', __('account.wizard.fields.bathrooms'), ['min' => 0, 'max' => 20]) : null,
+                $show('floor') ? $number('floor', __('account.wizard.fields.floor'), ['min' => -3, 'max' => 100]) : null,
+                $show('total_floors') ? $number('total_floors', __('account.wizard.fields.total_floors'), ['min' => 1, 'max' => 100]) : null,
+            ])),
             default => [],
         };
     @endphp
@@ -62,7 +70,7 @@
     @if ($numbers !== [])
         <section class="grid grid-cols-2 gap-4 md:grid-cols-4">
             @foreach ($numbers as $field)
-                <x-form.field :label="$field['label']" for="wizard-{{ $field['key'] }}" :error="$errors->first('form.'.$field['key'])">
+                <x-form.field :label="$field['label']" for="wizard-{{ $field['key'] }}" :error="$errors->first('form.'.$field['key'])" :optional="$field['optional']">
                     <input id="wizard-{{ $field['key'] }}" type="number" inputmode="decimal" wire:model.blur="form.{{ $field['key'] }}"
                            @foreach ($field['attributes'] as $attribute => $value) {{ $attribute }}="{{ $value }}" @endforeach
                            class="{{ $control }} {{ $border('form.'.$field['key']) }}">
@@ -92,15 +100,19 @@
         </section>
     @elseif ($type === 'property')
         <section class="flex flex-col gap-6">
-            <div>
-                <h2 class="text-[15px] font-semibold text-navy">{{ __('account.wizard.fields.condition') }} <span class="text-xs font-medium text-secondary">({{ __('components.optional') }})</span></h2>
-                <x-account.choice-pills class="mt-3" model="form.condition" :options="$options['conditions']" :label="__('account.wizard.fields.condition')" />
-            </div>
-            <div class="grid gap-6 md:grid-cols-2">
+            @if ($show('condition'))
                 <div>
-                    <h2 class="text-[15px] font-semibold text-navy">{{ __('account.wizard.fields.building_status') }}</h2>
-                    <x-account.choice-pills class="mt-3" model="form.building_status" :options="$options['buildingStatuses']" :label="__('account.wizard.fields.building_status')" />
+                    <h2 class="text-[15px] font-semibold text-navy">{{ __('account.wizard.fields.condition') }} <span class="text-xs font-medium text-secondary">({{ __('components.optional') }})</span></h2>
+                    <x-account.choice-pills class="mt-3" model="form.condition" :options="$options['conditions']" :label="__('account.wizard.fields.condition')" />
                 </div>
+            @endif
+            <div class="grid gap-6 md:grid-cols-2">
+                @if ($show('building_status'))
+                    <div>
+                        <h2 class="text-[15px] font-semibold text-navy">{{ __('account.wizard.fields.building_status') }} <span class="text-xs font-medium text-secondary">({{ __('components.optional') }})</span></h2>
+                        <x-account.choice-pills class="mt-3" model="form.building_status" :options="$options['buildingStatuses']" :label="__('account.wizard.fields.building_status')" />
+                    </div>
+                @endif
                 <div>
                     <h2 class="text-[15px] font-semibold text-navy">{{ __('account.wizard.fields.listed_by') }}</h2>
                     <x-account.choice-pills class="mt-3" model="form.listed_by" :options="$options['listedBy']" :label="__('account.wizard.fields.listed_by')" />
@@ -112,6 +124,10 @@
             <div>
                 <h2 class="text-[15px] font-semibold text-navy">{{ __('account.wizard.fields.features') }}</h2>
                 <x-account.check-pills class="mt-3" model="form.features" :options="$options['features']" :label="__('account.wizard.fields.features')" />
+            </div>
+            <div>
+                <h2 class="text-[15px] font-semibold text-navy">{{ __('account.wizard.fields.nearby') }} <span class="text-xs font-medium text-secondary">({{ __('components.optional') }})</span></h2>
+                <x-account.check-pills class="mt-3" model="form.nearby" :options="\App\Enums\NearbyPlace::options()" :label="__('account.wizard.fields.nearby')" />
             </div>
         </section>
     @elseif ($type === 'classified')

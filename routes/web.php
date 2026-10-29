@@ -1,5 +1,7 @@
 <?php
 
+use App\Enums\PropertyDeal;
+use App\Enums\PropertyType;
 use App\Http\Controllers\Account\AccountSecurityController;
 use App\Http\Controllers\Account\ApplicationCvController;
 use App\Http\Controllers\Account\ConversationController;
@@ -81,7 +83,14 @@ app(LocaleRouter::class)->group(function (): void {
     Route::get('/hotels/{hotel}', [HotelController::class, 'show'])->name('hotels.show');
     Route::post('/hotels/{hotel}/booking', BookingRequestController::class)->middleware('throttle:interactions')->name('hotels.booking');
 
-    Route::view('/real-estate', 'pages.real-estate.index')->name('real-estate.index');
+    Route::get('/real-estate', [PropertyController::class, 'index'])->name('real-estate.index');
+    Route::get('/real-estate/{type}/{deal}', [PropertyController::class, 'index'])
+        ->whereIn('type', PropertyType::values())
+        ->whereIn('deal', PropertyDeal::values())
+        ->name('real-estate.browse');
+    Route::get('/real-estate/{type}', [PropertyController::class, 'index'])
+        ->whereIn('type', PropertyType::values())
+        ->name('real-estate.type');
     Route::get('/real-estate/{property}', [PropertyController::class, 'show'])->name('real-estate.show');
 
     Route::view('/classifieds', 'pages.classifieds.index')->name('classifieds.index');

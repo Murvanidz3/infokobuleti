@@ -186,27 +186,40 @@ return [
         'auto_bump' => 'ავტო-ამოწევა',
     ],
 
+    'nearby_place' => [
+        'school' => 'სკოლა',
+        'kindergarten' => 'საბავშვო ბაღი',
+        'pharmacy' => 'აფთიაქი',
+        'supermarket' => 'სუპერმარკეტი',
+        'bus_stop' => 'ავტობუსის გაჩერება',
+        'park' => 'პარკი',
+        'boulevard' => 'ბულვარი',
+        'beach' => 'პლაჟი',
+    ],
+
     'property_condition' => [
         'newly_renovated' => 'ახალი გარემონტებული',
-        'old_renovation' => 'ძველი გარემონტებული',
-        'needs_renovation' => 'სარემონტო',
+        'renovated' => 'გარემონტებული',
+        'old_renovation' => 'ძველი რემონტი',
+        'green_frame' => 'მწვანე კარკასი',
         'white_frame' => 'თეთრი კარკასი',
         'black_frame' => 'შავი კარკასი',
-        'green_frame' => 'მწვანე კარკასი',
     ],
 
     'property_deal' => [
         'sale' => 'იყიდება',
         'rent' => 'ქირავდება',
+        'pledge' => 'გირავდება',
         'daily_rent' => 'ქირავდება დღიურად',
     ],
 
     'property_type' => [
         'apartment' => 'ბინა',
-        'house' => 'სახლი',
+        'house' => 'კერძო სახლი',
+        'country_house' => 'აგარაკი',
         'land' => 'მიწის ნაკვეთი',
         'commercial' => 'კომერციული ფართი',
-        'hotel_business' => 'სასტუმრო (ბიზნესი)',
+        'hotel' => 'სასტუმრო',
     ],
 
     'report_reason' => [

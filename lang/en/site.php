@@ -137,7 +137,10 @@ return [
     ],
     'real_estate' => [
         'title' => 'Real estate in Kobuleti',
-        'subtitle' => 'Apartments, houses, land and commercial space to buy, rent or rent by the day.',
+        'subtitle' => 'Apartments, private houses, country houses, land, commercial space and hotels — for sale, rent, pledge or daily rent.',
+        'browse' => ':deal · :type',
+        'browse_type' => ':type',
+        'nearby' => 'Nearby',
         'search_placeholder' => 'e.g. sea view',
         'land_area' => 'Land area',
         'bedrooms' => 'Bedrooms',

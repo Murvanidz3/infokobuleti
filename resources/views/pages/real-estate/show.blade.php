@@ -7,7 +7,7 @@
         <x-breadcrumbs :items="[
             ['label' => __('nav.home'), 'url' => localized_route('home')],
             ['label' => __('nav.real_estate'), 'url' => localized_route('real-estate.index')],
-            ['label' => $property->type->getLabel(), 'url' => localized_route('real-estate.index', ['type' => [$property->type->value]])],
+            ['label' => $property->type->getLabel(), 'url' => localized_route('real-estate.type', ['type' => $property->type->value])],
             ['label' => $property->title],
         ]" />
 
@@ -43,6 +43,16 @@
                         <ul class="grid grid-cols-2 gap-x-6 gap-y-3 xs:grid-cols-3">
                             @foreach ($property->features as $feature)
                                 <li class="flex items-center gap-2.5 text-[15px] text-navy"><x-icon :name="\App\View\Components\Icon::has($feature->icon) ? $feature->icon : 'check'" :size="18" class="shrink-0 text-sea" />{{ $feature->name }}</li>
+                            @endforeach
+                        </ul>
+                    </x-detail.section>
+                @endif
+
+                @if ($nearbyPlaces !== [])
+                    <x-detail.section :title="__('site.real_estate.nearby')">
+                        <ul class="grid grid-cols-2 gap-x-6 gap-y-3 xs:grid-cols-3">
+                            @foreach ($nearbyPlaces as $place)
+                                <li class="flex items-center gap-2.5 text-[15px] text-navy"><x-icon name="pin" :size="18" class="shrink-0 text-sea" />{{ $place }}</li>
                             @endforeach
                         </ul>
                     </x-detail.section>

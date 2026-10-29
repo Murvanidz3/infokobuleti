@@ -32,8 +32,21 @@ it('recomputes price_per_m2 when price or area change', function () {
     expect($property->fresh()->price_per_m2)->toBe(750.0);
 });
 
-it('leaves price_per_m2 empty for land without a built area', function () {
-    $land = Property::factory()->type(PropertyType::Land)->create(['area_m2' => null]);
+it('computes price_per_m2 from the plot when there is no built area', function () {
+    $land = Property::factory()->type(PropertyType::Land)->create([
+        'area_m2' => null,
+        'land_area_m2' => 500,
+        'price' => 25000,
+    ]);
+
+    expect($land->fresh()->price_per_m2)->toBe(50.0);
+});
+
+it('leaves price_per_m2 empty when neither area is set', function () {
+    $land = Property::factory()->type(PropertyType::Land)->create([
+        'area_m2' => null,
+        'land_area_m2' => null,
+    ]);
 
     expect($land->fresh()->price_per_m2)->toBeNull();
 });

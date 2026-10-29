@@ -34,12 +34,27 @@ trait HasSlug
         $slug = $base;
         $suffix = 2;
 
-        while ($this->slugQuery()->where('slug', $slug)->exists()) {
+        while ($this->slugTaken($slug)) {
             $slug = "{$base}-{$suffix}";
             $suffix++;
         }
 
         return $slug;
+    }
+
+    /**
+     * Slugs that must not be used, so a listing cannot shadow a browse URL.
+     *
+     * @return list<string>
+     */
+    protected function reservedSlugs(): array
+    {
+        return [];
+    }
+
+    protected function slugTaken(string $slug): bool
+    {
+        return in_array($slug, $this->reservedSlugs(), true) || $this->slugQuery()->where('slug', $slug)->exists();
     }
 
     public function getRouteKeyName(): string

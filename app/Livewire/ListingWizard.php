@@ -15,6 +15,7 @@ use App\Enums\HotelType;
 use App\Enums\ItemCondition;
 use App\Enums\ListedBy;
 use App\Enums\ListingStatus;
+use App\Enums\NearbyPlace;
 use App\Enums\PropertyCondition;
 use App\Enums\PropertyDeal;
 use App\Enums\PropertyType;
@@ -158,6 +159,18 @@ class ListingWizard extends Component
 
         if ($property === 'form.category_id' && $this->type === 'classified') {
             $this->form['attribute_values'] = [];
+        }
+
+        if ($property === 'form.property_type' && $this->type === 'property') {
+            $chosen = PropertyType::tryFrom((string) $value);
+
+            if ($chosen !== null) {
+                foreach (['area_m2', 'land_area_m2', 'rooms', 'bedrooms', 'bathrooms', 'floor', 'total_floors', 'condition', 'building_status'] as $field) {
+                    if (! $chosen->allows($field)) {
+                        $this->form[$field] = '';
+                    }
+                }
+            }
         }
 
         $this->persist();
@@ -377,7 +390,7 @@ class ListingWizard extends Component
             'sea' => SeaDistance::meters(is_numeric($this->form['lat'] ?? null) ? (float) $this->form['lat'] : null, is_numeric($this->form['lng'] ?? null) ? (float) $this->form['lng'] : null),
             'summary' => ListingForm::STEPS[$this->step - 1] === 'preview' ? $this->summary($price) : [],
             'priceInsight' => $this->type === 'property' && ListingForm::STEPS[$this->step - 1] === 'price'
-                ? app(PriceInsight::class)->estimate($this->form['deal'] ?? null, $this->form['property_type'] ?? null, $this->form['price'] ?? null, $this->form['currency'] ?? null, $this->form['area_m2'] ?? null, $this->form['location_id'] ?? null)
+                ? app(PriceInsight::class)->estimate($this->form['deal'] ?? null, $this->form['property_type'] ?? null, $this->form['price'] ?? null, $this->form['currency'] ?? null, filled($this->form['area_m2'] ?? null) ? $this->form['area_m2'] : ($this->form['land_area_m2'] ?? null), $this->form['location_id'] ?? null)
                 : null,
             'editing' => $this->editType !== null,
             'cancelUrl' => $this->editType !== null ? localized_route('account.listings', ['type' => $this->editType]) : localized_route('account'),
@@ -600,6 +613,27 @@ class ListingWizard extends Component
     }
 
     /**
+     * Price divided by the built area, or by the plot area when there is no building.
+     *
+     * @param  array<string, mixed>  $form
+     * @param  callable(mixed, string): ?string  $money
+     */
+    private function pricePerSquareMetre(array $form, callable $money): ?string
+    {
+        $area = is_numeric($form['area_m2'] ?? null)
+            ? (float) $form['area_m2']
+            : (is_numeric($form['land_area_m2'] ?? null) ? (float) $form['land_area_m2'] : 0.0);
+
+        if (! is_numeric($form['price'] ?? null) || $area <= 0) {
+            return null;
+        }
+
+        $formatted = $money(((float) $form['price']) / $area, 'currency');
+
+        return $formatted === null ? null : $formatted.' / m²';
+    }
+
+    /**
      * Key facts for the preview step.
      *
      * @return list<array{label: string, value: string}>
@@ -630,12 +664,16 @@ class ListingWizard extends Component
                 [__('account.wizard.fields.deal'), $options['deals'][$form['deal']] ?? null],
                 [__('account.wizard.fields.property_type'), $options['propertyTypes'][$form['property_type']] ?? null],
                 [__('account.wizard.fields.price'), $money($form['price'], 'currency')],
+                [__('site.real_estate.per_m2'), $this->pricePerSquareMetre($form, $money)],
                 [__('account.wizard.fields.area_m2'), filled($form['area_m2']) ? $form['area_m2'].' m²' : null],
-                [__('account.wizard.fields.land_area_m2'), filled($form['land_area_m2']) ? $form['land_area_m2'].' m²' : null],
-                [__('account.wizard.fields.rooms'), $form['rooms']],
-                [__('account.wizard.fields.floor'), filled($form['floor']) ? $form['floor'].(filled($form['total_floors']) ? ' / '.$form['total_floors'] : '') : null],
+                [($form['property_type'] ?? '') === PropertyType::Land->value ? __('account.wizard.fields.land_area_m2') : __('account.wizard.fields.yard_area'), filled($form['land_area_m2']) ? $form['land_area_m2'].' m²' : null],
+                [($form['property_type'] ?? '') === PropertyType::Hotel->value ? __('account.wizard.fields.rooms_count') : __('account.wizard.fields.rooms'), $form['rooms']],
+                [__('account.wizard.fields.bedrooms'), $form['bedrooms'] ?? null],
+                [__('account.wizard.fields.floor'), filled($form['floor']) ? $form['floor'].(filled($form['total_floors']) ? ' / '.$form['total_floors'] : '') : (filled($form['total_floors']) ? (string) $form['total_floors'] : null)],
                 [__('account.wizard.fields.condition'), $options['conditions'][$form['condition']] ?? null],
+                [__('account.wizard.fields.building_status'), $options['buildingStatuses'][$form['building_status']] ?? null],
                 [__('account.wizard.fields.features'), $chosen($options['features'], $form['features'] ?? [])],
+                [__('account.wizard.fields.nearby'), $chosen(NearbyPlace::options(), $form['nearby'] ?? [])],
             ],
             'classified' => [
                 [__('account.wizard.fields.category_id'), Category::query()->find(is_numeric($form['category_id']) ? (int) $form['category_id'] : null)?->name],

@@ -2,6 +2,8 @@
 
 namespace App\Services\Seo;
 
+use App\Enums\PropertyDeal;
+use App\Enums\PropertyType;
 use App\Models\Article;
 use App\Models\BusinessProfile;
 use App\Models\Classified;
@@ -88,6 +90,14 @@ final class SitemapWriter
     private function staticEntries(): array
     {
         $entries = array_map(fn (string $route): array => $this->entry($route, [], null), self::STATIC_ROUTES);
+
+        foreach (PropertyType::cases() as $type) {
+            $entries[] = $this->entry('real-estate.type', ['type' => $type->value], null);
+
+            foreach (PropertyDeal::cases() as $deal) {
+                $entries[] = $this->entry('real-estate.browse', ['type' => $type->value, 'deal' => $deal->value], null);
+            }
+        }
 
         foreach (Page::query()->where('is_published', true)->get(['id', 'slug', 'updated_at']) as $page) {
             $entries[] = $this->entry('pages.show', ['page' => $page->slug], $page->updated_at);

@@ -184,27 +184,40 @@ return [
         'auto_bump' => 'Автоподнятие',
     ],
 
+    'nearby_place' => [
+        'school' => 'Школа',
+        'kindergarten' => 'Детский сад',
+        'pharmacy' => 'Аптека',
+        'supermarket' => 'Супермаркет',
+        'bus_stop' => 'Автобусная остановка',
+        'park' => 'Парк',
+        'boulevard' => 'Бульвар',
+        'beach' => 'Пляж',
+    ],
+
     'property_condition' => [
         'newly_renovated' => 'Новый ремонт',
+        'renovated' => 'С ремонтом',
         'old_renovation' => 'Старый ремонт',
-        'needs_renovation' => 'Требует ремонта',
+        'green_frame' => 'Зелёный каркас',
         'white_frame' => 'Белый каркас',
         'black_frame' => 'Чёрный каркас',
-        'green_frame' => 'Зелёный каркас',
     ],
 
     'property_deal' => [
         'sale' => 'Продажа',
         'rent' => 'Аренда',
+        'pledge' => 'Под залог',
         'daily_rent' => 'Посуточно',
     ],
 
     'property_type' => [
         'apartment' => 'Квартира',
-        'house' => 'Дом',
+        'house' => 'Частный дом',
+        'country_house' => 'Дача',
         'land' => 'Земельный участок',
         'commercial' => 'Коммерческая площадь',
-        'hotel_business' => 'Гостиница (бизнес)',
+        'hotel' => 'Гостиница',
     ],
 
     'report_reason' => [

@@ -57,8 +57,8 @@ class HomepageData
 
         $tiles = [
             'hotels' => ['listings', 'bed', localized_route('hotels.index')],
-            'apartments' => ['listings', 'building', localized_route('real-estate.index', ['type' => ['apartment']])],
-            'houses' => ['listings', 'house', localized_route('real-estate.index', ['type' => ['house']])],
+            'apartments' => ['listings', 'building', localized_route('real-estate.type', ['type' => PropertyType::Apartment->value])],
+            'houses' => ['listings', 'house', localized_route('real-estate.type', ['type' => PropertyType::House->value])],
             'cars' => ['listings', 'car', localized_route('classifieds.index', ['category' => 'cars'])],
             'services' => ['listings', 'wrench', localized_route('classifieds.index', ['category' => 'services'])],
             'jobs' => ['vacancies', 'briefcase', localized_route('jobs.index')],

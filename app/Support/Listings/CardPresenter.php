@@ -4,7 +4,6 @@ namespace App\Support\Listings;
 
 use App\Enums\Currency;
 use App\Enums\PropertyDeal;
-use App\Enums\PropertyType;
 use App\Enums\SalaryPeriod;
 use App\Enums\SiteFeature;
 use App\Models\Article;
@@ -71,7 +70,7 @@ class CardPresenter
         $suffix = match ($property->deal) {
             PropertyDeal::Rent => ' '.__('listing.per_month'),
             PropertyDeal::DailyRent => ' '.__('listing.per_day'),
-            default => '',
+            PropertyDeal::Sale, PropertyDeal::Pledge => '',
         };
         $converted = null;
 
@@ -81,7 +80,10 @@ class CardPresenter
 
         return [
             'favorite' => $this->favoriteKey($property),
-            'deal' => $property->deal === PropertyDeal::Sale ? 'sale' : 'rent',
+            'deal' => match ($property->deal) {
+                PropertyDeal::Sale, PropertyDeal::Pledge => 'sale',
+                PropertyDeal::Rent, PropertyDeal::DailyRent => 'rent',
+            },
             'badge' => (string) $property->deal->getLabel(),
             'price' => $this->price->format($amount, $currency).$suffix,
             'converted' => $converted,
@@ -117,7 +119,7 @@ class CardPresenter
 
         if ($property->floor !== null && $property->total_floors !== null) {
             $features[] = ['icon' => 'layers', 'text' => __('listing.floor', ['floor' => $property->floor, 'total' => $property->total_floors])];
-        } elseif ($property->land_area_m2 !== null && in_array($property->type, [PropertyType::House, PropertyType::Land], true)) {
+        } elseif ($property->land_area_m2 !== null && $property->type->allows('land_area_m2')) {
             $features[] = ['icon' => 'house', 'text' => __('listing.yard', ['value' => $this->price->number((float) $property->land_area_m2)])];
         }
 

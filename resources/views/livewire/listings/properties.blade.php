@@ -34,9 +34,23 @@
                 <x-filters.range from="floor_min" to="floor_max" :label="__('site.filters.floor')" />
             </x-filters.group>
 
-            <x-filters.group :title="__('site.filters.building')">
-                <x-filters.pills model="building" :multiple="false" :options="['' => __('site.filters.any'), 'new' => __('site.filters.building_new'), 'old' => __('site.filters.building_old')]" />
+            <x-filters.group :title="__('site.filters.condition')">
+                <x-filters.pills model="condition" :options="$conditionOptions" />
             </x-filters.group>
+
+            <x-filters.group :title="__('site.filters.building')">
+                <x-filters.pills model="building" :multiple="false" :options="['' => __('site.filters.any')] + $buildingOptions" />
+            </x-filters.group>
+
+            <x-filters.group :title="__('site.filters.sea')">
+                <x-filters.pills model="sea" :multiple="false" :options="['' => __('site.filters.any')] + collect(\App\Livewire\Listings\PropertyIndex::SEA_OPTIONS)->mapWithKeys(fn (int $meters): array => [(string) $meters => __('site.filters.sea_up_to', ['distance' => $meters])])->all()" />
+            </x-filters.group>
+
+            @if ($amenityOptions)
+                <x-filters.group :title="__('site.filters.amenities')">
+                    <x-filters.pills model="amenities" :options="$amenityOptions" />
+                </x-filters.group>
+            @endif
 
             @if ($locationOptions)
                 <x-filters.group :title="__('home.search.fields.location')">

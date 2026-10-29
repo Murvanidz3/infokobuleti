@@ -74,24 +74,18 @@
                             @break
 
                         @case('real_estate')
-                            <div class="flex min-h-16 min-w-0 items-center gap-3 rounded-field bg-surface-alt px-4 py-3">
-                                <x-icon name="tag" :size="20" class="text-navy" />
-                                <div class="min-w-0 flex-1">
-                                    <span id="search-deal-label" class="mb-[3px] block text-xs font-medium text-secondary">{{ __('home.search.fields.deal') }}</span>
-                                    <div role="radiogroup" aria-labelledby="search-deal-label" class="flex gap-1">
-                                        @foreach (['sale' => __('home.search.deal.buy'), 'rent' => __('home.search.deal.rent')] as $deal => $dealLabel)
-                                            <label class="cursor-pointer">
-                                                <input type="radio" name="deal" value="{{ $deal }}" class="peer sr-only" @checked($loop->first)>
-                                                <span class="block rounded-full px-3.5 py-1 text-[13px] font-semibold text-secondary transition-colors duration-200 peer-checked:bg-navy peer-checked:text-white peer-focus-visible:outline-2 peer-focus-visible:outline-coral">{{ $dealLabel }}</span>
-                                            </label>
-                                        @endforeach
-                                    </div>
-                                </div>
-                            </div>
+                            <x-hero.field icon="tag" :label="__('home.search.fields.deal')">
+                                <select name="deal" class="{{ $control }}">
+                                    <option value="">{{ __('site.filters.any') }}</option>
+                                    @foreach (\App\Enums\PropertyDeal::options() as $value => $text)
+                                        <option value="{{ $value }}">{{ $text }}</option>
+                                    @endforeach
+                                </select>
+                            </x-hero.field>
                             <x-hero.field icon="building" :label="__('home.search.fields.type')">
                                 <select name="type[]" class="{{ $control }}">
                                     <option value="">{{ __('site.filters.any') }}</option>
-                                    @foreach ($preset('property_types') as $value => $text)
+                                    @foreach (\App\Enums\PropertyType::options() as $value => $text)
                                         <option value="{{ $value }}">{{ $text }}</option>
                                     @endforeach
                                 </select>

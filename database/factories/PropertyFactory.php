@@ -5,6 +5,7 @@ namespace Database\Factories;
 use App\Enums\BuildingStatus;
 use App\Enums\Currency;
 use App\Enums\ListedBy;
+use App\Enums\NearbyPlace;
 use App\Enums\PropertyCondition;
 use App\Enums\PropertyDeal;
 use App\Enums\PropertyType;
@@ -35,8 +36,16 @@ class PropertyFactory extends Factory
      */
     public function definition(): array
     {
-        $type = fake()->randomElement([PropertyType::Apartment, PropertyType::Apartment, PropertyType::Apartment, PropertyType::House, PropertyType::Land, PropertyType::Commercial]);
-        $deal = $type === PropertyType::Land ? PropertyDeal::Sale : fake()->randomElement(PropertyDeal::cases());
+        $type = fake()->randomElement([
+            PropertyType::Apartment, PropertyType::Apartment, PropertyType::Apartment,
+            PropertyType::House, PropertyType::CountryHouse, PropertyType::Land,
+            PropertyType::Commercial, PropertyType::Hotel,
+        ]);
+        $deal = match ($type) {
+            PropertyType::Land => PropertyDeal::Sale,
+            PropertyType::Hotel => fake()->randomElement([PropertyDeal::DailyRent, PropertyDeal::Sale]),
+            default => fake()->randomElement(PropertyDeal::cases()),
+        };
 
         return [
             ...$this->listingAttributes(),
@@ -80,16 +89,16 @@ class PropertyFactory extends Factory
 
         $area = match ($type) {
             PropertyType::Apartment => $rooms * fake()->numberBetween(20, 30) + 10,
-            PropertyType::House => fake()->numberBetween(90, 260),
+            PropertyType::House, PropertyType::CountryHouse => fake()->numberBetween(90, 260),
             PropertyType::Land => null,
             PropertyType::Commercial => fake()->numberBetween(40, 300),
-            PropertyType::HotelBusiness => fake()->numberBetween(300, 1500),
+            PropertyType::Hotel => fake()->numberBetween(300, 1500),
         };
 
         [$price, $currency] = match ($deal) {
-            PropertyDeal::Sale => [match ($type) {
+            PropertyDeal::Sale, PropertyDeal::Pledge => [match ($type) {
                 PropertyType::Land => fake()->numberBetween(15, 200) * 1000,
-                PropertyType::HotelBusiness => fake()->numberBetween(25, 120) * 10000,
+                PropertyType::Hotel => fake()->numberBetween(25, 120) * 10000,
                 default => (int) round($area * fake()->numberBetween(850, 1400), -3),
             }, Currency::USD],
             PropertyDeal::Rent => [fake()->numberBetween(8, 30) * 100, Currency::GEL],
@@ -102,15 +111,18 @@ class PropertyFactory extends Factory
             'price' => $price,
             'currency' => $currency,
             'area_m2' => $area,
-            'land_area_m2' => in_array($type, [PropertyType::House, PropertyType::Land], true) ? fake()->numberBetween(3, 30) * 100 : null,
-            'rooms' => in_array($type, [PropertyType::Apartment, PropertyType::House], true) ? $rooms + ($type === PropertyType::House ? 2 : 0) : null,
-            'bedrooms' => in_array($type, [PropertyType::Apartment, PropertyType::House], true) ? max(1, $rooms - 1) : null,
-            'bathrooms' => $type === PropertyType::Land ? null : fake()->numberBetween(1, 2),
-            'floor' => $isApartment ? $floor : null,
-            'total_floors' => $isApartment ? fake()->numberBetween($floor, 16) : null,
-            'condition' => $type === PropertyType::Land ? null : fake()->randomElement(PropertyCondition::cases()),
-            'building_status' => $isApartment ? fake()->randomElement(BuildingStatus::cases()) : null,
+            'land_area_m2' => $type->allows('land_area_m2') ? fake()->numberBetween(3, 30) * 100 : null,
+            'rooms' => $type->allows('rooms') ? $rooms + ($type === PropertyType::House ? 2 : 0) : null,
+            'bedrooms' => $type->allows('bedrooms') ? max(1, $rooms - 1) : null,
+            'bathrooms' => $type->allows('bathrooms') ? fake()->numberBetween(1, 2) : null,
+            'floor' => $unitFloor = $type->allows('floor') ? ($isApartment ? $floor : fake()->numberBetween(1, 2)) : null,
+            'total_floors' => $type->allows('total_floors')
+                ? ($isApartment ? fake()->numberBetween($floor, 16) : fake()->numberBetween(max(1, $unitFloor ?? 1), 3))
+                : null,
+            'condition' => $type->allows('condition') ? fake()->randomElement(PropertyCondition::cases()) : null,
+            'building_status' => $type->allows('building_status') ? fake()->randomElement(BuildingStatus::cases()) : null,
             'cadastral_code' => $type === PropertyType::Land ? '20.'.fake()->numerify('##.##.###') : null,
+            'nearby' => fake()->boolean(70) ? fake()->randomElements(array_column(NearbyPlace::cases(), 'value'), fake()->numberBetween(1, 3)) : [],
         ];
     }
 
@@ -131,7 +143,10 @@ class PropertyFactory extends Factory
                 ['ka' => 'კერძო სახლი ბაღით', 'en' => 'Private house with a garden', 'ru' => 'Частный дом с садом'],
                 ['ka' => 'ორსართულიანი სახლი ეზოთი', 'en' => 'Two-storey house with a yard', 'ru' => 'Двухэтажный дом с двором'],
                 ['ka' => 'სახლი ზღვასთან ახლოს', 'en' => 'House close to the sea', 'ru' => 'Дом недалеко от моря'],
+            ]),
+            PropertyType::CountryHouse => fake()->randomElement([
                 ['ka' => 'აგარაკი მანდარინის ბაღით', 'en' => 'Country house with a mandarin orchard', 'ru' => 'Дача с мандариновым садом'],
+                ['ka' => 'აგარაკი ზღვასთან ახლოს', 'en' => 'Country house close to the sea', 'ru' => 'Дача недалеко от моря'],
             ]),
             PropertyType::Land => fake()->randomElement([
                 ['ka' => 'სამშენებლო ნაკვეთი', 'en' => 'Building plot', 'ru' => 'Участок под застройку'],
@@ -144,8 +159,8 @@ class PropertyFactory extends Factory
                 ['ka' => 'მაღაზიის ფართი ცენტრში', 'en' => 'Retail space in the centre', 'ru' => 'Торговое помещение в центре'],
                 ['ka' => 'ოფისი ბულვართან ახლოს', 'en' => 'Office near the boulevard', 'ru' => 'Офис рядом с бульваром'],
             ]),
-            PropertyType::HotelBusiness => fake()->randomElement([
-                ['ka' => 'მოქმედი საოჯახო სასტუმრო', 'en' => 'Operating guesthouse business', 'ru' => 'Действующий гостевой дом'],
+            PropertyType::Hotel => fake()->randomElement([
+                ['ka' => 'მოქმედი საოჯახო სასტუმრო', 'en' => 'Operating guesthouse', 'ru' => 'Действующий гостевой дом'],
                 ['ka' => 'სასტუმრო 15 ოთახით', 'en' => 'Hotel with 15 rooms', 'ru' => 'Гостиница на 15 номеров'],
             ]),
         };
@@ -162,7 +177,7 @@ class PropertyFactory extends Factory
                 'en' => 'A level plot with electricity and water connected. Cadastral records are in order.',
                 'ru' => 'Ровный участок, подведены свет и вода. Кадастровые документы в порядке.',
             ],
-            PropertyType::Commercial, PropertyType::HotelBusiness => [
+            PropertyType::Commercial, PropertyType::Hotel => [
                 'ka' => 'გამოსადეგია ბიზნესისთვის: მაღალი გამვლელობა, ცალკე შესასვლელი და ყველა კომუნიკაცია.',
                 'en' => 'Suited to business: busy foot traffic, a separate entrance and all utilities.',
                 'ru' => 'Подходит под бизнес: высокая проходимость, отдельный вход и все коммуникации.',

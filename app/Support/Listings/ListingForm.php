@@ -12,6 +12,7 @@ use App\Enums\Experience;
 use App\Enums\HotelType;
 use App\Enums\ItemCondition;
 use App\Enums\ListedBy;
+use App\Enums\NearbyPlace;
 use App\Enums\PropertyCondition;
 use App\Enums\PropertyDeal;
 use App\Enums\PropertyType;
@@ -85,7 +86,7 @@ final class ListingForm
             'property' => [
                 'deal' => '', 'property_type' => '', 'area_m2' => '', 'land_area_m2' => '', 'rooms' => '', 'bedrooms' => '',
                 'bathrooms' => '', 'floor' => '', 'total_floors' => '', 'condition' => '', 'building_status' => '',
-                'cadastral_code' => '', 'listed_by' => ListedBy::Owner->value, 'features' => [],
+                'cadastral_code' => '', 'listed_by' => ListedBy::Owner->value, 'features' => [], 'nearby' => [],
                 'price' => '', 'currency' => Currency::USD->value,
             ],
             'classified' => [
@@ -141,6 +142,7 @@ final class ListingForm
                 'condition' => $value('condition'), 'building_status' => $value('building_status'), 'cadastral_code' => $value('cadastral_code'),
                 'listed_by' => $value('listed_by'),
                 'features' => $listing->features()->pluck('amenities.id')->map(fn (mixed $id): string => (string) $id)->all(),
+                'nearby' => array_values(array_map('strval', $listing->nearby ?? [])),
                 'price' => self::number($listing->getAttribute('price')), 'currency' => $value('currency'),
             ],
             $listing instanceof Classified => [
@@ -318,19 +320,7 @@ final class ListingForm
                 'website' => self::nullable($form['website'] ?? null),
             ],
             'property' => [
-                'deal' => $form['deal'],
-                'type' => $form['property_type'],
-                'area_m2' => self::float($form['area_m2'] ?? null),
-                'land_area_m2' => self::float($form['land_area_m2'] ?? null),
-                'rooms' => self::int($form['rooms'] ?? null),
-                'bedrooms' => self::int($form['bedrooms'] ?? null),
-                'bathrooms' => self::int($form['bathrooms'] ?? null),
-                'floor' => self::int($form['floor'] ?? null),
-                'total_floors' => self::int($form['total_floors'] ?? null),
-                'condition' => self::nullable($form['condition'] ?? null),
-                'building_status' => self::nullable($form['building_status'] ?? null),
-                'cadastral_code' => self::nullable($form['cadastral_code'] ?? null),
-                'listed_by' => $form['listed_by'] ?: ListedBy::Owner->value,
+                ...self::propertyAttributes($form),
                 'distance_to_sea_m' => SeaDistance::meters($lat, $lng),
                 'price' => (float) $form['price'],
                 'currency' => $form['currency'],
@@ -448,21 +438,7 @@ final class ListingForm
                 'amenities' => ['array'],
                 'amenities.*' => [Rule::exists('amenities', 'id')->where('scope', AmenityScope::Hotel->value)],
             ],
-            'property' => [
-                'area_m2' => [($form['property_type'] ?? '') === PropertyType::Land->value ? 'nullable' : 'required', 'numeric', 'between:1,100000'],
-                'land_area_m2' => [($form['property_type'] ?? '') === PropertyType::Land->value ? 'required' : 'nullable', 'numeric', 'between:1,10000000'],
-                'rooms' => ['nullable', 'integer', 'between:1,50'],
-                'bedrooms' => ['nullable', 'integer', 'between:0,50'],
-                'bathrooms' => ['nullable', 'integer', 'between:0,20'],
-                'floor' => ['nullable', 'integer', 'between:-3,100'],
-                'total_floors' => ['nullable', 'integer', 'between:1,100', self::notBelow($form['floor'] ?? null)],
-                'condition' => ['nullable', Rule::enum(PropertyCondition::class)],
-                'building_status' => ['nullable', Rule::enum(BuildingStatus::class)],
-                'cadastral_code' => ['nullable', 'string', 'max:32', 'regex:/^[\d.\/-]+$/'],
-                'listed_by' => ['required', Rule::enum(ListedBy::class)],
-                'features' => ['array'],
-                'features.*' => [Rule::exists('amenities', 'id')->where('scope', AmenityScope::Property->value)],
-            ],
+            'property' => self::propertyDetailRules($form),
             'classified' => [
                 'condition' => ['nullable', Rule::enum(ItemCondition::class)],
                 ...self::schemaRules($form),
@@ -477,6 +453,92 @@ final class ListingForm
             ],
             default => [],
         };
+    }
+
+    /**
+     * Columns that depend on the property type. Irrelevant ones are stored as null.
+     *
+     * @param  array<string, mixed>  $form
+     * @return array<string, mixed>
+     */
+    private static function propertyAttributes(array $form): array
+    {
+        $type = PropertyType::from((string) $form['property_type']);
+        $keep = fn (string $field, mixed $value): mixed => $type->allows($field) ? $value : null;
+
+        return [
+            'deal' => $form['deal'],
+            'type' => $type->value,
+            'area_m2' => $keep('area_m2', self::float($form['area_m2'] ?? null)),
+            'land_area_m2' => $keep('land_area_m2', self::float($form['land_area_m2'] ?? null)),
+            'rooms' => $keep('rooms', self::int($form['rooms'] ?? null)),
+            'bedrooms' => $keep('bedrooms', self::int($form['bedrooms'] ?? null)),
+            'bathrooms' => $keep('bathrooms', self::int($form['bathrooms'] ?? null)),
+            'floor' => $keep('floor', self::int($form['floor'] ?? null)),
+            'total_floors' => $keep('total_floors', self::int($form['total_floors'] ?? null)),
+            'condition' => $keep('condition', self::nullable($form['condition'] ?? null)),
+            'building_status' => $keep('building_status', self::nullable($form['building_status'] ?? null)),
+            'cadastral_code' => self::nullable($form['cadastral_code'] ?? null),
+            'listed_by' => $form['listed_by'] ?: ListedBy::Owner->value,
+            'nearby' => self::nearby($form['nearby'] ?? []),
+        ];
+    }
+
+    /**
+     * @param  array<string, mixed>  $form
+     * @return array<string, mixed>
+     */
+    private static function propertyDetailRules(array $form): array
+    {
+        $type = PropertyType::tryFrom((string) ($form['property_type'] ?? ''));
+        $numeric = function (string $field, array $rules) use ($type): array {
+            if ($type !== null && ! $type->allows($field)) {
+                return ['prohibited'];
+            }
+
+            return [$type?->requires($field) ? 'required' : 'nullable', ...$rules];
+        };
+
+        return [
+            'area_m2' => $numeric('area_m2', ['numeric', 'between:1,100000']),
+            'land_area_m2' => $numeric('land_area_m2', ['numeric', 'between:1,10000000']),
+            'rooms' => $numeric('rooms', ['integer', 'between:1,50']),
+            'bedrooms' => $numeric('bedrooms', ['integer', 'between:0,50']),
+            'bathrooms' => $numeric('bathrooms', ['integer', 'between:0,20']),
+            'floor' => $numeric('floor', ['integer', 'between:-3,100']),
+            'total_floors' => [
+                ...$numeric('total_floors', ['integer', 'between:1,100']),
+                ...($type === null || $type->allows('total_floors') ? [self::notBelow($form['floor'] ?? null)] : []),
+            ],
+            'condition' => $type !== null && ! $type->allows('condition') ? ['prohibited'] : ['nullable', Rule::enum(PropertyCondition::class)],
+            'building_status' => $type !== null && ! $type->allows('building_status') ? ['prohibited'] : ['nullable', Rule::enum(BuildingStatus::class)],
+            'cadastral_code' => ['nullable', 'string', 'max:32', 'regex:/^[\d.\/-]+$/'],
+            'listed_by' => ['required', Rule::enum(ListedBy::class)],
+            'features' => ['array'],
+            'features.*' => [Rule::exists('amenities', 'id')->where('scope', AmenityScope::Property->value)],
+            'nearby' => ['array'],
+            'nearby.*' => [Rule::enum(NearbyPlace::class)],
+        ];
+    }
+
+    /**
+     * @return list<string>|null
+     */
+    private static function nearby(mixed $values): ?array
+    {
+        $places = [];
+
+        foreach ((array) $values as $value) {
+            $place = NearbyPlace::tryFrom((string) $value);
+
+            if ($place !== null) {
+                $places[] = $place->value;
+            }
+        }
+
+        $places = array_values(array_unique($places));
+
+        return $places === [] ? null : $places;
     }
 
     /**
