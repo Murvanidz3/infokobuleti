@@ -1,7 +1,7 @@
 {{-- Step 4: photos. Resized in the browser, uploaded one by one, reordered by drag or arrows; the first is the cover. --}}
 @php
     $max = \App\Support\Listings\ListingForm::MAX_PHOTOS;
-    $photos = $form['photos'] ?? [];
+    $photos = is_array($form['photos'] ?? null) ? $form['photos'] : [];
     $required = \App\Support\Listings\ListingForm::requiresPhotos($type);
 @endphp
 
@@ -42,6 +42,7 @@
     @if ($photos !== [])
         <ul class="grid grid-cols-2 gap-3 xs:grid-cols-3 md:grid-cols-4">
             @foreach ($photos as $index => $photo)
+                @continue(! is_array($photo) || ! isset($photo['source'], $photo['id'], $photo['url']))
                 <li wire:key="photo-{{ $photo['source'] }}-{{ $photo['id'] }}"
                     draggable="true"
                     x-on:dragstart="dragStart({{ $index }})"

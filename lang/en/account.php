@@ -229,13 +229,14 @@ return [
         'yes' => 'Yes',
         'fix_errors' => 'Please fix before sending:',
         'moderation' => 'A moderator reviews your listing after you send it, usually within a few hours. We will notify you of the result.',
-        'moderation_edit' => 'Your changes go live after moderation. Until then the listing is temporarily hidden.',
+        'moderation_edit' => 'A listing that is already on the site stays visible. A new listing, or one that was rejected, expired or archived, is reviewed before it goes live.',
         'edit_step' => 'Edit :step',
         'discard' => 'Delete draft',
         'discard_changes' => 'Discard changes',
         'confirm_discard' => 'Discard unsaved changes?',
         'submitted' => 'Your listing was sent to moderation. We will notify you of the result.',
         'updated' => 'Your changes were sent to moderation.',
+        'saved' => 'Your changes are saved and the listing stays on the site.',
         'fields' => [
             'title' => 'Title',
             'description' => 'Description',
@@ -344,6 +345,8 @@ return [
         'errors' => [
             'category' => 'Choose the most specific category.',
             'not_below' => 'This value cannot be lower than the previous one.',
+            'photo' => 'Choose a photo from this form.',
+            'status' => 'This listing cannot be submitted from its current status.',
         ],
     ],
 

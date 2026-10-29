@@ -1,5 +1,5 @@
 {{-- Step 6: how the listing will read, then submit to moderation. --}}
-@php($photos = $form['photos'] ?? [])
+@php($photos = is_array($form['photos'] ?? null) ? $form['photos'] : [])
 
 <div class="flex flex-col gap-6">
     @if ($errors->any())
@@ -16,6 +16,7 @@
     @if ($photos !== [])
         <div class="grid grid-cols-4 gap-2 md:grid-cols-[2fr_1fr_1fr] md:grid-rows-2">
             @foreach (array_slice($photos, 0, 5) as $index => $photo)
+                @continue(! is_array($photo) || ! isset($photo['url']))
                 <div @class(['relative overflow-hidden rounded-tile bg-surface-alt', 'col-span-4 aspect-4/3 md:col-span-1 md:row-span-2 md:aspect-auto' => $index === 0, 'aspect-square max-md:hidden md:aspect-auto' => $index > 2, 'aspect-square md:aspect-auto' => $index > 0 && $index <= 2])>
                     <img src="{{ $photo['url'] }}" alt="" class="absolute inset-0 size-full object-cover">
                 </div>

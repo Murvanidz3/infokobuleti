@@ -16,9 +16,12 @@ class ListingPolicy
     /** Renewal opens this many days before the expiry date. */
     public const int RENEW_WINDOW_DAYS = 7;
 
+    /**
+     * Archived listings stay editable: submitting one sends it back to moderation.
+     */
     public function update(User $user, Model&Listing $listing): bool
     {
-        return $this->owns($user, $listing) && $listing->listingStatus() !== ListingStatus::Archived;
+        return $this->owns($user, $listing);
     }
 
     public function pause(User $user, Model&Listing $listing): bool

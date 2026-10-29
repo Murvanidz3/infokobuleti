@@ -24,9 +24,9 @@ it('allows only the documented transitions', function (ListingStatus $from, List
         'pending' => ['published', 'rejected', 'draft'],
         'rejected' => ['pending'],
         'published' => ['paused', 'expired', 'archived', 'pending'],
-        'paused' => ['published', 'archived'],
-        'expired' => ['pending', 'archived'],
-        'archived' => ['draft'],
+        'paused' => ['published', 'pending', 'archived'],
+        'expired' => ['pending', 'published', 'archived'],
+        'archived' => ['draft', 'pending'],
     ];
 
     foreach (ListingStatus::cases() as $from) {

@@ -72,11 +72,24 @@ class OwnerListings
 
     /**
      * One of the user's listings, or a 404 (other people's listings are never found).
+     * The account list hides archived listings; the editor passes $withArchived so an owner
+     * can open one and send it back to moderation.
      */
-    public function find(User $user, string $type, int $id): Model&Listing
+    public function find(User $user, string $type, int $id, bool $withArchived = false): Model&Listing
     {
+        if (! $withArchived) {
+            /** @var Model&Listing */
+            return $this->query($user, $type)->whereKey($id)->firstOrFail();
+        }
+
+        $class = self::TYPES[$type] ?? abort(404);
+
         /** @var Model&Listing */
-        return $this->query($user, $type)->whereKey($id)->firstOrFail();
+        return $class::query()
+            ->where('user_id', $user->getKey())
+            ->with(in_array($type, ['classified', 'vacancy'], true) ? ['media', 'location', 'category'] : ['media', 'location'])
+            ->whereKey($id)
+            ->firstOrFail();
     }
 
     /**
