@@ -10,7 +10,8 @@ use Illuminate\Support\Facades\DB;
 
 /**
  * One-click renewal: an approved listing gets a fresh expiry period from today and goes live again.
- * The content was already moderated, so it skips the moderation queue; edits go through it.
+ * The content was already moderated, so renewal skips the queue. Editing a published listing
+ * also leaves it published (SubmitListing); this action does not change the content.
  */
 class RenewListing
 {

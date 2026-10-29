@@ -174,6 +174,9 @@ final class ListingForm
             'location' => self::locationRules($type),
             'photos' => [
                 'photos' => [self::requiresPhotos($type) ? 'required' : 'nullable', 'array', 'max:'.self::MAX_PHOTOS],
+                'photos.*' => ['array'],
+                'photos.*.source' => ['required', 'string', Rule::in(['draft', 'listing'])],
+                'photos.*.id' => ['required', 'integer', 'min:1'],
             ],
             'price' => self::priceRules($type, $form),
             default => [],
@@ -250,6 +253,26 @@ final class ListingForm
         }
 
         return $names;
+    }
+
+    /**
+     * Messages for rules whose default text would name an internal key.
+     *
+     * @return array<string, string>
+     */
+    public static function validationMessages(): array
+    {
+        $photo = __('account.wizard.errors.photo');
+
+        return [
+            'form.photos.array' => $photo,
+            'form.photos.*.array' => $photo,
+            'form.photos.*.source.required' => $photo,
+            'form.photos.*.source.in' => $photo,
+            'form.photos.*.id.required' => $photo,
+            'form.photos.*.id.integer' => $photo,
+            'form.photos.*.id.min' => $photo,
+        ];
     }
 
     public static function requiresPhotos(string $type): bool

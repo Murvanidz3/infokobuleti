@@ -4,6 +4,7 @@ namespace App\Actions\Listings;
 
 use App\Contracts\Listing;
 use App\Enums\ListingStatus;
+use App\Exceptions\InvalidStatusTransition;
 use App\Exceptions\ListingLimitReached;
 use App\Jobs\AnnounceToModerators;
 use App\Models\Hotel;
@@ -13,26 +14,31 @@ use App\Models\User;
 use App\Models\Vacancy;
 use App\Services\Account\OwnerListings;
 use App\Services\Listings\ListingLimits;
+use App\Services\Listings\ListingPhotos;
 use App\Support\Listings\ListingForm;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
-use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
 /**
- * Turns a wizard draft into a listing (new) or applies it to the listing being edited, and sends
- * the result to the moderation queue. The draft and its leftover photos are removed afterwards.
+ * Turns a wizard draft into a listing (new) or applies it to the listing being edited.
+ *
+ * A listing that is already published stays published: the wizard writes onto that same row,
+ * and there is no second copy that could stay on the site while a revision waited. Sending it
+ * back to pending is what takes it down, including for a price change. Every other status
+ * (new, rejected, paused, expired, archived) still enters the moderation queue.
  */
 class SubmitListing
 {
     public function __construct(
         private OwnerListings $listings,
         private ListingLimits $limits,
+        private ListingPhotos $photos,
     ) {}
 
     /**
-     * @throws ValidationException when the form is incomplete
+     * @throws ValidationException when the form is incomplete or the status cannot be submitted
      * @throws ListingLimitReached when the monthly free listings are used up
      */
     public function handle(User $user, ListingDraft $draft): Model&Listing
@@ -40,15 +46,28 @@ class SubmitListing
         $type = (string) $draft->listing_type;
         $form = $draft->data;
 
-        Validator::make(['form' => $form], ListingForm::allRules($type, $form), [], ListingForm::validationAttributes())->validate();
+        Validator::make(
+            ['form' => $form],
+            ListingForm::allRules($type, $form),
+            ListingForm::validationMessages(),
+            ListingForm::validationAttributes(),
+        )->validate();
 
-        $editing = $draft->listing_id !== null ? $this->listings->find($user, $type, $draft->listing_id) : null;
-
-        if ($editing === null && ! $this->limits->canCreate($user)) {
-            throw new ListingLimitReached((int) $this->limits->limitFor($user), $this->limits->packageLimit($user) !== null);
-        }
+        $editing = $draft->listing_id !== null
+            ? $this->listings->find($user, $type, (int) $draft->listing_id, withArchived: true)
+            : null;
 
         return DB::transaction(function () use ($user, $draft, $type, $form, $editing): Model&Listing {
+            if ($editing === null) {
+                // The limit is a count of rows. Hold the owner row so two submits cannot both
+                // observe a free slot and both insert.
+                User::query()->whereKey($user->getKey())->lockForUpdate()->first();
+
+                if (! $this->limits->canCreate($user)) {
+                    throw new ListingLimitReached((int) $this->limits->limitFor($user), $this->limits->packageLimit($user) !== null);
+                }
+            }
+
             /** @var Model&Listing $listing */
             $listing = $editing ?? new (OwnerListings::TYPES[$type]);
             $listing->forceFill(['user_id' => $user->getKey()]);
@@ -67,18 +86,49 @@ class SubmitListing
             $listing->save();
 
             $this->syncRelations($listing, $form);
-            $this->syncPhotos($listing, $draft, $form['photos'] ?? []);
 
-            if ($listing->listingStatus() !== ListingStatus::Pending) {
-                $listing->transitionTo(ListingStatus::Pending, by: $user);
+            $photos = $form['photos'] ?? [];
+
+            if (! is_array($photos)) {
+                throw ValidationException::withMessages([
+                    'form.photos' => __('account.wizard.errors.photo'),
+                ]);
             }
+
+            $this->photos->sync($listing, $draft, $photos);
+
+            $this->moveToQueueUnlessPublished($listing, $user);
 
             $draft->delete();
 
-            AnnounceToModerators::dispatch($listing->getMorphClass(), (int) $listing->getKey());
+            if ($listing->listingStatus() === ListingStatus::Pending) {
+                AnnounceToModerators::dispatch($listing->getMorphClass(), (int) $listing->getKey());
+            }
 
             return $listing;
         });
+    }
+
+    /**
+     * @throws ValidationException
+     */
+    private function moveToQueueUnlessPublished(Model&Listing $listing, User $user): void
+    {
+        if ($listing->listingStatus() === ListingStatus::Published) {
+            return;
+        }
+
+        if ($listing->listingStatus() === ListingStatus::Pending) {
+            return;
+        }
+
+        try {
+            $listing->transitionTo(ListingStatus::Pending, by: $user);
+        } catch (InvalidStatusTransition) {
+            throw ValidationException::withMessages([
+                'status' => __('account.wizard.errors.status'),
+            ]);
+        }
     }
 
     /**
@@ -101,38 +151,6 @@ class SubmitListing
 
         if ($listing instanceof Property) {
             $listing->features()->sync(array_map('intval', $form['features'] ?? []));
-        }
-    }
-
-    /**
-     * Gallery = the photos listed in the form, in that order (the first is the cover). Photos
-     * uploaded in the wizard move from the draft; gallery photos removed in the wizard are deleted.
-     *
-     * @param  list<array{source: string, id: int}>  $photos
-     */
-    private function syncPhotos(Model&Listing $listing, ListingDraft $draft, array $photos): void
-    {
-        $keep = collect($photos)->where('source', 'listing')->pluck('id')->map(fn (mixed $id): int => (int) $id)->all();
-
-        $listing->getMedia('gallery')
-            ->reject(fn (Media $media): bool => in_array((int) $media->getKey(), $keep, true))
-            ->each(fn (Media $media) => $media->delete());
-
-        $draftMedia = $draft->getMedia('photos')->keyBy(fn (Media $media): int => (int) $media->getKey());
-        $order = [];
-
-        foreach ($photos as $photo) {
-            $id = (int) $photo['id'];
-
-            if ($photo['source'] === 'listing' && in_array($id, $keep, true)) {
-                $order[] = $id;
-            } elseif ($photo['source'] === 'draft' && $draftMedia->has($id)) {
-                $order[] = (int) $draftMedia->get($id)->move($listing, 'gallery')->getKey();
-            }
-        }
-
-        if ($order !== []) {
-            Media::setNewOrder($order);
         }
     }
 }

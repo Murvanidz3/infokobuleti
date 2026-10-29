@@ -32,7 +32,8 @@ enum ListingStatus: string implements FilamentLabel, HasColor
             self::Published => [self::Paused, self::Expired, self::Archived, self::Pending],
             self::Paused => [self::Published, self::Pending, self::Archived],
             self::Expired => [self::Pending, self::Published, self::Archived],
-            self::Archived => [self::Draft],
+            // Pending: the owner edits an archived listing and sends it back to moderation.
+            self::Archived => [self::Draft, self::Pending],
         };
     }
 

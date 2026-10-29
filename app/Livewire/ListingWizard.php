@@ -14,6 +14,7 @@ use App\Enums\Experience;
 use App\Enums\HotelType;
 use App\Enums\ItemCondition;
 use App\Enums\ListedBy;
+use App\Enums\ListingStatus;
 use App\Enums\PropertyCondition;
 use App\Enums\PropertyDeal;
 use App\Enums\PropertyType;
@@ -93,7 +94,7 @@ class ListingWizard extends Component
         $user = $this->user();
 
         if ($editType !== null && $editId !== null) {
-            $listing = $listings->find($user, $editType, $editId);
+            $listing = $listings->find($user, $editType, $editId, withArchived: true);
             abort_unless(Gate::forUser($user)->allows('update', $listing), 403);
 
             $this->editType = $editType;
@@ -195,6 +196,10 @@ class ListingWizard extends Component
     {
         $photos = $this->form['photos'] ?? [];
 
+        if (! is_array($photos)) {
+            $photos = [];
+        }
+
         if (count($photos) >= ListingForm::MAX_PHOTOS) {
             $this->reset('upload');
             $this->addError('upload', __('account.wizard.photos.limit', ['max' => ListingForm::MAX_PHOTOS]));
@@ -233,13 +238,13 @@ class ListingWizard extends Component
     public function removePhoto(int $index): void
     {
         $photos = $this->form['photos'] ?? [];
-        $photo = $photos[$index] ?? null;
+        $photo = is_array($photos) ? ($photos[$index] ?? null) : null;
 
-        if ($photo === null) {
+        if (! is_array($photo)) {
             return;
         }
 
-        if ($photo['source'] === 'draft') {
+        if (($photo['source'] ?? null) === 'draft' && is_numeric($photo['id'] ?? null)) {
             $this->draft()?->media()->whereKey((int) $photo['id'])->first()?->delete();
         }
 
@@ -252,7 +257,7 @@ class ListingWizard extends Component
     {
         $photos = $this->form['photos'] ?? [];
 
-        if (! isset($photos[$from]) || $to < 0 || $to >= count($photos)) {
+        if (! is_array($photos) || ! isset($photos[$from]) || $to < 0 || $to >= count($photos)) {
             return;
         }
 
@@ -337,9 +342,18 @@ class ListingWizard extends Component
             return;
         }
 
-        session()->flash('status', $this->editType !== null ? __('account.wizard.updated') : __('account.wizard.submitted'));
+        $pending = $listing->listingStatus() === ListingStatus::Pending;
 
-        $this->redirect(localized_route('account.listings', ['type' => $listing->getMorphClass(), 'group' => 'pending']));
+        session()->flash('status', match (true) {
+            $this->editType === null => __('account.wizard.submitted'),
+            $pending => __('account.wizard.updated'),
+            default => __('account.wizard.saved'),
+        });
+
+        $this->redirect(localized_route('account.listings', [
+            'type' => $listing->getMorphClass(),
+            'group' => $pending ? 'pending' : 'active',
+        ]));
     }
 
     public function discard(): void
@@ -389,7 +403,7 @@ class ListingWizard extends Component
         $rules = ListingForm::rules($this->type, $step, $this->form);
 
         if ($rules !== []) {
-            $this->validate($rules, [], ListingForm::validationAttributes());
+            $this->validate($rules, ListingForm::validationMessages(), ListingForm::validationAttributes());
         }
     }
 

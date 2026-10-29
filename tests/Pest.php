@@ -1,6 +1,17 @@
 <?php
 
+use App\Enums\Currency;
+use App\Enums\ListingStatus;
+use App\Enums\PropertyDeal;
+use App\Enums\PropertyType;
+use App\Models\ListingDraft;
+use App\Models\Location;
+use App\Models\Property;
+use App\Models\User;
+use App\Support\Listings\ListingForm;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Spatie\MediaLibrary\HasMedia;
+use Spatie\MediaLibrary\MediaCollections\Models\Media;
 use Tests\TestCase;
 
 /*
@@ -47,4 +58,52 @@ expect()->extend('toBeOne', function () {
 function something()
 {
     // ..
+}
+
+/**
+ * A saved property whose wizard form round-trips, plus the draft that edits it.
+ *
+ * @return array{0: Property, 1: ListingDraft, 2: array<string, mixed>}
+ */
+function editablePropertyDraft(User $user, ListingStatus $status = ListingStatus::Published): array
+{
+    $location = Location::factory()->create();
+    $property = Property::factory()
+        ->withStatus($status, $status === ListingStatus::Published
+            ? ['published_at' => now()->subDay(), 'expires_at' => now()->addDays(30)]
+            : ['published_at' => null, 'expires_at' => null])
+        ->type(PropertyType::Apartment, PropertyDeal::Sale)
+        ->for($user)
+        ->create([
+            'location_id' => $location->id,
+            'price' => 50000,
+            'currency' => Currency::USD,
+        ]);
+
+    $photo = wizardJpeg($property, 'gallery');
+    $form = ListingForm::fromListing($property);
+    $form['photos'] = [[
+        'source' => 'listing',
+        'id' => $photo->id,
+        'url' => $photo->getUrl(),
+    ]];
+
+    $draft = ListingDraft::factory()->create([
+        'user_id' => $user->id,
+        'listing_type' => 'property',
+        'listing_id' => $property->id,
+        'step' => 6,
+        'data' => $form,
+    ]);
+
+    return [$property, $draft, $form];
+}
+
+function wizardJpeg(HasMedia $model, string $collection): Media
+{
+    $path = tempnam(sys_get_temp_dir(), 'ik');
+    $image = imagecreatetruecolor(8, 8);
+    imagejpeg($image, $path, 90);
+
+    return $model->addMedia($path)->usingFileName(basename($path).'.jpg')->toMediaCollection($collection);
 }
