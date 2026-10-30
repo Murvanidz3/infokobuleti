@@ -37,11 +37,13 @@ class PriceInsight
      */
     public function forProperty(Property $property): ?array
     {
-        if ($property->area_m2 === null || $property->price_gel === null) {
+        $area = $property->area_m2 ?? $property->land_area_m2;
+
+        if ($area === null || $property->price_gel === null) {
             return null;
         }
 
-        return $this->compute($property->deal, $property->type, (float) $property->price_gel, (float) $property->area_m2, $property->location_id, $property->id);
+        return $this->compute($property->deal, $property->type, (float) $property->price_gel, (float) $area, $property->location_id, $property->id);
     }
 
     /**
@@ -127,15 +129,15 @@ class PriceInsight
                 ->where('status', ListingStatus::Published->value)
                 ->where('deal', $deal->value)
                 ->where('type', $type->value)
-                ->where('area_m2', '>', 0)
+                ->whereRaw('coalesce(area_m2, land_area_m2) > 0')
                 ->whereNotNull('price_gel')
                 ->when($locationId !== null, fn ($query) => $query->where('location_id', $locationId))
                 ->when($exceptId !== null, fn ($query) => $query->where('id', '!=', $exceptId))
                 ->selectRaw('count(*) as count')
-                ->selectRaw('percentile_cont(0.5) within group (order by price_gel / area_m2) as median')
-                ->selectRaw('percentile_cont(0.25) within group (order by price_gel / area_m2) as p25')
-                ->selectRaw('percentile_cont(0.75) within group (order by price_gel / area_m2) as p75')
-                ->selectRaw('min(price_gel / area_m2) as min, max(price_gel / area_m2) as max')
+                ->selectRaw('percentile_cont(0.5) within group (order by price_gel / coalesce(area_m2, land_area_m2)) as median')
+                ->selectRaw('percentile_cont(0.25) within group (order by price_gel / coalesce(area_m2, land_area_m2)) as p25')
+                ->selectRaw('percentile_cont(0.75) within group (order by price_gel / coalesce(area_m2, land_area_m2)) as p75')
+                ->selectRaw('min(price_gel / coalesce(area_m2, land_area_m2)) as min, max(price_gel / coalesce(area_m2, land_area_m2)) as max')
                 ->first();
 
             return [

@@ -12,8 +12,8 @@ enum ListingModule: string implements FilamentLabel
 {
     use HasLabel;
 
-    case Hotels = 'hotels';
     case Properties = 'properties';
+    case Projects = 'projects';
     case Classifieds = 'classifieds';
     case Vacancies = 'vacancies';
 }

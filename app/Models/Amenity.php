@@ -13,7 +13,7 @@ use Illuminate\Database\Eloquent\Relations\MorphToMany;
 use Spatie\Translatable\HasTranslations;
 
 /**
- * Hotel amenities, room amenities and property features in one table, split by scope.
+ * Property features (and leftover amenity rows from the retired hotel module) in one table, split by scope.
  */
 #[Fillable(['scope', 'group', 'name', 'slug', 'icon', 'sort', 'is_filterable'])]
 class Amenity extends Model
@@ -38,22 +38,6 @@ class Amenity extends Model
     public function scopeForScope(Builder $query, AmenityScope $scope): void
     {
         $query->where('scope', $scope)->orderBy('sort');
-    }
-
-    /**
-     * @return MorphToMany<Hotel, $this>
-     */
-    public function hotels(): MorphToMany
-    {
-        return $this->morphedByMany(Hotel::class, 'amenityable');
-    }
-
-    /**
-     * @return MorphToMany<RoomType, $this>
-     */
-    public function roomTypes(): MorphToMany
-    {
-        return $this->morphedByMany(RoomType::class, 'amenityable');
     }
 
     /**

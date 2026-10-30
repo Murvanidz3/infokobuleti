@@ -24,7 +24,7 @@ class DeleteAccount
         }
 
         DB::transaction(function () use ($user): void {
-            foreach (['hotels', 'properties', 'classifieds', 'vacancies'] as $relation) {
+            foreach (['properties', 'projects', 'classifieds', 'vacancies'] as $relation) {
                 $user->{$relation}()->get()->each(fn (Model $listing) => $listing->delete());
             }
 

@@ -120,8 +120,8 @@ return [
     ],
 
     'listing_module' => [
-        'hotels' => 'Гостиницы',
         'properties' => 'Недвижимость',
+        'projects' => 'Новостройки',
         'classifieds' => 'Объявления',
         'vacancies' => 'Вакансии',
     ],
@@ -186,25 +186,26 @@ return [
 
     'property_condition' => [
         'newly_renovated' => 'Новый ремонт',
+        'renovated' => 'С ремонтом',
         'old_renovation' => 'Старый ремонт',
-        'needs_renovation' => 'Требует ремонта',
+        'green_frame' => 'Зелёный каркас',
         'white_frame' => 'Белый каркас',
         'black_frame' => 'Чёрный каркас',
-        'green_frame' => 'Зелёный каркас',
     ],
 
     'property_deal' => [
         'sale' => 'Продажа',
         'rent' => 'Аренда',
+        'pledge' => 'Под залог',
         'daily_rent' => 'Посуточно',
     ],
 
     'property_type' => [
         'apartment' => 'Квартира',
-        'house' => 'Дом',
-        'land' => 'Земельный участок',
-        'commercial' => 'Коммерческая площадь',
-        'hotel_business' => 'Гостиница (бизнес)',
+        'house' => 'Частный дом',
+        'land' => 'Земля',
+        'commercial' => 'Коммерческая',
+        'hotel' => 'Гостиница',
     ],
 
     'report_reason' => [

@@ -6,7 +6,6 @@ use App\Contracts\Listing;
 use App\Enums\ListingModule;
 use App\Enums\ListingStatus;
 use App\Enums\PricePlanProduct;
-use App\Models\Hotel;
 use App\Models\PricePlan;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
@@ -18,8 +17,8 @@ class Catalog
 {
     /** Listing morph alias => module the price plans are scoped to. */
     public const array MODULES = [
-        'hotel' => ListingModule::Hotels,
         'property' => ListingModule::Properties,
+        'project' => ListingModule::Projects,
         'classified' => ListingModule::Classifieds,
         'vacancy' => ListingModule::Vacancies,
     ];
@@ -76,11 +75,6 @@ class Catalog
     private function listingProducts(Model $listing): array
     {
         $products = [PricePlanProduct::Vip, PricePlanProduct::SuperVip, PricePlanProduct::Bump, PricePlanProduct::AutoBump];
-
-        // Homepage slots are sold for hotels.
-        if ($listing instanceof Hotel) {
-            $products[] = PricePlanProduct::FeaturedHotel;
-        }
 
         return array_map(fn (PricePlanProduct $product): string => $product->value, $products);
     }

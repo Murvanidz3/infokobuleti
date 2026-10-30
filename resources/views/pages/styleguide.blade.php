@@ -11,8 +11,6 @@
     $sections = __('styleguide.sections');
     $heading = 'mb-6 font-serif text-[28px] font-semibold text-navy';
     $caption = 'mb-3 text-xs font-semibold tracking-[0.06em] text-secondary uppercase';
-    $hotel = $hotels[0];
-    $savedHotel = $hotels[2];
     $property = $properties[0];
     $breadcrumbs = [
         ['label' => __('nav.home'), 'url' => localized_route('home')],
@@ -182,7 +180,7 @@
     <x-section spacing="compact" id="sg-headers">
         <h2 class="{{ $heading }}">{{ $sections['headers'] }}</h2>
         <div class="flex flex-col gap-10">
-            <x-section-header :title="__('home.hotels.title')" :subtitle="__('home.hotels.subtitle')" href="#" :link-label="__('home.hotels.all')" />
+            <x-section-header :title="__('home.real_estate.title')" :subtitle="__('home.real_estate.subtitle')" href="#" :link-label="__('home.real_estate.all')" />
             <x-section-header size="sm" :title="__('home.classifieds.title')" href="#" />
         </div>
     </x-section>
@@ -191,8 +189,6 @@
     <x-section spacing="compact" background="alt" id="sg-cards">
         <h2 class="{{ $heading }}">{{ $sections['cards'] }}</h2>
         <div class="grid grid-cols-[repeat(auto-fill,minmax(min(100%,280px),1fr))] gap-6">
-            <x-card.hotel :name="$hotel['name']" :address="$hotel['address']" :sea="$hotel['sea']" :rating="$hotel['rating']" :reviews="$hotel['reviews']" :price="$hotel['price']" :url="$hotel['url']" :image="$hotel['image']" :saved="$hotel['saved']" />
-            <x-card.hotel :name="$savedHotel['name']" :address="$savedHotel['address']" :sea="$savedHotel['sea']" :rating="$savedHotel['rating']" :reviews="$savedHotel['reviews']" :price="$savedHotel['price']" :url="$savedHotel['url']" :image="$savedHotel['image']" :saved="$savedHotel['saved']" />
             <x-card.property :badge="$property['badge']" :price="$property['price']" :converted="$property['converted']" :title="$property['title']" :location="$property['location']" :features="$property['features']" :url="$property['url']" :image="$property['image']" :saved="$property['saved']" />
             <x-card.news :tag="$news[0]['tag']" :date="$news[0]['date']" :title="$news[0]['title']" :url="$news[0]['url']" :image="$news[0]['image']" />
         </div>
@@ -246,15 +242,15 @@
 
     <x-section spacing="compact" background="alt" id="sg-carousel">
         <div x-data="carousel">
-            <x-section-header :title="$sections['carousel']" href="#" :link-label="__('home.hotels.all')">
+            <x-section-header :title="$sections['carousel']" href="#" :link-label="__('home.real_estate.title')">
                 <x-slot:actions>
                     <x-carousel.arrows />
                 </x-slot:actions>
             </x-section-header>
             <x-carousel :label="$sections['carousel']">
-                @foreach ($hotels as $item)
+                @foreach ($properties as $item)
                     <x-carousel.item>
-                        <x-card.hotel class="h-full" :name="$item['name']" :address="$item['address']" :sea="$item['sea']" :rating="$item['rating']" :reviews="$item['reviews']" :price="$item['price']" :url="$item['url']" :image="$item['image']" :saved="$item['saved']" />
+                        <x-card.property class="h-full" :badge="$item['badge']" :price="$item['price']" :converted="$item['converted']" :title="$item['title']" :location="$item['location']" :features="$item['features']" :url="$item['url']" :image="$item['image']" :saved="$item['saved']" />
                     </x-carousel.item>
                 @endforeach
             </x-carousel>

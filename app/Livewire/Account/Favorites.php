@@ -6,12 +6,11 @@ use App\Models\BusinessProfile;
 use App\Models\Classified;
 use App\Models\Event;
 use App\Models\Favorite;
-use App\Models\Hotel;
 use App\Models\Place;
+use App\Models\Project;
 use App\Models\Property;
 use App\Models\User;
 use App\Models\Vacancy;
-use App\Services\PriceFormatter;
 use App\Support\Listings\CardPresenter;
 use App\Support\Listings\ListingTypes;
 use App\Support\Listings\PublicUrl;
@@ -72,8 +71,8 @@ class Favorites extends Component
         $paginator = (clone $base)
             ->when($this->type !== '', fn ($query) => $query->where('favoritable_type', $this->type))
             ->with(['favoritable' => fn (MorphTo $morph) => $morph->morphWith([
-                Hotel::class => ['media', 'location'],
                 Property::class => ['media', 'location'],
+                Project::class => ['media', 'location'],
                 Classified::class => ['media', 'location', 'category'],
                 Vacancy::class => ['media', 'location', 'businessProfile'],
                 Place::class => ['media', 'location'],
@@ -122,9 +121,9 @@ class Favorites extends Component
     {
         $price = match (true) {
             $model instanceof Property => $cards->property($model)['price'],
+            $model instanceof Project => $cards->project($model)['price'],
             $model instanceof Classified => $cards->classifiedPrice($model),
             $model instanceof Vacancy => $cards->salary($model),
-            $model instanceof Hotel && $model->price_from !== null => __('account.listings.price_from', ['price' => app(PriceFormatter::class)->format((float) $model->price_from)]),
             default => null,
         };
 

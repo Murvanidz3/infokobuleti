@@ -5,8 +5,8 @@ namespace App\Search;
 use App\Models\Article;
 use App\Models\Classified;
 use App\Models\Event;
-use App\Models\Hotel;
 use App\Models\Place;
+use App\Models\Project;
 use App\Models\Property;
 use App\Models\Vacancy;
 use App\Support\Listings\CardPresenter;
@@ -25,8 +25,8 @@ class SiteSearch
      * @var array<string, array{0: class-string<Model>, 1: list<string>, 2: string, 3: string}>
      */
     public const array MODULES = [
-        'hotels' => [Hotel::class, ['media', 'location'], 'hotels.index', 'nav.hotels'],
         'real_estate' => [Property::class, ['media', 'location'], 'real-estate.index', 'nav.real_estate'],
+        'projects' => [Project::class, ['media', 'location'], 'projects.index', 'nav.projects'],
         'classifieds' => [Classified::class, ['media', 'location', 'category.parent'], 'classifieds.index', 'nav.classifieds'],
         'jobs' => [Vacancy::class, ['location', 'businessProfile'], 'jobs.index', 'nav.jobs'],
         'guide' => [Place::class, ['media', 'location'], 'guide.index', 'nav.guide'],
@@ -92,8 +92,8 @@ class SiteSearch
     public function item(Model $model): array
     {
         $card = match (true) {
-            $model instanceof Hotel => $this->cards->hotel($model),
             $model instanceof Property => $this->cards->property($model),
+            $model instanceof Project => $this->cards->project($model),
             $model instanceof Classified => $this->cards->classified($model),
             $model instanceof Vacancy => $this->cards->job($model),
             $model instanceof Place => $this->cards->guide($model),
@@ -103,8 +103,8 @@ class SiteSearch
         };
 
         $meta = match (true) {
-            $model instanceof Hotel => collect([$card['price'] ? $card['price'].' '.__('listing.per_night') : null, $card['address']])->filter()->implode(' · '),
             $model instanceof Property => $card['price'].' · '.$card['location'],
+            $model instanceof Project => $card['price'].' · '.$card['location'],
             $model instanceof Classified => $card['price'].' · '.$card['meta'],
             $model instanceof Vacancy => $card['salary'].' · '.$card['employer'],
             $model instanceof Place => $card['tag'],
@@ -113,7 +113,7 @@ class SiteSearch
         };
 
         return [
-            'title' => (string) ($card['name'] ?? $card['title']),
+            'title' => (string) $card['title'],
             'url' => (string) $card['url'],
             'image' => $card['image'] ?? null,
             'meta' => (string) $meta,

@@ -12,7 +12,6 @@ class HomeController extends Controller
     {
         return view('pages.home', [
             'categories' => $data->categories(),
-            'hotels' => $data->hotels(),
             'properties' => $data->properties(),
             'classifieds' => $data->classifieds(),
             'jobs' => $data->jobs(),

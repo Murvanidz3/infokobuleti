@@ -120,8 +120,8 @@ return [
     ],
 
     'listing_module' => [
-        'hotels' => 'Hotels',
         'properties' => 'Real estate',
+        'projects' => 'New construction',
         'classifieds' => 'Classifieds',
         'vacancies' => 'Jobs',
     ],
@@ -186,25 +186,26 @@ return [
 
     'property_condition' => [
         'newly_renovated' => 'Newly renovated',
+        'renovated' => 'Renovated',
         'old_renovation' => 'Old renovation',
-        'needs_renovation' => 'Needs renovation',
+        'green_frame' => 'Green frame',
         'white_frame' => 'White frame',
         'black_frame' => 'Black frame',
-        'green_frame' => 'Green frame',
     ],
 
     'property_deal' => [
         'sale' => 'For sale',
         'rent' => 'For rent',
+        'pledge' => 'For pledge',
         'daily_rent' => 'Daily rent',
     ],
 
     'property_type' => [
         'apartment' => 'Apartment',
-        'house' => 'House',
+        'house' => 'Private house',
         'land' => 'Land',
-        'commercial' => 'Commercial space',
-        'hotel_business' => 'Hotel (business)',
+        'commercial' => 'Commercial',
+        'hotel' => 'Hotel',
     ],
 
     'report_reason' => [

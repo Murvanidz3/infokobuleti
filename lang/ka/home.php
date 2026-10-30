@@ -48,9 +48,11 @@ return [
         'options' => [
             'property_types' => [
                 'apartment' => 'ბინა',
-                'house' => 'სახლი',
-                'land' => 'ნაკვეთი',
+                'house' => 'კერძო სახლი',
+                'country_house' => 'აგარაკი',
+                'land' => 'მიწის ნაკვეთი',
                 'commercial' => 'კომერციული ფართი',
+                'hotel' => 'სასტუმრო',
             ],
             'rooms' => [
                 '1' => '1 და მეტი',

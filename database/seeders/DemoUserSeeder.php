@@ -10,7 +10,7 @@ use Illuminate\Database\Seeder;
 use Illuminate\Support\Str;
 
 /**
- * Staff accounts, non-hotel businesses and individual users. Hotel owners are created by HotelSeeder.
+ * Staff accounts, businesses and individual users.
  */
 class DemoUserSeeder extends Seeder
 {

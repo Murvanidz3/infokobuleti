@@ -4,8 +4,8 @@ namespace App\Console\Commands;
 
 use App\Contracts\HumanVerifier;
 use App\Enums\Role;
-use App\Models\Hotel;
 use App\Models\Page;
+use App\Models\Project;
 use App\Models\Property;
 use App\Models\User;
 use App\Services\Monitoring\HealthChecks;
@@ -34,8 +34,8 @@ class LaunchCheck extends Command
         $checks = collect($health->last()['checks'])->keyBy('key');
         $lastCheck = $health->last()['at'];
         $gateways = array_diff((array) config('payments.gateways'), ['fake']);
-        $listings = Hotel::query()->count() + Property::query()->count();
-        $withoutPhotos = Hotel::query()->whereDoesntHave('media')->count() + Property::query()->whereDoesntHave('media')->count();
+        $listings = Property::query()->count() + Project::query()->count();
+        $withoutPhotos = Property::query()->whereDoesntHave('media')->count() + Project::query()->whereDoesntHave('media')->count();
 
         $rows = [
             ['Environment is production', app()->isProduction(), app()->environment()],
@@ -55,7 +55,7 @@ class LaunchCheck extends Command
             ['Telegram bot (moderation, alerts)', filled(config('services.telegram.bot_token')), filled(config('services.telegram.bot_token')) ? 'configured' : 'postponed'],
             ['Legal pages published (privacy, terms)', $legal->count() === 2 && $legal->every(fn (Page $page): bool => mb_strlen(strip_tags((string) $page->body)) > 200), $legal->count().' of 2 published'],
             ['No demo data', ! User::query()->whereIn('email', self::DEMO_EMAILS)->exists(), User::query()->whereIn('email', self::DEMO_EMAILS)->exists() ? 'demo staff accounts found' : 'clean'],
-            ['Real photos on listings', $listings === 0 ? null : $withoutPhotos === 0, $listings === 0 ? 'no listings yet' : "{$withoutPhotos} of {$listings} hotels / properties without photos"],
+            ['Real photos on listings', $listings === 0 ? null : $withoutPhotos === 0, $listings === 0 ? 'no listings yet' : "{$withoutPhotos} of {$listings} properties / projects without photos"],
             ['A super admin exists', $staff->contains(fn (User $user): bool => $user->hasRole(Role::SuperAdmin->value)), $staff->count().' staff account(s)'],
             ['Every staff account has 2FA', $staff->isNotEmpty() && $staff->every(fn (User $user): bool => $user->hasTwoFactorEnabled()), $staff->reject(fn (User $user): bool => $user->hasTwoFactorEnabled())->pluck('email')->implode(', ') ?: 'all'],
             ['Background jobs running', $checks->get('horizon')['ok'] ?? null, $checks->get('horizon')['value'] ?? 'not checked yet'],

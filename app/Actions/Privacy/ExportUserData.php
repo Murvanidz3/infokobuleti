@@ -38,7 +38,7 @@ class ExportUserData
      */
     public function data(User $user): array
     {
-        $user->loadMissing(['businessProfiles', 'hotels', 'properties', 'classifieds', 'vacancies', 'vacancyApplications', 'bookingRequests', 'favorites', 'reviews', 'savedSearches', 'userSessions', 'orders', 'walletTransactions', 'businessSubscriptions', 'pushSubscriptions']);
+        $user->loadMissing(['businessProfiles', 'properties', 'projects', 'classifieds', 'vacancies', 'vacancyApplications', 'favorites', 'reviews', 'savedSearches', 'userSessions', 'orders', 'walletTransactions', 'businessSubscriptions', 'pushSubscriptions']);
 
         return [
             'exported_at' => now()->toIso8601String(),
@@ -60,13 +60,12 @@ class ExportUserData
             ],
             'business_profiles' => $this->rows($user->businessProfiles),
             'listings' => [
-                'hotels' => $this->rows($user->hotels),
                 'properties' => $this->rows($user->properties),
+                'projects' => $this->rows($user->projects),
                 'classifieds' => $this->rows($user->classifieds),
                 'vacancies' => $this->rows($user->vacancies),
             ],
             'job_applications' => $this->rows($user->vacancyApplications),
-            'booking_requests' => $this->rows($user->bookingRequests),
             'favorites' => $this->rows($user->favorites),
             'reviews' => $this->rows($user->reviews),
             'saved_searches' => $this->rows($user->savedSearches),

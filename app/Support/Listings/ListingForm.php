@@ -9,7 +9,6 @@ use App\Enums\CategoryModule;
 use App\Enums\Currency;
 use App\Enums\EmploymentType;
 use App\Enums\Experience;
-use App\Enums\HotelType;
 use App\Enums\ItemCondition;
 use App\Enums\ListedBy;
 use App\Enums\PropertyCondition;
@@ -19,7 +18,7 @@ use App\Enums\SalaryPeriod;
 use App\Enums\VacancyBenefit;
 use App\Models\Category;
 use App\Models\Classified;
-use App\Models\Hotel;
+use App\Models\Project;
 use App\Models\Property;
 use App\Models\User;
 use App\Models\Vacancy;
@@ -43,7 +42,7 @@ final class ListingForm
     public const array STEPS = ['type', 'details', 'location', 'photos', 'price', 'preview'];
 
     /** @var list<string> */
-    public const array TYPES = ['property', 'hotel', 'classified', 'vacancy'];
+    public const array TYPES = ['property', 'project', 'classified', 'vacancy'];
 
     public const int MAX_PHOTOS = 20;
 
@@ -75,12 +74,9 @@ final class ListingForm
         ];
 
         return $common + match ($type) {
-            'hotel' => [
-                'hotel_type' => '', 'stars' => '', 'rooms_count' => '', 'check_in_from' => '14:00', 'check_out_until' => '12:00',
-                'season_start_month' => '', 'season_end_month' => '', 'amenities' => [],
-                'contact_email' => (string) $user->email, 'website' => '',
-                'room' => ['name' => '', 'capacity_adults' => '2', 'base_price' => '', 'units' => '1'],
-                'has_rooms' => false,
+            'project' => [
+                'developer' => '', 'completion_on' => '',
+                'price_per_m2' => '', 'currency' => Currency::USD->value,
             ],
             'property' => [
                 'deal' => '', 'property_type' => '', 'area_m2' => '', 'land_area_m2' => '', 'rooms' => '', 'bedrooms' => '',
@@ -125,14 +121,11 @@ final class ListingForm
         ];
 
         return $form + match (true) {
-            $listing instanceof Hotel => [
-                'hotel_type' => $value('type'), 'stars' => $value('stars'), 'rooms_count' => $value('rooms_count'),
-                'check_in_from' => substr($value('check_in_from'), 0, 5), 'check_out_until' => substr($value('check_out_until'), 0, 5),
-                'season_start_month' => $value('season_start_month'), 'season_end_month' => $value('season_end_month'),
-                'amenities' => $listing->amenities()->pluck('amenities.id')->map(fn (mixed $id): string => (string) $id)->all(),
-                'contact_email' => $value('contact_email'), 'website' => $value('website'),
-                'room' => ['name' => '', 'capacity_adults' => '2', 'base_price' => '', 'units' => '1'],
-                'has_rooms' => $listing->roomTypes()->exists(),
+            $listing instanceof Project => [
+                'developer' => $value('developer'),
+                'completion_on' => $listing->completion_on?->toDateString() ?? '',
+                'price_per_m2' => self::number($listing->getAttribute('price_per_m2')),
+                'currency' => $value('currency'),
             ],
             $listing instanceof Property => [
                 'deal' => $value('deal'), 'property_type' => $value('type'), 'area_m2' => self::number($listing->getAttribute('area_m2')),
@@ -277,12 +270,12 @@ final class ListingForm
 
     public static function requiresPhotos(string $type): bool
     {
-        return in_array($type, ['hotel', 'property'], true);
+        return in_array($type, ['project', 'property'], true);
     }
 
     public static function requiresPin(string $type): bool
     {
-        return in_array($type, ['hotel', 'property'], true);
+        return in_array($type, ['project', 'property'], true);
     }
 
     /**
@@ -304,33 +297,17 @@ final class ListingForm
         ];
 
         return $common + match ($type) {
-            'hotel' => [
-                'type' => $form['hotel_type'],
-                'stars' => self::int($form['stars'] ?? null),
-                'rooms_count' => self::int($form['rooms_count'] ?? null),
-                'check_in_from' => self::nullable($form['check_in_from'] ?? null),
-                'check_out_until' => self::nullable($form['check_out_until'] ?? null),
-                'season_start_month' => self::int($form['season_start_month'] ?? null),
-                'season_end_month' => self::int($form['season_end_month'] ?? null),
+            'project' => [
+                'developer' => trim((string) ($form['developer'] ?? '')),
+                'completion_on' => self::nullable($form['completion_on'] ?? null),
+                'price_per_m2' => (float) ($form['price_per_m2'] ?? 0),
+                'currency' => $form['currency'] ?: Currency::USD->value,
                 'distance_to_sea_m' => SeaDistance::meters($lat, $lng),
+                'contact_name' => self::nullable($form['contact_name'] ?? null),
                 'contact_phone' => self::phone($form['contact_phone'] ?? null),
-                'contact_email' => self::nullable($form['contact_email'] ?? null),
-                'website' => self::nullable($form['website'] ?? null),
             ],
             'property' => [
-                'deal' => $form['deal'],
-                'type' => $form['property_type'],
-                'area_m2' => self::float($form['area_m2'] ?? null),
-                'land_area_m2' => self::float($form['land_area_m2'] ?? null),
-                'rooms' => self::int($form['rooms'] ?? null),
-                'bedrooms' => self::int($form['bedrooms'] ?? null),
-                'bathrooms' => self::int($form['bathrooms'] ?? null),
-                'floor' => self::int($form['floor'] ?? null),
-                'total_floors' => self::int($form['total_floors'] ?? null),
-                'condition' => self::nullable($form['condition'] ?? null),
-                'building_status' => self::nullable($form['building_status'] ?? null),
-                'cadastral_code' => self::nullable($form['cadastral_code'] ?? null),
-                'listed_by' => $form['listed_by'] ?: ListedBy::Owner->value,
+                ...self::propertyAttributes($form),
                 'distance_to_sea_m' => SeaDistance::meters($lat, $lng),
                 'price' => (float) $form['price'],
                 'currency' => $form['currency'],
@@ -406,7 +383,7 @@ final class ListingForm
     private static function typeRules(string $type): array
     {
         return match ($type) {
-            'hotel' => ['hotel_type' => ['required', Rule::enum(HotelType::class)]],
+            'project' => ['developer' => ['required', 'string', 'min:2', 'max:160']],
             'property' => [
                 'deal' => ['required', Rule::enum(PropertyDeal::class)],
                 'property_type' => ['required', Rule::enum(PropertyType::class)],
@@ -438,31 +415,11 @@ final class ListingForm
         ];
 
         return $rules + match ($type) {
-            'hotel' => [
-                'stars' => ['nullable', 'integer', 'between:1,5'],
-                'rooms_count' => ['nullable', 'integer', 'between:1,1000'],
-                'check_in_from' => ['nullable', 'date_format:H:i'],
-                'check_out_until' => ['nullable', 'date_format:H:i'],
-                'season_start_month' => ['nullable', 'integer', 'between:1,12', 'required_with:form.season_end_month'],
-                'season_end_month' => ['nullable', 'integer', 'between:1,12', 'required_with:form.season_start_month'],
-                'amenities' => ['array'],
-                'amenities.*' => [Rule::exists('amenities', 'id')->where('scope', AmenityScope::Hotel->value)],
+            'project' => [
+                'developer' => ['required', 'string', 'min:2', 'max:160'],
+                'completion_on' => ['nullable', 'date', 'after_or_equal:today'],
             ],
-            'property' => [
-                'area_m2' => [($form['property_type'] ?? '') === PropertyType::Land->value ? 'nullable' : 'required', 'numeric', 'between:1,100000'],
-                'land_area_m2' => [($form['property_type'] ?? '') === PropertyType::Land->value ? 'required' : 'nullable', 'numeric', 'between:1,10000000'],
-                'rooms' => ['nullable', 'integer', 'between:1,50'],
-                'bedrooms' => ['nullable', 'integer', 'between:0,50'],
-                'bathrooms' => ['nullable', 'integer', 'between:0,20'],
-                'floor' => ['nullable', 'integer', 'between:-3,100'],
-                'total_floors' => ['nullable', 'integer', 'between:1,100', self::notBelow($form['floor'] ?? null)],
-                'condition' => ['nullable', Rule::enum(PropertyCondition::class)],
-                'building_status' => ['nullable', Rule::enum(BuildingStatus::class)],
-                'cadastral_code' => ['nullable', 'string', 'max:32', 'regex:/^[\d.\/-]+$/'],
-                'listed_by' => ['required', Rule::enum(ListedBy::class)],
-                'features' => ['array'],
-                'features.*' => [Rule::exists('amenities', 'id')->where('scope', AmenityScope::Property->value)],
-            ],
+            'property' => self::propertyDetailRules($form),
             'classified' => [
                 'condition' => ['nullable', Rule::enum(ItemCondition::class)],
                 ...self::schemaRules($form),
@@ -477,6 +434,69 @@ final class ListingForm
             ],
             default => [],
         };
+    }
+
+    /**
+     * Columns that depend on the property type. Irrelevant ones are stored as null.
+     *
+     * @param  array<string, mixed>  $form
+     * @return array<string, mixed>
+     */
+    private static function propertyAttributes(array $form): array
+    {
+        $type = PropertyType::from((string) $form['property_type']);
+        $keep = fn (string $field, mixed $value): mixed => $type->allows($field) ? $value : null;
+
+        return [
+            'deal' => $form['deal'],
+            'type' => $type->value,
+            'area_m2' => $keep('area_m2', self::float($form['area_m2'] ?? null)),
+            'land_area_m2' => $keep('land_area_m2', self::float($form['land_area_m2'] ?? null)),
+            'rooms' => $keep('rooms', self::int($form['rooms'] ?? null)),
+            'bedrooms' => $keep('bedrooms', self::int($form['bedrooms'] ?? null)),
+            'bathrooms' => $keep('bathrooms', self::int($form['bathrooms'] ?? null)),
+            'floor' => $keep('floor', self::int($form['floor'] ?? null)),
+            'total_floors' => $keep('total_floors', self::int($form['total_floors'] ?? null)),
+            'condition' => $keep('condition', self::nullable($form['condition'] ?? null)),
+            'building_status' => $keep('building_status', self::nullable($form['building_status'] ?? null)),
+            'cadastral_code' => self::nullable($form['cadastral_code'] ?? null),
+            'listed_by' => $form['listed_by'] ?: ListedBy::Owner->value,
+        ];
+    }
+
+    /**
+     * @param  array<string, mixed>  $form
+     * @return array<string, mixed>
+     */
+    private static function propertyDetailRules(array $form): array
+    {
+        $type = PropertyType::tryFrom((string) ($form['property_type'] ?? ''));
+        $numeric = function (string $field, array $rules) use ($type): array {
+            if ($type !== null && ! $type->allows($field)) {
+                return ['prohibited'];
+            }
+
+            return [$type?->requires($field) ? 'required' : 'nullable', ...$rules];
+        };
+
+        return [
+            'area_m2' => $numeric('area_m2', ['numeric', 'between:1,100000']),
+            'land_area_m2' => $numeric('land_area_m2', ['numeric', 'between:1,10000000']),
+            'rooms' => $numeric('rooms', ['integer', 'between:1,50']),
+            'bedrooms' => $numeric('bedrooms', ['integer', 'between:0,50']),
+            'bathrooms' => $numeric('bathrooms', ['integer', 'between:0,20']),
+            'floor' => $numeric('floor', ['integer', 'between:-3,100']),
+            'total_floors' => [
+                ...$numeric('total_floors', ['integer', 'between:1,100']),
+                ...($type === null || $type->allows('total_floors') ? [self::notBelow($form['floor'] ?? null)] : []),
+            ],
+            'condition' => $type !== null && ! $type->allows('condition') ? ['prohibited'] : ['nullable', Rule::enum(PropertyCondition::class)],
+            'building_status' => $type !== null && ! $type->allows('building_status') ? ['prohibited'] : ['nullable', Rule::enum(BuildingStatus::class)],
+            'cadastral_code' => ['nullable', 'string', 'max:32', 'regex:/^[\d.\/-]+$/'],
+            'listed_by' => ['required', Rule::enum(ListedBy::class)],
+            'features' => ['array'],
+            'features.*' => [Rule::exists('amenities', 'id')->where('scope', AmenityScope::Property->value)],
+        ];
     }
 
     /**
@@ -503,12 +523,11 @@ final class ListingForm
         $phone = ['string', 'max:24', 'regex:'.self::PHONE_PATTERN];
 
         return match ($type) {
-            'hotel' => ($form['has_rooms'] ?? false) ? self::hotelContactRules($phone) : [
-                'room.name' => ['required', 'string', 'min:2', 'max:80'],
-                'room.capacity_adults' => ['required', 'integer', 'between:1,20'],
-                'room.base_price' => ['required', 'numeric', 'between:1,100000'],
-                'room.units' => ['required', 'integer', 'between:1,500'],
-                ...self::hotelContactRules($phone),
+            'project' => [
+                'price_per_m2' => ['required', 'numeric', 'between:1,1000000'],
+                'currency' => ['required', Rule::enum(Currency::class)],
+                'contact_name' => ['nullable', 'string', 'max:120'],
+                'contact_phone' => ['required', ...$phone],
             ],
             'property' => [
                 'price' => ['required', 'numeric', 'between:1,100000000000'],
@@ -534,19 +553,6 @@ final class ListingForm
             ],
             default => [],
         };
-    }
-
-    /**
-     * @param  list<string>  $phone
-     * @return array<string, mixed>
-     */
-    private static function hotelContactRules(array $phone): array
-    {
-        return [
-            'contact_phone' => ['required', ...$phone],
-            'contact_email' => ['nullable', 'email:rfc', 'max:190'],
-            'website' => ['nullable', 'url:http,https', 'max:190'],
-        ];
     }
 
     /**

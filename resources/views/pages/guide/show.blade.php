@@ -40,7 +40,7 @@
 
                 @if ($place->lat !== null)
                     <x-detail.section :title="__('site.detail.location')">
-                        <x-detail.map :lat="$place->lat" :lng="$place->lng" :title="$place->title" :nearby="$nearby" :address="$address" />
+                        <x-detail.map :lat="$place->lat" :lng="$place->lng" :title="$place->title" :address="$address" />
                     </x-detail.section>
                 @endif
 

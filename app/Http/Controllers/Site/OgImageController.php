@@ -7,8 +7,8 @@ use App\Models\Article;
 use App\Models\BusinessProfile;
 use App\Models\Classified;
 use App\Models\Event;
-use App\Models\Hotel;
 use App\Models\Place;
+use App\Models\Project;
 use App\Models\Property;
 use App\Models\Vacancy;
 use App\Services\Seo\OgImage;
@@ -24,8 +24,8 @@ class OgImageController extends Controller
 {
     /** @var array<string, class-string<Model>> */
     public const array TYPES = [
-        'hotel' => Hotel::class,
         'property' => Property::class,
+        'project' => Project::class,
         'classified' => Classified::class,
         'vacancy' => Vacancy::class,
         'place' => Place::class,

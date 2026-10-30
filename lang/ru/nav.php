@@ -6,6 +6,7 @@ return [
     'home' => 'Главная',
     'hotels' => 'Отели',
     'real_estate' => 'Недвижимость',
+    'projects' => 'Новостройки',
     'classifieds' => 'Объявления',
     'jobs' => 'Вакансии',
     'events' => 'События',

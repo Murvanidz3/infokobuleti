@@ -3,7 +3,7 @@
 namespace Database\Factories;
 
 use App\Enums\ReviewStatus;
-use App\Models\Hotel;
+use App\Models\Place;
 use App\Models\Review;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
@@ -31,8 +31,8 @@ class ReviewFactory extends Factory
 
         return [
             'user_id' => User::factory(),
-            'reviewable_type' => 'hotel',
-            'reviewable_id' => Hotel::factory(),
+            'reviewable_type' => 'place',
+            'reviewable_id' => Place::factory(),
             'rating' => $sample['rating'],
             'body' => $sample['body'],
             'status' => ReviewStatus::Published,

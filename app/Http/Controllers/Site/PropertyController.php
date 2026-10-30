@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Site;
 
 use App\Enums\PropertyDeal;
+use App\Enums\PropertyType;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\Site\Concerns\ShowsListing;
 use App\Models\Property;
@@ -19,6 +20,43 @@ use Illuminate\View\View;
 class PropertyController extends Controller
 {
     use ShowsListing;
+
+    public function index(?string $type = null, ?string $deal = null): View
+    {
+        $propertyType = PropertyType::tryFrom((string) $type);
+        $propertyDeal = PropertyDeal::tryFrom((string) $deal);
+
+        $title = match (true) {
+            $propertyType !== null && $propertyDeal !== null => __('site.real_estate.browse', [
+                'deal' => $propertyDeal->getLabel(),
+                'type' => $propertyType->getLabel(),
+            ]),
+            $propertyType !== null => __('site.real_estate.browse_type', ['type' => $propertyType->getLabel()]),
+            default => __('site.real_estate.title'),
+        };
+
+        $breadcrumbs = [
+            ['label' => __('nav.home'), 'url' => localized_route('home')],
+            ['label' => __('nav.real_estate'), 'url' => $propertyType !== null ? localized_route('real-estate.index') : null],
+        ];
+
+        if ($propertyType !== null) {
+            $breadcrumbs[] = [
+                'label' => $propertyType->getLabel(),
+                'url' => $propertyDeal !== null ? localized_route('real-estate.type', ['type' => $propertyType->value]) : null,
+            ];
+        }
+
+        if ($propertyDeal !== null) {
+            $breadcrumbs[] = ['label' => $propertyDeal->getLabel()];
+        }
+
+        return view('pages.real-estate.index', [
+            'title' => $title,
+            'subtitle' => __('site.real_estate.subtitle'),
+            'breadcrumbs' => $breadcrumbs,
+        ]);
+    }
 
     public function show(Property $property, CardPresenter $cards, DetailPresenter $detail, PriceFormatter $price, Favorites $favorites, StructuredData $seo): View
     {
@@ -47,8 +85,8 @@ class PropertyController extends Controller
             $property->floor !== null ? ['icon' => 'layers', 'label' => __('site.filters.floor'), 'value' => $property->total_floors ? $property->floor.' / '.$property->total_floors : (string) $property->floor] : null,
             $property->building_status !== null ? ['icon' => 'building', 'label' => __('site.filters.building'), 'value' => (string) $property->building_status->getLabel()] : null,
             $property->condition !== null ? ['icon' => 'wrench', 'label' => __('site.filters.condition'), 'value' => (string) $property->condition->getLabel()] : null,
-            $property->distance_to_sea_m !== null ? ['icon' => 'waves', 'label' => __('site.hotels.to_sea'), 'value' => (string) $cards->sea($property->distance_to_sea_m)] : null,
-            $property->price_per_m2 !== null && $property->deal === PropertyDeal::Sale ? ['icon' => 'tag', 'label' => __('site.real_estate.per_m2'), 'value' => $price->format((float) $property->price_per_m2, $currency)] : null,
+            $property->distance_to_sea_m !== null ? ['icon' => 'waves', 'label' => __('site.real_estate.to_sea'), 'value' => (string) $cards->sea($property->distance_to_sea_m)] : null,
+            $property->price_per_m2 !== null ? ['icon' => 'tag', 'label' => __('site.real_estate.per_m2'), 'value' => $price->format((float) $property->price_per_m2, $currency)] : null,
             $property->cadastral_code ? ['icon' => 'file', 'label' => __('site.real_estate.cadastral'), 'value' => (string) $property->cadastral_code] : null,
         ]));
 
@@ -62,7 +100,6 @@ class PropertyController extends Controller
             'facts' => $facts,
             'owner' => $detail->owner($property),
             'hasPhone' => Contact::phone($property) !== null,
-            'nearby' => $detail->nearby($property),
             'similar' => $similar,
             'saved' => $favorites->isSaved($property),
             'description' => $detail->description($property),

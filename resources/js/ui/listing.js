@@ -134,31 +134,6 @@ export function registerListing(Alpine) {
         },
     }));
 
-    // Hotel availability calendar → booking form dates.
-    Alpine.data('stayPicker', (initialIn = '', initialOut = '') => ({
-        checkIn: initialIn,
-        checkOut: initialOut,
-
-        pick(date) {
-            if (!this.checkIn || (this.checkIn && this.checkOut) || date <= this.checkIn) {
-                this.checkIn = date;
-                this.checkOut = '';
-
-                return;
-            }
-
-            this.checkOut = date;
-        },
-
-        state(date) {
-            if (date === this.checkIn || date === this.checkOut) {
-                return 'edge';
-            }
-
-            return this.checkIn && this.checkOut && date > this.checkIn && date < this.checkOut ? 'inside' : '';
-        },
-    }));
-
     // Header search: instant suggestions grouped by module.
     Alpine.data('siteSearch', () => ({
         query: '',

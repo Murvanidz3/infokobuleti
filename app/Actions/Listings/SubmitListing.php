@@ -7,7 +7,6 @@ use App\Enums\ListingStatus;
 use App\Exceptions\InvalidStatusTransition;
 use App\Exceptions\ListingLimitReached;
 use App\Jobs\AnnounceToModerators;
-use App\Models\Hotel;
 use App\Models\ListingDraft;
 use App\Models\Property;
 use App\Models\User;
@@ -136,19 +135,6 @@ class SubmitListing
      */
     private function syncRelations(Model $listing, array $form): void
     {
-        if ($listing instanceof Hotel) {
-            $listing->amenities()->sync(array_map('intval', $form['amenities'] ?? []));
-
-            if (! ($form['has_rooms'] ?? false) && filled($form['room']['name'] ?? null)) {
-                $listing->roomTypes()->create([
-                    'name' => ['ka' => trim((string) $form['room']['name'])],
-                    'capacity_adults' => (int) $form['room']['capacity_adults'],
-                    'base_price' => (float) $form['room']['base_price'],
-                    'units' => (int) $form['room']['units'],
-                ]);
-            }
-        }
-
         if ($listing instanceof Property) {
             $listing->features()->sync(array_map('intval', $form['features'] ?? []));
         }

@@ -101,7 +101,6 @@ class EventController extends Controller
             'body' => SafeHtml::clean((string) $event->description),
             'hasPhone' => Contact::phone($event) !== null,
             'owner' => $detail->owner($event),
-            'nearby' => $detail->nearby($event),
             'more' => ListingQuery::public(Event::query())->with(['media', 'location', 'category', 'place'])->whereKeyNot($event->id)->upcoming()->limit(3)->get()->map(fn (Event $item) => $cards->event($item)),
             'saved' => $favorites->isSaved($event),
             'calendarUrl' => $this->googleCalendarUrl($event),

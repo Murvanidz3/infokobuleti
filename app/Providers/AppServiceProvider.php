@@ -74,10 +74,8 @@ class AppServiceProvider extends ServiceProvider
         'location' => Models\Location::class,
         'category' => Models\Category::class,
         'amenity' => Models\Amenity::class,
-        'hotel' => Models\Hotel::class,
-        'room_type' => Models\RoomType::class,
-        'booking_request' => Models\BookingRequest::class,
         'property' => Models\Property::class,
+        'project' => Models\Project::class,
         'classified' => Models\Classified::class,
         'vacancy' => Models\Vacancy::class,
         'vacancy_application' => Models\VacancyApplication::class,
@@ -108,7 +106,7 @@ class AppServiceProvider extends ServiceProvider
      * @var list<class-string<Model>>
      */
     private const array PUBLIC_MODELS = [
-        Models\Hotel::class, Models\RoomType::class, Models\Property::class, Models\Classified::class, Models\Vacancy::class,
+        Models\Property::class, Models\Project::class, Models\Classified::class, Models\Vacancy::class,
         Models\Place::class, Models\Article::class, Models\Event::class, Models\Category::class, Models\Setting::class,
     ];
 
@@ -174,7 +172,7 @@ class AppServiceProvider extends ServiceProvider
         Gate::before(fn (Models\User $user, string $ability) => ! in_array($ability, self::TWO_FACTOR_ABILITIES, true) && $user->hasRole(Role::SuperAdmin->value) ? true : null);
 
         // Owners manage their own listings from the account area.
-        foreach ([Models\Hotel::class, Models\Property::class, Models\Classified::class, Models\Vacancy::class] as $listing) {
+        foreach ([Models\Property::class, Models\Project::class, Models\Classified::class, Models\Vacancy::class] as $listing) {
             Gate::policy($listing, ListingPolicy::class);
         }
 

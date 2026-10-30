@@ -10,7 +10,7 @@ use Illuminate\Database\Eloquent\Relations\Relation;
  */
 final class ListingTypes
 {
-    public const array INTERACTIVE = ['hotel', 'property', 'classified', 'vacancy', 'place', 'event', 'business_profile'];
+    public const array INTERACTIVE = ['property', 'project', 'classified', 'vacancy', 'place', 'event', 'business_profile'];
 
     /**
      * The published (or otherwise visible) record behind "{type}/{id}", or a 404.

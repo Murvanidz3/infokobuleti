@@ -5,7 +5,6 @@ namespace App\Support\Listings;
 use App\Enums\ReviewStatus;
 use App\Enums\SiteFeature;
 use App\Models\BusinessProfile;
-use App\Models\Place;
 use App\Models\Property;
 use App\Models\Review;
 use App\Models\User;
@@ -80,41 +79,6 @@ class DetailPresenter
             'initials' => $owner instanceof User ? $owner->initials() : '•',
             'rating' => null,
         ];
-    }
-
-    /**
-     * Published places within ~1.5 km, closest first, as map pins.
-     *
-     * @return list<array{lat: float, lng: float, pin: null, title: string, url: string, image: ?string, meta: string}>
-     */
-    public function nearby(Model $record, int $limit = 6): array
-    {
-        $lat = $record->getAttribute('lat');
-        $lng = $record->getAttribute('lng');
-
-        if ($lat === null || $lng === null) {
-            return [];
-        }
-
-        $delta = 0.014;
-
-        return ListingQuery::public(Place::query())
-            ->with(['media', 'location'])
-            ->when($record instanceof Place, fn ($query) => $query->whereKeyNot($record->getKey()))
-            ->withinBounds((float) $lat - $delta, (float) $lng - $delta * 1.35, (float) $lat + $delta, (float) $lng + $delta * 1.35)
-            ->nearest((float) $lat, (float) $lng)
-            ->limit($limit)
-            ->get()
-            ->map(fn (Place $place): array => [
-                'lat' => (float) $place->lat,
-                'lng' => (float) $place->lng,
-                'pin' => null,
-                'title' => (string) $place->title,
-                'url' => localized_route('guide.show', [$place]),
-                'image' => $place->coverUrl('thumb'),
-                'meta' => (string) $place->type->getLabel(),
-            ])
-            ->all();
     }
 
     /**

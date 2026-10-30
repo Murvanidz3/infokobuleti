@@ -63,6 +63,16 @@ class Property extends Model implements Listing, SearchableListing
     }
 
     /**
+     * Slugs reserved by /real-estate/{type} and /real-estate/{type}/{deal}.
+     *
+     * @return list<string>
+     */
+    protected function reservedSlugs(): array
+    {
+        return [...PropertyType::values(), ...PropertyDeal::values(), 'projects'];
+    }
+
+    /**
      * @return BelongsTo<User, $this>
      */
     public function user(): BelongsTo
@@ -91,6 +101,18 @@ class Property extends Model implements Listing, SearchableListing
      */
     protected function searchableFilters(): array
     {
-        return ['deal' => $this->deal->value, 'type' => $this->type->value, 'price' => $this->price_gel, 'area_m2' => $this->area_m2, 'rooms' => $this->rooms];
+        return [
+            'deal' => $this->deal->value,
+            'type' => $this->type->value,
+            'price' => $this->price_gel !== null ? (float) $this->price_gel : null,
+            'area_m2' => $this->area_m2 !== null ? (float) $this->area_m2 : null,
+            'rooms' => $this->rooms !== null ? (int) $this->rooms : null,
+            'floor' => $this->floor !== null ? (int) $this->floor : null,
+            'condition' => $this->condition?->value,
+            'building_status' => $this->building_status?->value,
+            'distance_to_sea_m' => $this->distance_to_sea_m !== null ? (int) $this->distance_to_sea_m : null,
+            'location_id' => $this->location_id !== null ? (int) $this->location_id : null,
+            'amenities' => $this->features()->orderBy('amenities.slug')->pluck('amenities.slug')->all(),
+        ];
     }
 }

@@ -122,8 +122,8 @@ return [
     ],
 
     'listing_module' => [
-        'hotels' => 'სასტუმროები',
         'properties' => 'უძრავი ქონება',
+        'projects' => 'მშენებარე პროექტები',
         'classifieds' => 'განცხადებები',
         'vacancies' => 'ვაკანსიები',
     ],
@@ -188,25 +188,26 @@ return [
 
     'property_condition' => [
         'newly_renovated' => 'ახალი გარემონტებული',
-        'old_renovation' => 'ძველი გარემონტებული',
-        'needs_renovation' => 'სარემონტო',
+        'renovated' => 'გარემონტებული',
+        'old_renovation' => 'ძველი რემონტი',
+        'green_frame' => 'მწვანე კარკასი',
         'white_frame' => 'თეთრი კარკასი',
         'black_frame' => 'შავი კარკასი',
-        'green_frame' => 'მწვანე კარკასი',
     ],
 
     'property_deal' => [
         'sale' => 'იყიდება',
         'rent' => 'ქირავდება',
+        'pledge' => 'გირავდება',
         'daily_rent' => 'ქირავდება დღიურად',
     ],
 
     'property_type' => [
         'apartment' => 'ბინა',
-        'house' => 'სახლი',
-        'land' => 'მიწის ნაკვეთი',
-        'commercial' => 'კომერციული ფართი',
-        'hotel_business' => 'სასტუმრო (ბიზნესი)',
+        'house' => 'კერძო სახლი',
+        'land' => 'მიწა',
+        'commercial' => 'კომერციული',
+        'hotel' => 'სასტუმრო',
     ],
 
     'report_reason' => [

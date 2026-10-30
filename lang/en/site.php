@@ -137,7 +137,10 @@ return [
     ],
     'real_estate' => [
         'title' => 'Real estate in Kobuleti',
-        'subtitle' => 'Apartments, houses, land and commercial space to buy, rent or rent by the day.',
+        'subtitle' => 'Apartments, private houses, land, commercial space and hotels — for sale, rent, pledge or daily rent.',
+        'browse' => ':deal · :type',
+        'browse_type' => ':type',
+        'to_sea' => 'To the sea',
         'search_placeholder' => 'e.g. sea view',
         'land_area' => 'Land area',
         'bedrooms' => 'Bedrooms',
@@ -145,6 +148,15 @@ return [
         'per_m2' => 'Price per m²',
         'cadastral' => 'Cadastral code',
         'features' => 'Features',
+    ],
+    'projects' => [
+        'title' => 'New construction in Kobuleti',
+        'subtitle' => 'Residential projects under construction. Prices are a starting price per square metre. Call the developer — there is no booking on the site.',
+        'search_placeholder' => 'Project or developer',
+        'badge' => 'Under construction',
+        'developer' => 'Developer',
+        'completion' => 'Completion',
+        'price_from_label' => 'From, per m²',
     ],
     'classifieds' => [
         'title' => 'Classifieds',
@@ -261,8 +273,8 @@ return [
     'business' => [
         'about' => 'About the business',
         'sections' => [
-            'hotels' => 'Hotels',
             'properties' => 'Real estate',
+            'projects' => 'New construction',
             'vacancies' => 'Jobs',
             'places' => 'Places',
         ],

@@ -7,7 +7,7 @@
         <x-breadcrumbs :items="[
             ['label' => __('nav.home'), 'url' => localized_route('home')],
             ['label' => __('nav.real_estate'), 'url' => localized_route('real-estate.index')],
-            ['label' => $property->type->getLabel(), 'url' => localized_route('real-estate.index', ['type' => [$property->type->value]])],
+            ['label' => $property->type->getLabel(), 'url' => localized_route('real-estate.type', ['type' => $property->type->value])],
             ['label' => $property->title],
         ]" />
 
@@ -50,7 +50,7 @@
 
                 @if ($property->lat !== null)
                     <x-detail.section :title="__('site.detail.location')">
-                        <x-detail.map :lat="$property->lat" :lng="$property->lng" :title="$property->title" :nearby="$nearby" :address="$card['location']" />
+                        <x-detail.map :lat="$property->lat" :lng="$property->lng" :title="$property->title" :address="$card['location']" />
                     </x-detail.section>
                 @endif
             </div>

@@ -3,8 +3,8 @@
 use App\Models\Article;
 use App\Models\Classified;
 use App\Models\Event;
-use App\Models\Hotel;
 use App\Models\Place;
+use App\Models\Project;
 use App\Models\Property;
 use App\Models\Vacancy;
 
@@ -124,18 +124,42 @@ return [
     'algolia' => [
         'id' => env('ALGOLIA_APP_ID', ''),
         'secret' => env('ALGOLIA_SECRET', ''),
-        // Titles first (ranked higher), then descriptions; Georgian, English and Russian side by side.
-        // Synonyms are pushed separately from the admin settings (php artisan search:sync).
         'index-settings' => [
-            Hotel::class => [
-                'searchableAttributes' => ['title_ka', 'title_en', 'title_ru', 'description_ka', 'description_en', 'description_ru'],
-                'filterableAttributes' => ['status', 'type', 'stars', 'price', 'distance_to_sea_m', 'rating', '_geo'],
-                'sortableAttributes' => ['published_at', 'promotion_level'],
-            ],
+            // Meilisearch settings live under scout.meilisearch. Scout reads them from the active driver.
+        ],
+        'model-settings' => [
+            // User::class => [
+            //     'embedding' => [
+            //         'embedder' => 'default',
+            //         'dimensions' => 1536,
+            //     ],
+            // ],
+        ],
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Meilisearch Configuration
+    |--------------------------------------------------------------------------
+    |
+    | Titles first (ranked higher), then descriptions; Georgian, English and Russian side by side.
+    | Synonyms are pushed separately from the admin settings (php artisan search:sync).
+    |
+    */
+
+    'meilisearch' => [
+        'host' => env('MEILISEARCH_HOST', 'http://localhost:7700'),
+        'key' => env('MEILISEARCH_KEY'),
+        'index-settings' => [
             Property::class => [
                 'searchableAttributes' => ['title_ka', 'title_en', 'title_ru', 'description_ka', 'description_en', 'description_ru'],
-                'filterableAttributes' => ['status', 'deal', 'type', 'price', 'area_m2', 'rooms', '_geo'],
-                'sortableAttributes' => ['published_at', 'promotion_level'],
+                'filterableAttributes' => ['status', 'deal', 'type', 'price', 'area_m2', 'rooms', 'floor', 'condition', 'building_status', 'distance_to_sea_m', 'location_id', 'amenities', '_geo'],
+                'sortableAttributes' => ['published_at', 'promotion_level', 'price', 'area_m2', 'distance_to_sea_m'],
+            ],
+            Project::class => [
+                'searchableAttributes' => ['title_ka', 'title_en', 'title_ru', 'description_ka', 'description_en', 'description_ru', 'developer'],
+                'filterableAttributes' => ['status', 'price', 'completion_on', 'distance_to_sea_m', 'location_id', '_geo'],
+                'sortableAttributes' => ['published_at', 'promotion_level', 'price', 'distance_to_sea_m'],
             ],
             Classified::class => [
                 'searchableAttributes' => ['title_ka', 'title_en', 'title_ru', 'description_ka', 'description_en', 'description_ru'],
@@ -162,14 +186,6 @@ return [
                 'filterableAttributes' => ['status', 'category_id', 'starts_at', '_geo'],
                 'sortableAttributes' => ['published_at', 'promotion_level'],
             ],
-        ],
-        'model-settings' => [
-            // User::class => [
-            //     'embedding' => [
-            //         'embedder' => 'default',
-            //         'dimensions' => 1536,
-            //     ],
-            // ],
         ],
     ],
 

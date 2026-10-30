@@ -3,11 +3,14 @@
 namespace App\Livewire\Listings;
 
 use App\Contracts\ExchangeRates;
+use App\Enums\AmenityScope;
 use App\Enums\BuildingStatus;
 use App\Enums\Currency;
 use App\Enums\ListingModule;
+use App\Enums\PropertyCondition;
 use App\Enums\PropertyDeal;
 use App\Enums\PropertyType;
+use App\Models\Amenity;
 use App\Models\Property;
 use App\Services\PriceFormatter;
 use App\Support\Listings\CardPresenter;
@@ -16,14 +19,16 @@ use Illuminate\Database\Eloquent\Model;
 use Livewire\Attributes\Url;
 
 /**
- * /real-estate: deal, type, price in GEL or USD, area, rooms, floor, location, new/old building
- * and "with photos only".
+ * /real-estate: deal, type, district, price in GEL or USD, area, rooms, floor, condition,
+ * building status, distance to the sea, amenities, keyword and "with photos only".
  *
  * @extends ListingIndex<Property>
  */
 class PropertyIndex extends ListingIndex
 {
     public const array ROOM_OPTIONS = ['1', '2', '3', '4'];
+
+    public const array SEA_OPTIONS = [100, 300, 500, 1000];
 
     #[Url(except: '')]
     public string $deal = '';
@@ -57,11 +62,22 @@ class PropertyIndex extends ListingIndex
     #[Url(except: '')]
     public string $floor_max = '';
 
-    #[Url(except: '')]
-    public string $location = '';
+    /** @var list<string> */
+    #[Url(except: [])]
+    public $condition = [];
 
     #[Url(except: '')]
     public string $building = '';
+
+    #[Url(except: '')]
+    public string $sea = '';
+
+    /** @var list<string> */
+    #[Url(except: [])]
+    public $amenities = [];
+
+    #[Url(except: '')]
+    public string $location = '';
 
     #[Url(except: false)]
     public bool $photos = false;
@@ -88,7 +104,7 @@ class PropertyIndex extends ListingIndex
 
     protected function filterProperties(): array
     {
-        return ['deal', 'type', 'currency', 'price_min', 'price_max', 'area_min', 'area_max', 'rooms', 'floor_min', 'floor_max', 'location', 'building', 'photos'];
+        return ['deal', 'type', 'currency', 'price_min', 'price_max', 'area_min', 'area_max', 'rooms', 'floor_min', 'floor_max', 'condition', 'building', 'sea', 'amenities', 'location', 'photos'];
     }
 
     protected function sortOptions(): array
@@ -174,13 +190,43 @@ class PropertyIndex extends ListingIndex
             $query->whereIn('location_id', $this->locationIds($this->location));
         }
 
-        if (in_array($this->building, ['new', 'old'], true)) {
-            $query->whereIn('building_status', $this->building === 'new' ? [BuildingStatus::New->value, BuildingStatus::UnderConstruction->value] : [BuildingStatus::Old->value]);
+        $conditions = array_values(array_intersect($this->strings($this->condition), PropertyCondition::values()));
+
+        if ($conditions !== []) {
+            $query->whereIn('condition', $conditions);
+        }
+
+        if (BuildingStatus::tryFrom($this->building) !== null) {
+            $query->where('building_status', $this->building);
+        }
+
+        if (in_array((int) $this->sea, self::SEA_OPTIONS, true)) {
+            $query->where('distance_to_sea_m', '<=', (int) $this->sea);
+        }
+
+        foreach (array_slice($this->strings($this->amenities), 0, 12) as $slug) {
+            $query->whereHas('features', fn (Builder $feature) => $feature->where('slug', $slug));
         }
 
         if ($this->photos) {
             $this->filterPhotosOnly($query);
         }
+    }
+
+    public function mount(): void
+    {
+        $routeType = request()->route('type');
+        $routeDeal = request()->route('deal');
+
+        if (is_string($routeType) && PropertyType::tryFrom($routeType) !== null && $this->strings($this->type) === []) {
+            $this->type = [$routeType];
+        }
+
+        if (is_string($routeDeal) && PropertyDeal::tryFrom($routeDeal) !== null && $this->deal === '') {
+            $this->deal = $routeDeal;
+        }
+
+        parent::mount();
     }
 
     protected function card(Model $model): array
@@ -193,6 +239,9 @@ class PropertyIndex extends ListingIndex
         return [
             'dealOptions' => PropertyDeal::options(),
             'typeOptions' => PropertyType::options(),
+            'conditionOptions' => PropertyCondition::options(),
+            'buildingOptions' => BuildingStatus::options(),
+            'amenityOptions' => $this->amenityOptions(),
             'locationOptions' => $this->locationOptions(),
         ];
     }
@@ -226,12 +275,26 @@ class PropertyIndex extends ListingIndex
             $chips[] = ['label' => __('site.filters.floor').': '.$this->plainRange($this->floor_min, $this->floor_max), 'property' => 'floor_min'];
         }
 
-        if ($this->location !== '') {
-            $chips[] = ['label' => $this->locationLabel($this->location), 'property' => 'location'];
+        foreach ($this->strings($this->condition) as $condition) {
+            $chips[] = ['label' => PropertyCondition::tryFrom($condition)?->getLabel() ?? $condition, 'property' => 'condition', 'value' => $condition];
         }
 
-        if ($this->building !== '') {
-            $chips[] = ['label' => __('site.filters.building_'.$this->building), 'property' => 'building'];
+        if (($building = BuildingStatus::tryFrom($this->building)) !== null) {
+            $chips[] = ['label' => $building->getLabel(), 'property' => 'building'];
+        }
+
+        if (in_array((int) $this->sea, self::SEA_OPTIONS, true)) {
+            $chips[] = ['label' => __('site.filters.sea_up_to', ['distance' => $this->sea]), 'property' => 'sea'];
+        }
+
+        $amenityLabels = $this->amenityOptions();
+
+        foreach ($this->strings($this->amenities) as $slug) {
+            $chips[] = ['label' => $amenityLabels[$slug] ?? $slug, 'property' => 'amenities', 'value' => $slug];
+        }
+
+        if ($this->location !== '') {
+            $chips[] = ['label' => $this->locationLabel($this->location), 'property' => 'location'];
         }
 
         if ($this->photos) {
@@ -251,6 +314,15 @@ class PropertyIndex extends ListingIndex
         };
 
         parent::removeFilter($property, $value);
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    private function amenityOptions(): array
+    {
+        return Amenity::query()->forScope(AmenityScope::Property)->where('is_filterable', true)->get()
+            ->mapWithKeys(fn (Amenity $amenity): array => [$amenity->slug => (string) $amenity->name])->all();
     }
 
     private function plainRange(string $min, string $max, string $unit = ''): string

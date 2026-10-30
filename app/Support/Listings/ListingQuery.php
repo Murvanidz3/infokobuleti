@@ -12,7 +12,7 @@ use Illuminate\Database\Eloquent\Model;
 final class ListingQuery
 {
     /** Morph aliases of modules whose items expire (tables with an expires_at column). */
-    public const array EXPIRING = ['hotel', 'property', 'classified', 'vacancy'];
+    public const array EXPIRING = ['property', 'project', 'classified', 'vacancy'];
 
     /**
      * @template TModel of Model

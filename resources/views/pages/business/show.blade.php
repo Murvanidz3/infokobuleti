@@ -40,14 +40,8 @@
             @foreach ($sections as $module => $items)
                 <x-detail.section :title="__('site.business.sections.'.$module)">
                     @switch($module)
-                        @case('hotels')
-                            <div class="grid grid-cols-[repeat(auto-fill,minmax(min(100%,260px),1fr))] gap-5">
-                                @foreach ($items as $item)
-                                    <x-card.hotel :name="$item['name']" :address="$item['address']" :sea="$item['sea']" :rating="$item['rating']" :reviews="$item['reviews']" :price="$item['price']" :url="$item['url']" :image="$item['image']" :saved="$item['saved']" :favorite="$item['favorite']" :promotion="$item['promotion'] ?? null" :logo="$item['logo'] ?? null" />
-                                @endforeach
-                            </div>
-                            @break
                         @case('properties')
+                        @case('projects')
                             <div class="grid grid-cols-[repeat(auto-fill,minmax(min(100%,270px),1fr))] gap-5">
                                 @foreach ($items as $item)
                                     <x-card.property :badge="$item['badge']" :price="$item['price']" :converted="$item['converted']" :title="$item['title']" :location="$item['location']" :features="$item['features']" :url="$item['url']" :image="$item['image']" :saved="$item['saved']" :favorite="$item['favorite']" :promotion="$item['promotion'] ?? null" :logo="$item['logo'] ?? null" :owner-verified="$item['ownerVerified'] ?? false" />

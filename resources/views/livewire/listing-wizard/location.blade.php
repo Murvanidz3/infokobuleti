@@ -17,7 +17,7 @@
                 {{ __('account.wizard.location.pin') }}
                 @unless ($pinRequired)<span class="text-xs font-medium text-secondary">({{ __('components.optional') }})</span>@endunless
             </h2>
-            @if ($sea !== null && in_array($type, ['hotel', 'property'], true))
+            @if ($sea !== null && in_array($type, ['property', 'project'], true))
                 <p class="inline-flex items-center gap-1.5 text-[14px] font-semibold text-navy"><x-icon name="waves" :size="17" class="text-secondary" />{{ __('account.wizard.location.sea', ['distance' => number_format($sea, 0, '.', ' ')]) }}</p>
             @endif
         </div>

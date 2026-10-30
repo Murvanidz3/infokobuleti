@@ -28,7 +28,7 @@ class BackupRestoreTest extends Command
     public const string CACHE_KEY = 'monitoring:restore-test';
 
     /** Tables whose row counts must survive the round trip. */
-    private const array TABLES = ['users', 'hotels', 'properties', 'classifieds', 'vacancies', 'orders', 'settings'];
+    private const array TABLES = ['users', 'properties', 'projects', 'classifieds', 'vacancies', 'orders', 'settings'];
 
     public function handle(Alerts $alerts): int
     {

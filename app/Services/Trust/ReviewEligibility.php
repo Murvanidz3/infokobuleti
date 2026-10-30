@@ -3,16 +3,14 @@
 namespace App\Services\Trust;
 
 use App\Enums\SiteFeature;
-use App\Models\BookingRequest;
 use App\Models\Conversation;
-use App\Models\Hotel;
 use App\Models\Review;
 use App\Models\User;
 use App\Support\Features;
 use Illuminate\Database\Eloquent\Model;
 
 /**
- * Who may review a hotel: someone who sent it a booking request or exchanged messages about it,
+ * Who may review a place: someone who exchanged messages about it,
  * who is not its owner and has not reviewed it yet. With the trust layer switched off, any
  * signed-in non-owner may.
  */
@@ -49,10 +47,6 @@ class ReviewEligibility
 
     private function hasContact(User $user, Model $subject): bool
     {
-        if ($subject instanceof Hotel && BookingRequest::query()->where('hotel_id', $subject->getKey())->where('user_id', $user->getKey())->exists()) {
-            return true;
-        }
-
         return Conversation::query()
             ->whereMorphedTo('subject', $subject)
             ->whereHas('participants', fn ($query) => $query->whereKey($user->getKey()))

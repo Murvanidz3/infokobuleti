@@ -45,7 +45,7 @@
             <li class="md:col-span-2">
                 <x-empty-state icon="heart" :title="__('account.favorites.empty_title')" :text="__('account.favorites.empty_text')">
                     <x-slot:action>
-                        <x-button variant="secondary" :href="localized_route('hotels.index')">{{ __('account.favorites.browse') }}</x-button>
+                        <x-button variant="secondary" :href="localized_route('real-estate.index')">{{ __('account.favorites.browse') }}</x-button>
                     </x-slot:action>
                 </x-empty-state>
             </li>
