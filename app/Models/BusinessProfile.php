@@ -66,14 +66,6 @@ class BusinessProfile extends Model implements HasMedia
     }
 
     /**
-     * @return HasMany<Hotel, $this>
-     */
-    public function hotels(): HasMany
-    {
-        return $this->hasMany(Hotel::class);
-    }
-
-    /**
      * @return HasMany<Property, $this>
      */
     public function properties(): HasMany

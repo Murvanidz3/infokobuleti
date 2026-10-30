@@ -4,8 +4,8 @@ namespace App\Services\Alerts;
 
 use App\Enums\SearchFrequency;
 use App\Livewire\Listings\ClassifiedIndex;
-use App\Livewire\Listings\HotelIndex;
 use App\Livewire\Listings\ListingIndex;
+use App\Livewire\Listings\ProjectIndex;
 use App\Livewire\Listings\PropertyIndex;
 use App\Livewire\Listings\VacancyIndex;
 use App\Models\SavedSearch;
@@ -31,8 +31,8 @@ class SavedSearchMatcher
 
     /** @var array<string, class-string<ListingIndex<covariant Model>>> */
     private const array COMPONENTS = [
-        'hotels' => HotelIndex::class,
         'properties' => PropertyIndex::class,
+        'projects' => ProjectIndex::class,
         'classifieds' => ClassifiedIndex::class,
         'vacancies' => VacancyIndex::class,
     ];

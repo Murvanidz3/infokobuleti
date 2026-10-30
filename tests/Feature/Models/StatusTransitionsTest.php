@@ -1,14 +1,16 @@
 <?php
 
 use App\Enums\ListingStatus;
+use App\Enums\Role;
 use App\Exceptions\InvalidStatusTransition;
 use App\Models\Article;
 use App\Models\Classified;
-use App\Models\Hotel;
 use App\Models\Place;
+use App\Models\Project;
 use App\Models\Property;
 use App\Models\User;
 use App\Models\Vacancy;
+use Database\Seeders\RoleSeeder;
 use Illuminate\Support\Carbon;
 use Spatie\Activitylog\Models\Activity;
 
@@ -45,9 +47,11 @@ it('throws on a forbidden transition and leaves the listing untouched', function
 
 it('sets publish and expiry dates per module when a moderator approves', function (string $model, int $days) {
     Carbon::setTestNow('2026-10-25 12:00:00');
+    $this->seed(RoleSeeder::class);
     $moderator = User::factory()->create();
+    $moderator->assignRole(Role::Moderator->value);
 
-    /** @var Property|Classified|Vacancy|Hotel $listing */
+    /** @var Property|Classified|Vacancy|Project $listing */
     $listing = $model::factory()->pending()->create();
     $listing->transitionTo(ListingStatus::Published, by: $moderator);
 
@@ -60,7 +64,7 @@ it('sets publish and expiry dates per module when a moderator approves', functio
     'property' => [Property::class, 60],
     'classified' => [Classified::class, 30],
     'vacancy' => [Vacancy::class, 30],
-    'hotel' => [Hotel::class, 365],
+    'project' => [Project::class, 90],
 ]);
 
 it('never sets an expiry on modules that do not expire', function (string $model) {

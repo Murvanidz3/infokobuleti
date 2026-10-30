@@ -1,8 +1,7 @@
-@props(['initial' => 'hotels', 'options' => ['classifieds' => [], 'jobs' => []]])
+@props(['initial' => 'real_estate', 'options' => ['classifieds' => [], 'jobs' => []]])
 
 @php
     $tabs = [
-        'hotels' => ['icon' => 'bed', 'hue' => 'var(--color-tab-hotels)', 'columns' => 'lg:grid-cols-4', 'action' => localized_route('hotels.index')],
         'real_estate' => ['icon' => 'house', 'hue' => 'var(--color-tab-realestate)', 'columns' => 'lg:grid-cols-4', 'action' => localized_route('real-estate.index')],
         'classifieds' => ['icon' => 'tag', 'hue' => 'var(--color-tab-classifieds)', 'columns' => 'lg:grid-cols-3', 'action' => localized_route('classifieds.index')],
         'jobs' => ['icon' => 'briefcase', 'hue' => 'var(--color-tab-jobs)', 'columns' => 'lg:grid-cols-3', 'action' => localized_route('jobs.index')],
@@ -49,30 +48,6 @@
                   class="flex flex-col gap-2.5 lg:flex-row">
                 <div x-ignore class="grid min-w-0 flex-1 grid-cols-2 gap-2 {{ $tab['columns'] }}">
                     @switch($key)
-                        @case('hotels')
-                            <x-hero.field icon="pin" :label="__('home.search.fields.destination')">
-                                <select name="location" class="{{ $control }}">
-                                    <option value="">{{ __('site.kobuleti_all') }}</option>
-                                    @foreach ($locations as $value => $text)
-                                        <option value="{{ $value }}">{{ $text }}</option>
-                                    @endforeach
-                                </select>
-                            </x-hero.field>
-                            <x-hero.field icon="calendar" :label="__('home.search.fields.check_in')">
-                                <input type="date" name="check_in" min="{{ today()->toDateString() }}" class="{{ $control }}">
-                            </x-hero.field>
-                            <x-hero.field icon="calendar" :label="__('home.search.fields.check_out')">
-                                <input type="date" name="check_out" min="{{ today()->addDay()->toDateString() }}" class="{{ $control }}">
-                            </x-hero.field>
-                            <x-hero.field icon="users" :label="__('home.search.fields.guests')">
-                                <select name="guests" class="{{ $control }}">
-                                    @foreach (range(1, 6) as $guests)
-                                        <option value="{{ $guests }}" @selected($guests === 2)>{{ trans_choice('site.filters.guests_count', $guests, ['count' => $guests === 6 ? '6+' : $guests]) }}</option>
-                                    @endforeach
-                                </select>
-                            </x-hero.field>
-                            @break
-
                         @case('real_estate')
                             <x-hero.field icon="tag" :label="__('home.search.fields.deal')">
                                 <select name="deal" class="{{ $control }}">

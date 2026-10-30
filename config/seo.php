@@ -28,7 +28,7 @@ return [
         'enabled' => (bool) env('PAGE_CACHE', true),
         'ttl' => (int) env('PAGE_CACHE_TTL', 300),
         'routes' => [
-            'home', 'hotels.index', 'hotels.show', 'real-estate.index', 'real-estate.show', 'classifieds.index',
+            'home', 'real-estate.index', 'real-estate.show', 'projects.index', 'projects.show', 'classifieds.index',
             'classifieds.show', 'jobs.index', 'jobs.show', 'guide.index', 'guide.show', 'events.index',
             'events.show', 'news.index', 'news.show', 'business.show', 'pages.show',
         ],

@@ -27,7 +27,6 @@ function propertyDetailForm(array $overrides = []): array
         'cadastral_code' => '',
         'listed_by' => ListedBy::Owner->value,
         'features' => [],
-        'nearby' => [],
     ], $overrides);
 }
 
@@ -72,18 +71,26 @@ it('requires only the plot area for land and rejects rooms and floor', function 
         ->and(propertyDetailsPass([...$land, 'floor' => '1']))->toBeFalse();
 });
 
-it('lets a country house omit rooms and stores a yard', function () {
+it('stores a yard on a private house and drops the unit floor', function () {
     $form = propertyDetailForm([
-        'property_type' => PropertyType::CountryHouse->value,
-        'rooms' => '',
-        'floor' => '',
+        'property_type' => PropertyType::House->value,
+        'floor' => '1',
         'land_area_m2' => '450',
     ]);
 
-    expect(propertyDetailsPass($form))->toBeTrue();
+    expect(propertyDetailsPass($form))->toBeFalse()
+        ->and(propertyDetailsPass(propertyDetailForm([
+            'property_type' => PropertyType::House->value,
+            'floor' => '',
+            'land_area_m2' => '450',
+        ])))->toBeTrue();
 
     $stored = ListingForm::attributes('property', [
-        ...$form,
+        ...propertyDetailForm([
+            'property_type' => PropertyType::House->value,
+            'floor' => '',
+            'land_area_m2' => '450',
+        ]),
         'deal' => 'sale',
         'price' => '90000',
         'currency' => 'USD',
@@ -92,7 +99,7 @@ it('lets a country house omit rooms and stores a yard', function () {
     ]);
 
     expect($stored['land_area_m2'])->toBe(450.0)
-        ->and($stored['rooms'])->toBeNull()
+        ->and($stored['rooms'])->toBe(2)
         ->and($stored['floor'])->toBeNull();
 });
 
@@ -124,14 +131,13 @@ it('keeps hotel room count and drops a yard on an apartment when saving', functi
         'deal' => 'daily_rent',
         'price' => '180',
         'currency' => 'GEL',
-        'nearby' => ['beach', 'not-a-place'],
         'lat' => null,
         'lng' => null,
     ]);
 
     expect($stored['rooms'])->toBe(12)
         ->and($stored['land_area_m2'])->toBe(600.0)
-        ->and($stored['nearby'])->toBe(['beach']);
+        ->and(array_key_exists('nearby', $stored))->toBeFalse();
 
     $apartment = ListingForm::attributes('property', [
         ...propertyDetailForm(['land_area_m2' => '40', 'rooms' => '2']),
@@ -144,11 +150,6 @@ it('keeps hotel room count and drops a yard on an apartment when saving', functi
 
     expect($apartment['land_area_m2'])->toBeNull()
         ->and($apartment['rooms'])->toBe(2);
-});
-
-it('rejects an unknown nearby place', function () {
-    expect(propertyDetailsPass(propertyDetailForm(['nearby' => ['beach']])))->toBeTrue()
-        ->and(propertyDetailsPass(propertyDetailForm(['nearby' => ['marina']])))->toBeFalse();
 });
 
 it('requires a private house to have rooms and area', function () {

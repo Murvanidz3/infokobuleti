@@ -7,7 +7,7 @@ use App\Enums\Permission;
 use App\Filament\NavigationGroup;
 use App\Filament\Support\ChecksPermission;
 use App\Filament\Support\Translatable;
-use App\Models\Hotel;
+use App\Models\Project;
 use App\Models\Property;
 use App\Services\Settings;
 use BackedEnum;
@@ -28,7 +28,7 @@ use Illuminate\Support\Arr;
 use UnitEnum;
 
 /**
- * Hand-picked hotels and properties for the homepage, the hero photo per season and the season
+ * Hand-picked projects and properties for the homepage, the hero photo per season and the season
  * override (the homepage reads these in Phase 6; the season logic arrives in Phase 9).
  *
  * @property-read Schema $form
@@ -66,7 +66,7 @@ class HomepageCuration extends Page
     public function mount(Settings $settings): void
     {
         $this->form->fill([
-            'featured_hotels' => $settings->get('homepage.featured_hotels', []),
+            'featured_projects' => $settings->get('homepage.featured_projects', []),
             'featured_properties' => $settings->get('homepage.featured_properties', []),
             'hero_summer' => $settings->get('homepage.hero.summer'),
             'hero_winter' => $settings->get('homepage.hero.winter'),
@@ -79,9 +79,9 @@ class HomepageCuration extends Page
         return $schema
             ->components([
                 Section::make(__('admin.homepage.featured'))->description(__('admin.homepage.featured_help'))->schema([
-                    Select::make('featured_hotels')->label(__('admin.resources.hotels.plural'))
+                    Select::make('featured_projects')->label(__('nav.projects'))
                         ->multiple()->maxItems(12)->searchable()
-                        ->options(fn (): array => self::options(Hotel::class)),
+                        ->options(fn (): array => self::options(Project::class)),
                     Select::make('featured_properties')->label(__('admin.resources.properties.plural'))
                         ->multiple()->maxItems(12)->searchable()
                         ->options(fn (): array => self::options(Property::class)),
@@ -116,7 +116,7 @@ class HomepageCuration extends Page
         $state = $this->form->getState();
 
         $settings->put([
-            'homepage.featured_hotels' => array_map('intval', $state['featured_hotels'] ?? []),
+            'homepage.featured_projects' => array_map('intval', $state['featured_projects'] ?? []),
             'homepage.featured_properties' => array_map('intval', $state['featured_properties'] ?? []),
             'homepage.hero.summer' => Arr::first(Arr::wrap($state['hero_summer'] ?? null)),
             'homepage.hero.winter' => Arr::first(Arr::wrap($state['hero_winter'] ?? null)),
@@ -131,7 +131,7 @@ class HomepageCuration extends Page
     /**
      * Published listings as select options, newest first.
      *
-     * @param  class-string<Hotel|Property>  $model
+     * @param  class-string<Project|Property>  $model
      * @return array<int, string>
      */
     private static function options(string $model): array

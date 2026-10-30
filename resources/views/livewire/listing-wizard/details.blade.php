@@ -50,10 +50,7 @@
             ? __('account.wizard.fields.rooms_count')
             : __('account.wizard.fields.rooms');
         $numbers = match ($type) {
-            'hotel' => [
-                $number('stars', __('account.wizard.fields.stars'), ['min' => 1, 'max' => 5]),
-                $number('rooms_count', __('account.wizard.fields.rooms_count'), ['min' => 1, 'max' => 1000]),
-            ],
+            'project' => [],
             'property' => array_values(array_filter([
                 $show('area_m2') ? $number('area_m2', __('account.wizard.fields.area_m2'), ['min' => 1, 'step' => '0.1'], ! ($propertyType?->requires('area_m2') ?? false)) : null,
                 $show('land_area_m2') ? $number('land_area_m2', $yardLabel, ['min' => 1], ! ($propertyType?->requires('land_area_m2') ?? false)) : null,
@@ -79,24 +76,14 @@
         </section>
     @endif
 
-    @if ($type === 'hotel')
+    @if ($type === 'project')
         <section class="grid gap-4 md:grid-cols-2">
-            <x-form.field :label="__('account.wizard.fields.check_in_from')" for="wizard-check-in" :error="$errors->first('form.check_in_from')" optional>
-                <input id="wizard-check-in" type="time" wire:model.blur="form.check_in_from" class="{{ $control }} {{ $border('form.check_in_from') }}">
+            <x-form.field :label="__('account.wizard.fields.developer')" for="wizard-developer" :error="$errors->first('form.developer')">
+                <input id="wizard-developer" type="text" wire:model.blur="form.developer" maxlength="160" class="{{ $control }} {{ $border('form.developer') }}">
             </x-form.field>
-            <x-form.field :label="__('account.wizard.fields.check_out_until')" for="wizard-check-out" :error="$errors->first('form.check_out_until')" optional>
-                <input id="wizard-check-out" type="time" wire:model.blur="form.check_out_until" class="{{ $control }} {{ $border('form.check_out_until') }}">
+            <x-form.field :label="__('account.wizard.fields.completion_on')" for="wizard-completion" :error="$errors->first('form.completion_on')" optional>
+                <input id="wizard-completion" type="date" wire:model.blur="form.completion_on" min="{{ today()->toDateString() }}" class="{{ $control }} {{ $border('form.completion_on') }}">
             </x-form.field>
-            <x-form.field :label="__('account.wizard.fields.season_start_month')" for="wizard-season-start" :error="$errors->first('form.season_start_month')" :hint="__('account.wizard.hints.season')" optional>
-                <x-form.select name="season_start" id="wizard-season-start" wire:model.live="form.season_start_month" :options="$options['months']" :placeholder="__('account.wizard.all_year')" />
-            </x-form.field>
-            <x-form.field :label="__('account.wizard.fields.season_end_month')" for="wizard-season-end" :error="$errors->first('form.season_end_month')" optional>
-                <x-form.select name="season_end" id="wizard-season-end" wire:model.live="form.season_end_month" :options="$options['months']" :placeholder="__('account.wizard.all_year')" />
-            </x-form.field>
-        </section>
-        <section>
-            <h2 class="text-[15px] font-semibold text-navy">{{ __('account.wizard.fields.amenities') }}</h2>
-            <x-account.check-pills class="mt-3" model="form.amenities" :options="$options['amenities']" :label="__('account.wizard.fields.amenities')" />
         </section>
     @elseif ($type === 'property')
         <section class="flex flex-col gap-6">
@@ -124,10 +111,6 @@
             <div>
                 <h2 class="text-[15px] font-semibold text-navy">{{ __('account.wizard.fields.features') }}</h2>
                 <x-account.check-pills class="mt-3" model="form.features" :options="$options['features']" :label="__('account.wizard.fields.features')" />
-            </div>
-            <div>
-                <h2 class="text-[15px] font-semibold text-navy">{{ __('account.wizard.fields.nearby') }} <span class="text-xs font-medium text-secondary">({{ __('components.optional') }})</span></h2>
-                <x-account.check-pills class="mt-3" model="form.nearby" :options="\App\Enums\NearbyPlace::options()" :label="__('account.wizard.fields.nearby')" />
             </div>
         </section>
     @elseif ($type === 'classified')

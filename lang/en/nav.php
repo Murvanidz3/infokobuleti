@@ -6,6 +6,7 @@ return [
     'home' => 'Home',
     'hotels' => 'Hotels',
     'real_estate' => 'Real estate',
+    'projects' => 'New construction',
     'classifieds' => 'Classifieds',
     'jobs' => 'Jobs',
     'events' => 'Events',

@@ -25,7 +25,7 @@ class PropertySeeder extends Seeder
     /** @var list<array{0: string, 1: string, 2: int}> type, deal, count */
     private const array PLAN = [
         ['apartment', 'sale', 20], ['apartment', 'rent', 8], ['apartment', 'daily_rent', 6], ['apartment', 'pledge', 2],
-        ['house', 'sale', 5], ['house', 'rent', 2], ['country_house', 'sale', 4], ['land', 'sale', 5],
+        ['house', 'sale', 9], ['house', 'rent', 2], ['land', 'sale', 5],
         ['commercial', 'sale', 1], ['commercial', 'rent', 2], ['hotel', 'sale', 2], ['hotel', 'daily_rent', 3],
     ];
 
@@ -34,7 +34,6 @@ class PropertySeeder extends Seeder
         'apartment' => ['kobuleti-centre', 'kobuleti-centre', 'kobuleti-centre', 'north-kobuleti', 'north-kobuleti', 'north-kobuleti', 'south-kobuleti', 'chakvi', 'tsikhisdziri'],
         'house' => ['south-kobuleti', 'tsikhisdziri', 'bobokvati', 'chaisubani', 'mukhaestate', 'chakvi', 'ochkhamuri'],
         'land' => ['bobokvati', 'pichvnari', 'dagva', 'buknari', 'sakhalvasho', 'kvirike', 'chaisubani'],
-        'country_house' => ['south-kobuleti', 'tsikhisdziri', 'bobokvati', 'chaisubani', 'chakvi'],
         'commercial' => ['kobuleti-centre', 'north-kobuleti'],
         'hotel' => ['north-kobuleti', 'kobuleti-centre', 'tsikhisdziri'],
     ];

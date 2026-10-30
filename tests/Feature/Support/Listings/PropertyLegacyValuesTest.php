@@ -29,9 +29,10 @@ it('maps hotel businesses and needs-renovation rows onto the current enums', fun
 
 it('rolls new values back to ones the previous enums accept', function () {
     $hotel = Property::factory()->type(PropertyType::Hotel, PropertyDeal::DailyRent)->create();
-    $country = Property::factory()->type(PropertyType::CountryHouse, PropertyDeal::Sale)->create([
+    $country = Property::factory()->type(PropertyType::House, PropertyDeal::Sale)->create([
         'condition' => PropertyCondition::Renovated,
     ]);
+    DB::table('properties')->where('id', $country->id)->update(['type' => 'country_house']);
     $pledged = Property::factory()->type(PropertyType::Apartment, PropertyDeal::Pledge)->create();
 
     PropertyLegacyValues::rollback();

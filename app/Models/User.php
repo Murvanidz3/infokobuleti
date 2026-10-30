@@ -183,14 +183,6 @@ class User extends Authenticatable implements FilamentUser, HasLocalePreference,
     }
 
     /**
-     * @return HasMany<Hotel, $this>
-     */
-    public function hotels(): HasMany
-    {
-        return $this->hasMany(Hotel::class);
-    }
-
-    /**
      * @return HasMany<Property, $this>
      */
     public function properties(): HasMany
@@ -223,11 +215,11 @@ class User extends Authenticatable implements FilamentUser, HasLocalePreference,
     }
 
     /**
-     * @return HasMany<BookingRequest, $this>
+     * @return HasMany<Project, $this>
      */
-    public function bookingRequests(): HasMany
+    public function projects(): HasMany
     {
-        return $this->hasMany(BookingRequest::class);
+        return $this->hasMany(Project::class);
     }
 
     /**

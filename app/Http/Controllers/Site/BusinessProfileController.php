@@ -4,8 +4,8 @@ namespace App\Http\Controllers\Site;
 
 use App\Http\Controllers\Controller;
 use App\Models\BusinessProfile;
-use App\Models\Hotel;
 use App\Models\Place;
+use App\Models\Project;
 use App\Models\Property;
 use App\Models\Vacancy;
 use App\Services\ListingStats;
@@ -29,8 +29,8 @@ class BusinessProfileController extends Controller
         }
 
         $sections = array_filter([
-            'hotels' => ListingQuery::public($profile->hotels()->getQuery())->with(['media', 'location'])->orderByPromotion()->limit(12)->get()->map(fn (Hotel $item) => $cards->hotel($item)),
             'properties' => ListingQuery::public($profile->properties()->getQuery())->with(['media', 'location'])->orderByPromotion()->limit(12)->get()->map(fn (Property $item) => $cards->property($item)),
+            'projects' => ListingQuery::public(Project::query()->where('business_profile_id', $profile->id))->with(['media', 'location'])->orderByPromotion()->limit(12)->get()->map(fn (Project $item) => $cards->project($item)),
             'vacancies' => ListingQuery::public($profile->vacancies()->getQuery())->with(['location', 'businessProfile.media'])->orderByPromotion()->limit(12)->get()->map(fn (Vacancy $item) => $cards->job($item)),
             'places' => ListingQuery::public($profile->places()->getQuery())->with(['media', 'location'])->limit(12)->get()->map(fn (Place $item) => $cards->guide($item)),
         ], fn ($items) => $items->isNotEmpty());

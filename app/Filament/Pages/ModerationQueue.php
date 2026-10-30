@@ -43,7 +43,7 @@ class ModerationQueue extends Page implements HasTable
     protected static ?string $slug = 'moderation';
 
     /** Morph aliases of the moderated modules. */
-    public const array TYPES = ['hotel', 'property', 'classified', 'vacancy', 'place', 'article', 'event'];
+    public const array TYPES = ['property', 'project', 'classified', 'vacancy', 'place', 'article', 'event'];
 
     public static function requiredPermission(): Permission
     {

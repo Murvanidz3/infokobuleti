@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers\Site;
 
-use App\Enums\NearbyPlace;
 use App\Enums\PropertyDeal;
 use App\Enums\PropertyType;
 use App\Http\Controllers\Controller;
@@ -86,7 +85,7 @@ class PropertyController extends Controller
             $property->floor !== null ? ['icon' => 'layers', 'label' => __('site.filters.floor'), 'value' => $property->total_floors ? $property->floor.' / '.$property->total_floors : (string) $property->floor] : null,
             $property->building_status !== null ? ['icon' => 'building', 'label' => __('site.filters.building'), 'value' => (string) $property->building_status->getLabel()] : null,
             $property->condition !== null ? ['icon' => 'wrench', 'label' => __('site.filters.condition'), 'value' => (string) $property->condition->getLabel()] : null,
-            $property->distance_to_sea_m !== null ? ['icon' => 'waves', 'label' => __('site.hotels.to_sea'), 'value' => (string) $cards->sea($property->distance_to_sea_m)] : null,
+            $property->distance_to_sea_m !== null ? ['icon' => 'waves', 'label' => __('site.real_estate.to_sea'), 'value' => (string) $cards->sea($property->distance_to_sea_m)] : null,
             $property->price_per_m2 !== null ? ['icon' => 'tag', 'label' => __('site.real_estate.per_m2'), 'value' => $price->format((float) $property->price_per_m2, $currency)] : null,
             $property->cadastral_code ? ['icon' => 'file', 'label' => __('site.real_estate.cadastral'), 'value' => (string) $property->cadastral_code] : null,
         ]));
@@ -101,8 +100,6 @@ class PropertyController extends Controller
             'facts' => $facts,
             'owner' => $detail->owner($property),
             'hasPhone' => Contact::phone($property) !== null,
-            'nearby' => $detail->nearby($property),
-            'nearbyPlaces' => array_map(fn (NearbyPlace $place): string => $place->getLabel(), $property->nearbyPlaces()),
             'similar' => $similar,
             'saved' => $favorites->isSaved($property),
             'description' => $detail->description($property),

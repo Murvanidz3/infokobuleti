@@ -120,8 +120,8 @@ return [
     ],
 
     'listing_module' => [
-        'hotels' => 'Гостиницы',
         'properties' => 'Недвижимость',
+        'projects' => 'Новостройки',
         'classifieds' => 'Объявления',
         'vacancies' => 'Вакансии',
     ],
@@ -184,17 +184,6 @@ return [
         'auto_bump' => 'Автоподнятие',
     ],
 
-    'nearby_place' => [
-        'school' => 'Школа',
-        'kindergarten' => 'Детский сад',
-        'pharmacy' => 'Аптека',
-        'supermarket' => 'Супермаркет',
-        'bus_stop' => 'Автобусная остановка',
-        'park' => 'Парк',
-        'boulevard' => 'Бульвар',
-        'beach' => 'Пляж',
-    ],
-
     'property_condition' => [
         'newly_renovated' => 'Новый ремонт',
         'renovated' => 'С ремонтом',
@@ -214,9 +203,8 @@ return [
     'property_type' => [
         'apartment' => 'Квартира',
         'house' => 'Частный дом',
-        'country_house' => 'Дача',
-        'land' => 'Земельный участок',
-        'commercial' => 'Коммерческая площадь',
+        'land' => 'Земля',
+        'commercial' => 'Коммерческая',
         'hotel' => 'Гостиница',
     ],
 

@@ -23,19 +23,19 @@ it('serves an seo browse url for a property type and deal', function () {
 });
 
 it('serves a type url and still opens a listing slug', function () {
-    $property = Property::factory()->type(PropertyType::CountryHouse, PropertyDeal::Sale)->create([
-        'title' => ['ka' => 'აგარაკი მანდარინებით უნიკალური', 'en' => 'Mandarin house', 'ru' => 'Дача'],
+    $property = Property::factory()->type(PropertyType::House, PropertyDeal::Sale)->create([
+        'title' => ['ka' => 'კერძო სახლი მანდარინებით უნიკალური', 'en' => 'Mandarin house', 'ru' => 'Дом'],
     ]);
 
-    $this->get('/real-estate/country_house')
+    $this->get('/real-estate/house')
         ->assertOk()
-        ->assertSee('აგარაკი მანდარინებით უნიკალური');
+        ->assertSee('კერძო სახლი მანდარინებით უნიკალური');
 
     $this->get('/en/real-estate/hotel/daily_rent')->assertOk();
 
     $this->get('/real-estate/'.$property->slug)
         ->assertOk()
-        ->assertSee('აგარაკი მანდარინებით უნიკალური');
+        ->assertSee('კერძო სახლი მანდარინებით უნიკალური');
 });
 
 it('does not let a listing slug shadow a browse path', function () {

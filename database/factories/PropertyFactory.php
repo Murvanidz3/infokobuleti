@@ -5,7 +5,6 @@ namespace Database\Factories;
 use App\Enums\BuildingStatus;
 use App\Enums\Currency;
 use App\Enums\ListedBy;
-use App\Enums\NearbyPlace;
 use App\Enums\PropertyCondition;
 use App\Enums\PropertyDeal;
 use App\Enums\PropertyType;
@@ -38,7 +37,7 @@ class PropertyFactory extends Factory
     {
         $type = fake()->randomElement([
             PropertyType::Apartment, PropertyType::Apartment, PropertyType::Apartment,
-            PropertyType::House, PropertyType::CountryHouse, PropertyType::Land,
+            PropertyType::House, PropertyType::Land,
             PropertyType::Commercial, PropertyType::Hotel,
         ]);
         $deal = match ($type) {
@@ -89,7 +88,7 @@ class PropertyFactory extends Factory
 
         $area = match ($type) {
             PropertyType::Apartment => $rooms * fake()->numberBetween(20, 30) + 10,
-            PropertyType::House, PropertyType::CountryHouse => fake()->numberBetween(90, 260),
+            PropertyType::House => fake()->numberBetween(90, 260),
             PropertyType::Land => null,
             PropertyType::Commercial => fake()->numberBetween(40, 300),
             PropertyType::Hotel => fake()->numberBetween(300, 1500),
@@ -122,7 +121,6 @@ class PropertyFactory extends Factory
             'condition' => $type->allows('condition') ? fake()->randomElement(PropertyCondition::cases()) : null,
             'building_status' => $type->allows('building_status') ? fake()->randomElement(BuildingStatus::cases()) : null,
             'cadastral_code' => $type === PropertyType::Land ? '20.'.fake()->numerify('##.##.###') : null,
-            'nearby' => fake()->boolean(70) ? fake()->randomElements(array_column(NearbyPlace::cases(), 'value'), fake()->numberBetween(1, 3)) : [],
         ];
     }
 
@@ -143,10 +141,6 @@ class PropertyFactory extends Factory
                 ['ka' => 'კერძო სახლი ბაღით', 'en' => 'Private house with a garden', 'ru' => 'Частный дом с садом'],
                 ['ka' => 'ორსართულიანი სახლი ეზოთი', 'en' => 'Two-storey house with a yard', 'ru' => 'Двухэтажный дом с двором'],
                 ['ka' => 'სახლი ზღვასთან ახლოს', 'en' => 'House close to the sea', 'ru' => 'Дом недалеко от моря'],
-            ]),
-            PropertyType::CountryHouse => fake()->randomElement([
-                ['ka' => 'აგარაკი მანდარინის ბაღით', 'en' => 'Country house with a mandarin orchard', 'ru' => 'Дача с мандариновым садом'],
-                ['ka' => 'აგარაკი ზღვასთან ახლოს', 'en' => 'Country house close to the sea', 'ru' => 'Дача недалеко от моря'],
             ]),
             PropertyType::Land => fake()->randomElement([
                 ['ka' => 'სამშენებლო ნაკვეთი', 'en' => 'Building plot', 'ru' => 'Участок под застройку'],

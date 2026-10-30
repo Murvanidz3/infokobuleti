@@ -10,8 +10,8 @@ use App\Models\Article;
 use App\Models\BusinessProfile;
 use App\Models\Classified;
 use App\Models\Event;
-use App\Models\Hotel;
 use App\Models\Place;
+use App\Models\Project;
 use App\Models\Property;
 use App\Models\Vacancy;
 use App\Services\DateFormatter;
@@ -35,30 +35,6 @@ class CardPresenter
         private DateFormatter $dates,
         private Favorites $favorites,
     ) {}
-
-    /**
-     * @return array{favorite: string, name: string, address: string, sea: ?string, rating: ?string, reviews: string, price: ?string, url: string, image: ?string, saved: bool, lat: ?float, lng: ?float, pin: ?string, promotion: ?string, logo: ?string}
-     */
-    public function hotel(Hotel $hotel): array
-    {
-        return [
-            'favorite' => $this->favoriteKey($hotel),
-            'name' => (string) $hotel->title,
-            'address' => $this->locationText($hotel),
-            'sea' => $this->sea($hotel->distance_to_sea_m),
-            'rating' => $hotel->rating_avg !== null ? number_format((float) $hotel->rating_avg, 1) : null,
-            'reviews' => trans_choice('ui.counts.reviews', (int) $hotel->reviews_count, ['count' => $this->price->number((int) $hotel->reviews_count)]),
-            'price' => $hotel->price_from !== null ? $this->price->format((float) $hotel->price_from) : null,
-            'url' => localized_route('hotels.show', [$hotel]),
-            'image' => $hotel->coverUrl(),
-            'saved' => $this->favorites->isSaved($hotel),
-            'lat' => $this->coordinate($hotel->lat),
-            'lng' => $this->coordinate($hotel->lng),
-            'pin' => $hotel->price_from !== null ? $this->price->format((float) $hotel->price_from) : null,
-            'promotion' => $this->promotion($hotel),
-            'logo' => $this->packageLogo($hotel),
-        ];
-    }
 
     /**
      * @return array{favorite: string, deal: string, badge: string, price: string, converted: ?string, title: string, location: string, features: list<array{icon: string, text: string}>, url: string, image: ?string, saved: bool, lat: ?float, lng: ?float, pin: string, promotion: ?string, logo: ?string, ownerVerified: bool}
@@ -124,6 +100,41 @@ class CardPresenter
         }
 
         return $features;
+    }
+
+    /**
+     * @return array{favorite: string, badge: string, price: string, converted: ?string, title: string, location: string, features: list<array{icon: string, text: string}>, url: string, image: ?string, saved: bool, lat: ?float, lng: ?float, pin: string, promotion: ?string, logo: ?string}
+     */
+    public function project(Project $project): array
+    {
+        $currency = $this->currency($project->currency);
+        $amount = (float) $project->price_per_m2;
+        $converted = $currency !== 'GEL' && $project->price_gel !== null
+            ? __('listing.approx', ['price' => $this->price->format((float) $project->price_gel).' / m²'])
+            : null;
+        $features = [['icon' => 'building', 'text' => (string) $project->developer]];
+
+        if ($project->completion_on !== null) {
+            $features[] = ['icon' => 'calendar', 'text' => $project->completion_on->format('m.Y')];
+        }
+
+        return [
+            'favorite' => $this->favoriteKey($project),
+            'badge' => __('site.projects.badge'),
+            'price' => $this->price->format($amount, $currency).' / m²',
+            'converted' => $converted,
+            'title' => (string) $project->title,
+            'location' => $this->locationText($project),
+            'features' => $features,
+            'url' => localized_route('projects.show', [$project]),
+            'image' => $project->coverUrl(),
+            'saved' => $this->favorites->isSaved($project),
+            'lat' => $this->coordinate($project->lat),
+            'lng' => $this->coordinate($project->lng),
+            'pin' => $this->price->compact($amount, $currency),
+            'promotion' => $this->promotion($project),
+            'logo' => $this->packageLogo($project),
+        ];
     }
 
     /**

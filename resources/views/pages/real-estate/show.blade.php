@@ -48,19 +48,9 @@
                     </x-detail.section>
                 @endif
 
-                @if ($nearbyPlaces !== [])
-                    <x-detail.section :title="__('site.real_estate.nearby')">
-                        <ul class="grid grid-cols-2 gap-x-6 gap-y-3 xs:grid-cols-3">
-                            @foreach ($nearbyPlaces as $place)
-                                <li class="flex items-center gap-2.5 text-[15px] text-navy"><x-icon name="pin" :size="18" class="shrink-0 text-sea" />{{ $place }}</li>
-                            @endforeach
-                        </ul>
-                    </x-detail.section>
-                @endif
-
                 @if ($property->lat !== null)
                     <x-detail.section :title="__('site.detail.location')">
-                        <x-detail.map :lat="$property->lat" :lng="$property->lng" :title="$property->title" :nearby="$nearby" :address="$card['location']" />
+                        <x-detail.map :lat="$property->lat" :lng="$property->lng" :title="$property->title" :address="$card['location']" />
                     </x-detail.section>
                 @endif
             </div>

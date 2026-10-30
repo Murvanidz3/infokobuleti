@@ -95,7 +95,7 @@ return [
         'deleted' => 'Deleted listing',
         'empty_title' => 'No favorites yet',
         'empty_text' => 'Tap the heart on any card to save it here.',
-        'browse' => 'Browse hotels',
+        'browse' => 'Browse listings',
     ],
 
     'searches' => [
@@ -214,10 +214,11 @@ return [
         'what' => 'What are you posting?',
         'modules' => [
             'property' => 'Real estate',
-            'hotel' => 'Hotel or holiday home',
+            'project' => 'New construction project',
             'classified' => 'Item or service',
             'vacancy' => 'Job vacancy',
         ],
+        'project_hint' => 'A project has a name, a developer and a starting price per square metre. Buyers call you. There is no unit list and no booking.',
         'choose_type' => 'Choose what you are posting.',
         'continue_draft' => 'Continue where you left off',
         'remaining' => '{0} You have used this month’s free listings.|{1} You can post :count more free listing this month.|[2,*] You can post :count more free listings this month.',
@@ -255,7 +256,9 @@ return [
             'area_m2' => 'Area, m²',
             'land_area_m2' => 'Land area, m²',
             'yard_area' => 'Yard area, m²',
-            'nearby' => 'Nearby',
+            'developer' => 'Developer',
+            'completion_on' => 'Completion date',
+            'price_per_m2' => 'Price from, per m²',
             'rooms' => 'Rooms',
             'bedrooms' => 'Bedrooms',
             'bathrooms' => 'Bathrooms',

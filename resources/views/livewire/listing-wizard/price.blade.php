@@ -5,42 +5,20 @@
 @endphp
 
 <div class="flex flex-col gap-7">
-    @if ($type === 'hotel')
-        @if ($form['has_rooms'] ?? false)
-            <div class="flex flex-wrap items-center justify-between gap-3 rounded-tile bg-surface-alt p-4 md:p-5">
-                <p class="text-[14.5px] text-navy">{{ __('account.wizard.room.manage_hint') }}</p>
-                @if ($editing)
-                    <x-button size="sm" variant="secondary" icon="bed" :href="localized_route('account.hotels.rooms', ['hotel' => $this->editId])">{{ __('account.wizard.room.manage') }}</x-button>
-                @endif
+    @if ($type === 'project')
+        <section class="grid gap-4 md:grid-cols-[1fr_auto]">
+            <x-form.field :label="__('account.wizard.fields.price_per_m2')" for="wizard-price-m2" :error="$errors->first('form.price_per_m2')">
+                <input id="wizard-price-m2" type="number" inputmode="decimal" min="1" wire:model.blur="form.price_per_m2" class="{{ $control }} {{ $border('form.price_per_m2') }}">
+            </x-form.field>
+            <div class="flex flex-col gap-2">
+                <span class="text-[13.5px] font-semibold text-navy">{{ __('account.wizard.fields.currency') }}</span>
+                <x-account.choice-pills model="form.currency" :options="$options['currencies']" :label="__('account.wizard.fields.currency')" class="flex-nowrap" />
             </div>
-        @else
-            <section aria-labelledby="room-title">
-                <h2 id="room-title" class="text-[15px] font-semibold text-navy">{{ __('account.wizard.room.title') }}</h2>
-                <p class="mt-1 text-[13.5px] text-secondary">{{ __('account.wizard.room.hint') }}</p>
-                <div class="mt-4 grid gap-4 md:grid-cols-[2fr_1fr_1fr_1fr]">
-                    <x-form.field :label="__('account.wizard.room.name')" for="wizard-room-name" :error="$errors->first('form.room.name')">
-                        <input id="wizard-room-name" type="text" wire:model.blur="form.room.name" maxlength="80" class="{{ $control }} {{ $border('form.room.name') }}" placeholder="{{ __('account.wizard.placeholders.room') }}">
-                    </x-form.field>
-                    <x-form.field :label="__('account.wizard.room.base_price')" for="wizard-room-price" :error="$errors->first('form.room.base_price')">
-                        <div class="relative">
-                            <input id="wizard-room-price" type="number" inputmode="decimal" min="1" wire:model.blur="form.room.base_price" class="{{ $control }} {{ $border('form.room.base_price') }} pr-9">
-                            <span class="pointer-events-none absolute top-1/2 right-4 -translate-y-1/2 text-secondary">₾</span>
-                        </div>
-                    </x-form.field>
-                    <x-form.field :label="__('account.wizard.room.capacity_adults')" for="wizard-room-capacity" :error="$errors->first('form.room.capacity_adults')">
-                        <input id="wizard-room-capacity" type="number" inputmode="numeric" min="1" max="20" wire:model.blur="form.room.capacity_adults" class="{{ $control }} {{ $border('form.room.capacity_adults') }}">
-                    </x-form.field>
-                    <x-form.field :label="__('account.wizard.room.units')" for="wizard-room-units" :error="$errors->first('form.room.units')">
-                        <input id="wizard-room-units" type="number" inputmode="numeric" min="1" max="500" wire:model.blur="form.room.units" class="{{ $control }} {{ $border('form.room.units') }}">
-                    </x-form.field>
-                </div>
-            </section>
-        @endif
+        </section>
         @php
             $fields = [
+            $input('contact_name', __('account.wizard.fields.contact_name'), 'text', ['autocomplete' => 'name', 'maxlength' => 120], true),
             $input('contact_phone', __('account.wizard.fields.contact_phone'), 'tel', ['inputmode' => 'tel', 'autocomplete' => 'tel', 'placeholder' => '+995 5XX XX XX XX']),
-            $input('contact_email', __('account.wizard.fields.contact_email'), 'email', ['autocomplete' => 'email'], true),
-            $input('website', __('account.wizard.fields.website'), 'url', ['placeholder' => 'https://'], true),
         ];
         @endphp
     @elseif ($type === 'property' || $type === 'classified')

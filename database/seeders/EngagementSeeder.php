@@ -3,7 +3,6 @@
 namespace Database\Seeders;
 
 use App\Enums\ApplicationStatus;
-use App\Enums\BookingStatus;
 use App\Enums\BusinessType;
 use App\Enums\ListingModule;
 use App\Enums\NotificationChannel;
@@ -14,13 +13,11 @@ use App\Enums\ReportStatus;
 use App\Enums\ReviewStatus;
 use App\Enums\Role;
 use App\Enums\SearchFrequency;
-use App\Models\BookingRequest;
 use App\Models\BusinessProfile;
 use App\Models\Classified;
 use App\Models\Conversation;
 use App\Models\DailyStat;
 use App\Models\Favorite;
-use App\Models\Hotel;
 use App\Models\Message;
 use App\Models\Payment;
 use App\Models\Place;
@@ -87,15 +84,6 @@ class EngagementSeeder extends Seeder
         'ru' => 'Спасибо за отзыв! Будем рады видеть вас снова.',
     ];
 
-    /** @var list<array{0: string, 1: string}> locale, message */
-    private const array BOOKING_MESSAGES = [
-        ['ka', 'გამარჯობა, გვაინტერესებს ოთახი ზღვის ხედით, თუ თავისუფალია.'],
-        ['ka', 'მოვდივართ ორი ზრდასრული და ერთი ბავშვი. შესაძლებელია ადრე შემოსვლა?'],
-        ['ka', 'პარკინგი გაქვთ? მანქანით ვიმოგზაურებთ.'],
-        ['en', 'Hello, is the room available for these dates? We would arrive around 6 pm.'],
-        ['ru', 'Здравствуйте! Есть ли свободный номер на эти даты? Нужна детская кроватка.'],
-    ];
-
     private const array COVER_NOTES = [
         'გამარჯობა, მაქვს მსგავს პოზიციაზე მუშაობის გამოცდილება და შემიძლია დაწყება ნებისმიერ დროს.',
         'ვარ სტუდენტი, ზაფხულის განმავლობაში სრულ განაკვეთზე მუშაობა შემიძლია.',
@@ -119,7 +107,6 @@ class EngagementSeeder extends Seeder
     {
         $this->reviews();
         $this->favorites();
-        $this->bookingRequests();
         $this->applications();
         $this->conversations();
         $this->savedSearches();
@@ -130,10 +117,6 @@ class EngagementSeeder extends Seeder
 
     private function reviews(): void
     {
-        foreach (Hotel::query()->published()->get() as $hotel) {
-            $this->reviewsFor($hotel, fake()->numberBetween(2, 8), 'stay', reply: $hotel->business_profile_id !== null);
-        }
-
         foreach (Place::query()->where('type', '!=', PlaceType::Service)->get() as $place) {
             $kind = in_array($place->type, [PlaceType::Restaurant, PlaceType::Cafe], true) ? 'food' : 'place';
             $this->reviewsFor($place, fake()->numberBetween(1, 5), $kind);
@@ -169,7 +152,6 @@ class EngagementSeeder extends Seeder
     private function favorites(): void
     {
         $pool = collect()
-            ->concat(Hotel::query()->published()->get())
             ->concat(Property::query()->published()->get())
             ->concat(Classified::query()->published()->get())
             ->concat(Place::query()->published()->get());
@@ -182,36 +164,6 @@ class EngagementSeeder extends Seeder
                     'favoritable_id' => $listing->getKey(),
                 ]);
             }
-        }
-    }
-
-    private function bookingRequests(): void
-    {
-        $hotels = Hotel::query()->published()->with('roomTypes')->get();
-        $statuses = [
-            ...array_fill(0, 18, BookingStatus::Pending), ...array_fill(0, 12, BookingStatus::Accepted),
-            ...array_fill(0, 5, BookingStatus::Declined), ...array_fill(0, 3, BookingStatus::Cancelled),
-            ...array_fill(0, 2, BookingStatus::Expired),
-        ];
-
-        foreach ($statuses as $status) {
-            $hotel = $hotels->random();
-            $room = $hotel->roomTypes->random();
-            $user = fake()->boolean(60) ? $this->individuals()->random() : null;
-            [$locale, $message] = fake()->randomElement(self::BOOKING_MESSAGES);
-
-            BookingRequest::factory()->status($status)->create([
-                'hotel_id' => $hotel->id,
-                'room_type_id' => $room->id,
-                'user_id' => $user?->id,
-                'adults' => fake()->numberBetween(1, $room->capacity_adults),
-                'children' => fake()->numberBetween(0, $room->capacity_children),
-                'contact_name' => $user->name ?? Kobuleti::name(),
-                'contact_phone' => $user->phone ?? Kobuleti::phone(),
-                'contact_email' => $user?->email,
-                'message' => $message,
-                'locale' => $locale,
-            ]);
         }
     }
 
@@ -281,7 +233,7 @@ class EngagementSeeder extends Seeder
             [ListingModule::Properties, 'ბინა ჩრდილოეთ ქობულეთში', ['deal' => 'sale', 'type' => 'apartment', 'location' => 'north-kobuleti', 'price_max' => 60000, 'currency' => 'USD']],
             [ListingModule::Properties, 'დღიური ქირა, 2+ ოთახი', ['deal' => 'daily_rent', 'type' => 'apartment', 'rooms_min' => 2]],
             [ListingModule::Properties, 'მიწის ნაკვეთი', ['deal' => 'sale', 'type' => 'land', 'land_area_min' => 500]],
-            [ListingModule::Hotels, 'საოჯახო სასტუმრო ზღვასთან', ['type' => 'guesthouse', 'distance_to_sea_max' => 300]],
+            [ListingModule::Properties, 'სასტუმრო ზღვასთან', ['deal' => 'daily_rent', 'type' => ['hotel'], 'sea' => '300']],
             [ListingModule::Classifieds, 'Toyota Prius', ['category' => 'cars', 'make' => 'toyota', 'price_max' => 12000, 'currency' => 'USD']],
             [ListingModule::Classifieds, 'iPhone', ['category' => 'phones', 'brand' => 'apple']],
             [ListingModule::Vacancies, 'სეზონური სამუშაო სასტუმროში', ['category' => 'hospitality', 'employment_type' => 'seasonal']],
@@ -324,7 +276,6 @@ class EngagementSeeder extends Seeder
     private function dailyStats(): void
     {
         $listings = collect()
-            ->concat(Hotel::query()->published()->limit(12)->get())
             ->concat(Property::query()->published()->limit(12)->get());
         $rows = [];
 
@@ -350,10 +301,10 @@ class EngagementSeeder extends Seeder
     private function promotions(): void
     {
         $plan = [
-            [Hotel::class, PromotionType::SuperVip, 2], [Property::class, PromotionType::SuperVip, 3], [Classified::class, PromotionType::SuperVip, 1],
-            [Hotel::class, PromotionType::Vip, 4], [Property::class, PromotionType::Vip, 5], [Classified::class, PromotionType::Vip, 4], [Vacancy::class, PromotionType::Vip, 2],
+            [Property::class, PromotionType::SuperVip, 3], [Classified::class, PromotionType::SuperVip, 1],
+            [Property::class, PromotionType::Vip, 5], [Classified::class, PromotionType::Vip, 4], [Vacancy::class, PromotionType::Vip, 2],
             [Property::class, PromotionType::Bump, 3], [Classified::class, PromotionType::Bump, 6],
-            [Hotel::class, PromotionType::FeaturedHome, 2],
+            [Property::class, PromotionType::FeaturedHome, 2],
         ];
         $used = [];
 

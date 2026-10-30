@@ -8,9 +8,9 @@ use App\Models\Article;
 use App\Models\BusinessProfile;
 use App\Models\Classified;
 use App\Models\Event;
-use App\Models\Hotel;
 use App\Models\Page;
 use App\Models\Place;
+use App\Models\Project;
 use App\Models\Property;
 use App\Models\Vacancy;
 use App\Support\Listings\ListingQuery;
@@ -29,7 +29,7 @@ final class SitemapWriter
     public const int PER_FILE = 10000;
 
     /** List pages, the homepage and contact. */
-    private const array STATIC_ROUTES = ['home', 'hotels.index', 'real-estate.index', 'classifieds.index', 'jobs.index', 'guide.index', 'events.index', 'news.index', 'contact'];
+    private const array STATIC_ROUTES = ['home', 'real-estate.index', 'projects.index', 'classifieds.index', 'jobs.index', 'guide.index', 'events.index', 'news.index', 'contact'];
 
     /**
      * Writes every file into $directory (the public folder) and returns the number of URLs per file.
@@ -45,8 +45,8 @@ final class SitemapWriter
         $counts = [];
         $counts += $this->writeFile($folder, 'pages', $this->staticEntries());
 
-        $counts += $this->module('hotels', 'hotels.show', Hotel::query(), $folder);
         $counts += $this->module('real-estate', 'real-estate.show', Property::query(), $folder);
+        $counts += $this->module('projects', 'projects.show', Project::query(), $folder);
         $counts += $this->module('classifieds', 'classifieds.show', Classified::query(), $folder);
         $counts += $this->module('jobs', 'jobs.show', Vacancy::query(), $folder);
         $counts += $this->module('guide', 'guide.show', Place::query(), $folder);

@@ -11,7 +11,6 @@ enum PropertyType: string implements FilamentLabel
 
     case Apartment = 'apartment';
     case House = 'house';
-    case CountryHouse = 'country_house';
     case Land = 'land';
     case Commercial = 'commercial';
     case Hotel = 'hotel';
@@ -26,7 +25,6 @@ enum PropertyType: string implements FilamentLabel
     {
         $shared = [
             'cadastral_code' => 'optional',
-            'nearby' => 'optional',
         ];
 
         return match ($this) {
@@ -46,17 +44,6 @@ enum PropertyType: string implements FilamentLabel
                 'area_m2' => 'required',
                 'land_area_m2' => 'optional',
                 'rooms' => 'required',
-                'bedrooms' => 'optional',
-                'bathrooms' => 'optional',
-                'total_floors' => 'optional',
-                'condition' => 'optional',
-                'building_status' => 'optional',
-            ],
-            self::CountryHouse => [
-                ...$shared,
-                'area_m2' => 'required',
-                'land_area_m2' => 'optional',
-                'rooms' => 'optional',
                 'bedrooms' => 'optional',
                 'bathrooms' => 'optional',
                 'total_floors' => 'optional',

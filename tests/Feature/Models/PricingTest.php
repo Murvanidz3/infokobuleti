@@ -4,13 +4,8 @@ use App\Contracts\ExchangeRates;
 use App\Enums\Currency;
 use App\Enums\PropertyType;
 use App\Models\Classified;
-use App\Models\Hotel;
 use App\Models\Property;
-use App\Models\RoomAvailability;
-use App\Models\RoomType;
-use App\Models\RoomTypePriceRule;
 use App\Services\Currency\FixedExchangeRates;
-use Illuminate\Support\Carbon;
 
 beforeEach(function () {
     $this->app->instance(ExchangeRates::class, new FixedExchangeRates(['USD' => 2.70, 'EUR' => 3.00]));
@@ -69,35 +64,4 @@ it('updates price_gel when the price or currency changes', function () {
 
 it('keeps price_gel empty for classifieds priced by agreement', function () {
     expect(Classified::factory()->create(['price' => null])->price_gel)->toBeNull();
-});
-
-it('caches the lowest room price on the hotel', function () {
-    $hotel = Hotel::factory()->create();
-    RoomType::factory()->for($hotel)->create(['base_price' => 180]);
-    $cheapest = RoomType::factory()->for($hotel)->create(['base_price' => 95]);
-
-    expect($hotel->fresh()->price_from)->toBe(95.0);
-
-    $cheapest->delete();
-
-    expect($hotel->fresh()->price_from)->toBe(180.0);
-});
-
-it('prices a night by override, then season, then base price', function () {
-    $room = RoomType::factory()->create(['base_price' => 120]);
-    RoomTypePriceRule::factory()->for($room)->create(['starts_on' => '2027-07-01', 'ends_on' => '2027-08-31', 'price' => 250]);
-    RoomAvailability::factory()->for($room)->priced(300)->create(['date' => '2027-08-15']);
-
-    expect($room->priceOn(Carbon::parse('2027-06-10')))->toBe(120.0)
-        ->and($room->priceOn(Carbon::parse('2027-07-20')))->toBe(250.0)
-        ->and($room->priceOn(Carbon::parse('2027-08-15')))->toBe(300.0);
-});
-
-it('knows whether a seasonal hotel is open in a month', function () {
-    $summer = Hotel::factory()->make(['season_start_month' => 5, 'season_end_month' => 10]);
-    $allYear = Hotel::factory()->make(['season_start_month' => null, 'season_end_month' => null]);
-
-    expect($summer->isOpenInMonth(7))->toBeTrue()
-        ->and($summer->isOpenInMonth(1))->toBeFalse()
-        ->and($allYear->isOpenInMonth(1))->toBeTrue();
 });

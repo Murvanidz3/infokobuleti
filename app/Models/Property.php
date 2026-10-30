@@ -6,7 +6,6 @@ use App\Contracts\Listing;
 use App\Enums\AmenityScope;
 use App\Enums\BuildingStatus;
 use App\Enums\ListedBy;
-use App\Enums\NearbyPlace;
 use App\Enums\PropertyCondition;
 use App\Enums\PropertyDeal;
 use App\Enums\PropertyType;
@@ -60,7 +59,6 @@ class Property extends Model implements Listing, SearchableListing
             'area_m2' => 'float',
             'land_area_m2' => 'float',
             'price_per_m2' => 'float',
-            'nearby' => 'array',
         ];
     }
 
@@ -71,18 +69,7 @@ class Property extends Model implements Listing, SearchableListing
      */
     protected function reservedSlugs(): array
     {
-        return [...PropertyType::values(), ...PropertyDeal::values()];
-    }
-
-    /**
-     * @return list<NearbyPlace>
-     */
-    public function nearbyPlaces(): array
-    {
-        return array_values(array_filter(array_map(
-            fn (mixed $value): ?NearbyPlace => is_string($value) ? NearbyPlace::tryFrom($value) : null,
-            is_array($this->nearby) ? $this->nearby : [],
-        )));
+        return [...PropertyType::values(), ...PropertyDeal::values(), 'projects'];
     }
 
     /**

@@ -49,7 +49,7 @@ class SiteSettings extends Page
     protected static ?string $slug = 'settings';
 
     /** Modules with an expiry, keyed by morph alias. */
-    public const array EXPIRING_MODULES = ['hotel', 'property', 'classified', 'vacancy'];
+    public const array EXPIRING_MODULES = ['property', 'project', 'classified', 'vacancy'];
 
     /** @var array<string, mixed>|null */
     public ?array $data = [];

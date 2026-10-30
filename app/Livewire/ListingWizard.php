@@ -11,11 +11,9 @@ use App\Enums\CategoryModule;
 use App\Enums\Currency;
 use App\Enums\EmploymentType;
 use App\Enums\Experience;
-use App\Enums\HotelType;
 use App\Enums\ItemCondition;
 use App\Enums\ListedBy;
 use App\Enums\ListingStatus;
-use App\Enums\NearbyPlace;
 use App\Enums\PropertyCondition;
 use App\Enums\PropertyDeal;
 use App\Enums\PropertyType;
@@ -518,11 +516,7 @@ class ListingWizard extends Component
         ];
 
         return $common + match ($this->type) {
-            'hotel' => [
-                'hotelTypes' => HotelType::options(),
-                'amenities' => $this->amenities(AmenityScope::Hotel),
-                'months' => collect(range(1, 12))->mapWithKeys(fn (int $month): array => [(string) $month => now()->setDate(2026, $month, 1)->locale(app()->getLocale())->translatedFormat('F')])->all(),
-            ],
+            'project' => [],
             'property' => [
                 'deals' => PropertyDeal::options(),
                 'propertyTypes' => PropertyType::options(),
@@ -653,12 +647,10 @@ class ListingWizard extends Component
         ];
 
         $pairs = [...$pairs, ...match ($this->type) {
-            'hotel' => [
-                [__('account.wizard.fields.hotel_type'), $options['hotelTypes'][$form['hotel_type']] ?? null],
-                [__('account.wizard.fields.stars'), filled($form['stars']) ? $form['stars'].' ★' : null],
-                [__('account.wizard.fields.rooms_count'), $form['rooms_count']],
-                [__('account.wizard.fields.amenities'), $chosen($options['amenities'], $form['amenities'] ?? [])],
-                [__('account.wizard.room.base_price'), ($form['has_rooms'] ?? false) ? null : $money($form['room']['base_price'] ?? null, 'GEL')],
+            'project' => [
+                [__('account.wizard.fields.developer'), $form['developer'] ?? null],
+                [__('account.wizard.fields.completion_on'), $form['completion_on'] ?? null],
+                [__('account.wizard.fields.price_per_m2'), is_numeric($form['price_per_m2'] ?? null) ? $money($form['price_per_m2'], 'currency').' / m²' : null],
             ],
             'property' => [
                 [__('account.wizard.fields.deal'), $options['deals'][$form['deal']] ?? null],
@@ -673,7 +665,6 @@ class ListingWizard extends Component
                 [__('account.wizard.fields.condition'), $options['conditions'][$form['condition']] ?? null],
                 [__('account.wizard.fields.building_status'), $options['buildingStatuses'][$form['building_status']] ?? null],
                 [__('account.wizard.fields.features'), $chosen($options['features'], $form['features'] ?? [])],
-                [__('account.wizard.fields.nearby'), $chosen(NearbyPlace::options(), $form['nearby'] ?? [])],
             ],
             'classified' => [
                 [__('account.wizard.fields.category_id'), Category::query()->find(is_numeric($form['category_id']) ? (int) $form['category_id'] : null)?->name],

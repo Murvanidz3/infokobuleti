@@ -126,8 +126,8 @@ export function registerMap(Alpine) {
         },
     }));
 
-    // A single static location (detail pages): one pin plus optional nearby places.
-    Alpine.data('placeMap', (center, nearby = [], openLabel = '') => ({
+    // A single static location (detail pages): the listing's own pin.
+    Alpine.data('placeMap', (center) => ({
         loading: true,
 
         init() {
@@ -149,12 +149,6 @@ export function registerMap(Alpine) {
                     icon: L.divIcon({ className: 'map-main-pin', html: '<span></span>', iconSize: [30, 30], iconAnchor: [15, 30] }),
                     title: center.title,
                 }).addTo(map);
-
-                nearby.forEach((place) => {
-                    L.marker([place.lat, place.lng], { icon: pinIcon(L, { pin: null }), title: place.title })
-                        .bindPopup(popupHtml(place, openLabel), { maxWidth: 260, minWidth: 200 })
-                        .addTo(map);
-                });
 
                 map.on('click', () => map.scrollWheelZoom.enable());
                 this.loading = false;

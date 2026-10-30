@@ -78,7 +78,6 @@ class GuideController extends Controller
             'content' => SafeHtml::clean((string) $place->content),
             'hours' => $this->hours($hours),
             'hasPhone' => Contact::phone($place) !== null,
-            'nearby' => $detail->nearby($place),
             'reviews' => $detail->reviews($place),
             'events' => ListingQuery::public($place->events()->getQuery())->with(['media', 'location', 'category', 'place'])->upcoming()->limit(3)->get()->map(fn (Event $event) => $cards->event($event)),
             'similar' => ListingQuery::public(Place::query())->with(['media', 'location'])->whereKeyNot($place->id)->where('type', $place->type)->orderByRaw('rating_avg desc nulls last')->limit(4)->get()->map(fn (Place $item) => $cards->guide($item)),

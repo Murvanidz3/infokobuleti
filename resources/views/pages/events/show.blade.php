@@ -29,7 +29,7 @@
                 @endif
                 @if ($event->lat !== null)
                     <x-detail.section :title="__('site.detail.location')">
-                        <x-detail.map :lat="$event->lat" :lng="$event->lng" :title="$event->title" :nearby="$nearby" :address="$card['venue']" />
+                        <x-detail.map :lat="$event->lat" :lng="$event->lng" :title="$event->title" :address="$card['venue']" />
                     </x-detail.section>
                 @endif
             </div>

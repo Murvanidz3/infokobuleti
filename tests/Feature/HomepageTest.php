@@ -1,5 +1,9 @@
 <?php
 
+use App\Enums\PropertyDeal;
+use App\Enums\PropertyType;
+use App\Models\Property;
+
 dataset('locales', [
     'ka' => ['/', 'ka'],
     'en' => ['/en', 'en'],
@@ -11,7 +15,7 @@ it('renders the homepage in every locale', function (string $url, string $locale
         ->assertOk()
         ->assertSee('<html lang="'.$locale.'"', false)
         ->assertSee(__('home.hero.title', [], $locale))
-        ->assertSee(__('home.hotels.title', [], $locale))
+        ->assertSee(__('home.real_estate.title', [], $locale))
         ->assertSee(__('home.cta.button', [], $locale));
 })->with('locales');
 
@@ -41,29 +45,25 @@ it('returns 404 for unsupported locale prefixes', function () {
     $this->get('/de')->assertNotFound();
 });
 
-it('renders favorite buttons with their saved state for the delegated toggle', function () {
+it('renders a favorite button on each homepage property card', function () {
+    Property::factory()->type(PropertyType::Apartment, PropertyDeal::Sale)->create([
+        'title' => ['ka' => 'სატესტო ბინა გაყიდვა', 'en' => 'Test sale', 'ru' => 'Тест'],
+    ]);
+    Property::factory()->type(PropertyType::Apartment, PropertyDeal::Rent)->create([
+        'title' => ['ka' => 'სატესტო ბინა ქირა', 'en' => 'Test rent', 'ru' => 'Тест'],
+    ]);
+
     $html = $this->get('/')->assertOk()->getContent();
 
-    expect(substr_count($html, 'data-favorite'))->toBe(12)
-        ->and(preg_match_all('/data-favorite\s+aria-pressed="true"/', $html))->toBe(1);
+    expect(substr_count($html, 'data-favorite'))->toBe(2)
+        ->and(preg_match_all('/data-segment="(sale|rent)"/', $html))->toBe(2);
 });
 
-it('tags property cards with their deal for the segmented filter', function () {
-    $html = $this->get('/')->assertOk()->getContent();
-
-    expect(preg_match_all('/data-segment="(sale|rent)"/', $html))->toBe(6)
-        ->and($html)->toContain('data-carousel-track');
-});
-
-it('renders the hotel, property, classified and job demo content', function () {
-    app()->setLocale('ka');
-
+it('renders the homepage sections without a hotel booking block', function () {
     $this->get('/')
         ->assertOk()
-        ->assertSee(__('demo.hotels.h1.name'))
-        ->assertSee(__('demo.properties.r1.title'))
-        ->assertSee(__('demo.classifieds.c1.title'))
-        ->assertSee(__('demo.jobs.j1.title'))
-        ->assertSee(__('demo.guide.g1.title'))
-        ->assertSee(__('demo.news.n1.title'));
+        ->assertSee(__('home.real_estate.title'))
+        ->assertSee(__('home.classifieds.title'))
+        ->assertSee(__('home.jobs.title'))
+        ->assertDontSee(__('home.hotels.title'));
 });

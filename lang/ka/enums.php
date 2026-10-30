@@ -122,8 +122,8 @@ return [
     ],
 
     'listing_module' => [
-        'hotels' => 'სასტუმროები',
         'properties' => 'უძრავი ქონება',
+        'projects' => 'მშენებარე პროექტები',
         'classifieds' => 'განცხადებები',
         'vacancies' => 'ვაკანსიები',
     ],
@@ -186,17 +186,6 @@ return [
         'auto_bump' => 'ავტო-ამოწევა',
     ],
 
-    'nearby_place' => [
-        'school' => 'სკოლა',
-        'kindergarten' => 'საბავშვო ბაღი',
-        'pharmacy' => 'აფთიაქი',
-        'supermarket' => 'სუპერმარკეტი',
-        'bus_stop' => 'ავტობუსის გაჩერება',
-        'park' => 'პარკი',
-        'boulevard' => 'ბულვარი',
-        'beach' => 'პლაჟი',
-    ],
-
     'property_condition' => [
         'newly_renovated' => 'ახალი გარემონტებული',
         'renovated' => 'გარემონტებული',
@@ -216,9 +205,8 @@ return [
     'property_type' => [
         'apartment' => 'ბინა',
         'house' => 'კერძო სახლი',
-        'country_house' => 'აგარაკი',
-        'land' => 'მიწის ნაკვეთი',
-        'commercial' => 'კომერციული ფართი',
+        'land' => 'მიწა',
+        'commercial' => 'კომერციული',
         'hotel' => 'სასტუმრო',
     ],
 

@@ -255,6 +255,7 @@ return [
     ],
     'morph' => [
         'hotel' => 'Hotel',
+        'project' => 'Project',
         'property' => 'Property',
         'classified' => 'Classified',
         'vacancy' => 'Job',

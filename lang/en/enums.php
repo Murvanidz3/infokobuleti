@@ -120,8 +120,8 @@ return [
     ],
 
     'listing_module' => [
-        'hotels' => 'Hotels',
         'properties' => 'Real estate',
+        'projects' => 'New construction',
         'classifieds' => 'Classifieds',
         'vacancies' => 'Jobs',
     ],
@@ -184,17 +184,6 @@ return [
         'auto_bump' => 'Auto-bump',
     ],
 
-    'nearby_place' => [
-        'school' => 'School',
-        'kindergarten' => 'Kindergarten',
-        'pharmacy' => 'Pharmacy',
-        'supermarket' => 'Supermarket',
-        'bus_stop' => 'Bus stop',
-        'park' => 'Park',
-        'boulevard' => 'Boulevard',
-        'beach' => 'Beach',
-    ],
-
     'property_condition' => [
         'newly_renovated' => 'Newly renovated',
         'renovated' => 'Renovated',
@@ -214,9 +203,8 @@ return [
     'property_type' => [
         'apartment' => 'Apartment',
         'house' => 'Private house',
-        'country_house' => 'Country house',
-        'land' => 'Land plot',
-        'commercial' => 'Commercial space',
+        'land' => 'Land',
+        'commercial' => 'Commercial',
         'hotel' => 'Hotel',
     ],
 

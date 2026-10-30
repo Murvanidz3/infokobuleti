@@ -1,6 +1,6 @@
 <?php
 
-use App\Models\BookingRequest;
+use App\Models\Project;
 use App\Models\Review;
 use App\Models\User;
 use App\Support\Database\ListingSchema;
@@ -20,8 +20,7 @@ it('creates every table of the data model', function (string $table) {
     expect(Schema::hasTable($table))->toBeTrue("Missing table {$table}");
 })->with([
     'users', 'business_profiles', 'locations', 'categories', 'amenities', 'amenityables',
-    'hotels', 'room_types', 'room_type_price_rules', 'room_availability', 'booking_requests',
-    'properties', 'classifieds', 'vacancies', 'vacancy_applications', 'places', 'articles', 'events',
+    'properties', 'projects', 'hotel_module_snapshots', 'classifieds', 'vacancies', 'vacancy_applications', 'places', 'articles', 'events',
     'favorites', 'reviews', 'reports', 'daily_stats', 'saved_searches',
     'conversations', 'conversation_participants', 'messages', 'payments', 'promotions',
     'roles', 'permissions', 'model_has_roles', 'media', 'activity_log',
@@ -38,13 +37,13 @@ it('adds a nullable pgvector embedding column with an HNSW index', function (str
     expect($type->type)->toBe('vector('.ListingSchema::EMBEDDING_DIMENSIONS.')')
         ->and($type->attnotnull)->toBeFalse()
         ->and($index?->indexdef)->toContain('vector_cosine_ops');
-})->with(['hotels', 'properties', 'classifieds', 'vacancies', 'places']);
+})->with(['properties', 'projects', 'classifieds', 'vacancies', 'places']);
 
 it('has a full-text index on every module', function (string $table) {
     $index = DB::selectOne('select indexdef from pg_indexes where tablename = ? and indexname = ?', [$table, "{$table}_search_index"]);
 
     expect($index?->indexdef)->toContain('to_tsvector');
-})->with(['hotels', 'properties', 'classifieds', 'vacancies', 'places', 'articles', 'events']);
+})->with(['properties', 'projects', 'classifieds', 'vacancies', 'places', 'articles', 'events']);
 
 it('keeps phone and email unique only among active users', function () {
     $user = User::factory()->create(['phone' => '+995555123456', 'email' => 'nino@example.com']);
@@ -68,6 +67,13 @@ it('enforces review ratings between 1 and 10', function () {
     expectQueryToFail(fn () => Review::factory()->create(['rating' => 11]));
 });
 
-it('rejects booking requests that end before they start', function () {
-    expectQueryToFail(fn () => BookingRequest::factory()->create(['check_in' => '2027-07-10', 'check_out' => '2027-07-10']));
+it('rejects a negative project price per square metre', function () {
+    expectQueryToFail(fn () => Project::factory()->create(['price_per_m2' => -1]));
+});
+
+it('drops the hotel booking tables and the nearby checklist', function () {
+    expect(Schema::hasTable('hotels'))->toBeFalse()
+        ->and(Schema::hasTable('booking_requests'))->toBeFalse()
+        ->and(Schema::hasColumn('properties', 'nearby'))->toBeFalse()
+        ->and(Schema::hasTable('projects'))->toBeTrue();
 });

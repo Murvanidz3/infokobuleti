@@ -255,6 +255,7 @@ return [
     ],
     'morph' => [
         'hotel' => 'სასტუმრო',
+        'project' => 'პროექტი',
         'property' => 'უძრავი ქონება',
         'classified' => 'განცხადება',
         'vacancy' => 'ვაკანსია',

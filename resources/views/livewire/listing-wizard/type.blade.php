@@ -2,7 +2,7 @@
 @php
     $modules = [
         'property' => 'building',
-        'hotel' => 'bed',
+        'project' => 'layers',
         'classified' => 'tag',
         'vacancy' => 'briefcase',
     ];
@@ -49,12 +49,8 @@
         </section>
     @endunless
 
-    @if ($type === 'hotel')
-        <section>
-            <h2 class="text-[15px] font-semibold text-navy">{{ __('account.wizard.fields.hotel_type') }}</h2>
-            <x-account.choice-pills class="mt-3" model="form.hotel_type" :options="$options['hotelTypes']" :label="__('account.wizard.fields.hotel_type')" />
-            @error('form.hotel_type')<p class="mt-2 text-[13px] font-medium text-coral-pressed">{{ $message }}</p>@enderror
-        </section>
+    @if ($type === 'project')
+        <p class="text-[14.5px] leading-relaxed text-secondary">{{ __('account.wizard.project_hint') }}</p>
     @elseif ($type === 'property')
         <section class="flex flex-col gap-6">
             <div>

@@ -6,8 +6,8 @@ return [
     | Main sections in header, drawer and footer order: lang key in nav.php => route name.
     */
     'nav' => [
-        'hotels' => 'hotels.index',
         'real_estate' => 'real-estate.index',
+        'projects' => 'projects.index',
         'classifieds' => 'classifieds.index',
         'jobs' => 'jobs.index',
         'guide' => 'guide.index',

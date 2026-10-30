@@ -3,8 +3,8 @@
 use App\Models\Article;
 use App\Models\Classified;
 use App\Models\Event;
-use App\Models\Hotel;
 use App\Models\Place;
+use App\Models\Project;
 use App\Models\Property;
 use App\Models\Vacancy;
 
@@ -151,15 +151,15 @@ return [
         'host' => env('MEILISEARCH_HOST', 'http://localhost:7700'),
         'key' => env('MEILISEARCH_KEY'),
         'index-settings' => [
-            Hotel::class => [
-                'searchableAttributes' => ['title_ka', 'title_en', 'title_ru', 'description_ka', 'description_en', 'description_ru'],
-                'filterableAttributes' => ['status', 'type', 'stars', 'price', 'distance_to_sea_m', 'rating', '_geo'],
-                'sortableAttributes' => ['published_at', 'promotion_level'],
-            ],
             Property::class => [
                 'searchableAttributes' => ['title_ka', 'title_en', 'title_ru', 'description_ka', 'description_en', 'description_ru'],
                 'filterableAttributes' => ['status', 'deal', 'type', 'price', 'area_m2', 'rooms', 'floor', 'condition', 'building_status', 'distance_to_sea_m', 'location_id', 'amenities', '_geo'],
                 'sortableAttributes' => ['published_at', 'promotion_level', 'price', 'area_m2', 'distance_to_sea_m'],
+            ],
+            Project::class => [
+                'searchableAttributes' => ['title_ka', 'title_en', 'title_ru', 'description_ka', 'description_en', 'description_ru', 'developer'],
+                'filterableAttributes' => ['status', 'price', 'completion_on', 'distance_to_sea_m', 'location_id', '_geo'],
+                'sortableAttributes' => ['published_at', 'promotion_level', 'price', 'distance_to_sea_m'],
             ],
             Classified::class => [
                 'searchableAttributes' => ['title_ka', 'title_en', 'title_ru', 'description_ka', 'description_en', 'description_ru'],

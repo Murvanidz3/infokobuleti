@@ -7,12 +7,11 @@ use App\Enums\ListingGroup;
 use App\Enums\ListingStatus;
 use App\Enums\PromotionType;
 use App\Models\Classified;
-use App\Models\Hotel;
+use App\Models\Project;
 use App\Models\Property;
 use App\Models\User;
 use App\Models\Vacancy;
 use App\Services\DateFormatter;
-use App\Services\PriceFormatter;
 use App\Support\Listings\CardPresenter;
 use App\Support\Listings\PublicUrl;
 use Illuminate\Database\Eloquent\Builder;
@@ -35,8 +34,8 @@ class OwnerListings
      * @var array<string, class-string<Model&Listing>>
      */
     public const array TYPES = [
-        'hotel' => Hotel::class,
         'property' => Property::class,
+        'project' => Project::class,
         'classified' => Classified::class,
         'vacancy' => Vacancy::class,
     ];
@@ -46,7 +45,6 @@ class OwnerListings
 
     public function __construct(
         private CardPresenter $cards,
-        private PriceFormatter $price,
         private DateFormatter $dates,
     ) {}
 
@@ -303,8 +301,8 @@ class OwnerListings
     private function priceText(Model $listing): ?string
     {
         return match (true) {
-            $listing instanceof Hotel => $listing->price_from !== null ? __('account.listings.price_from', ['price' => $this->price->format((float) $listing->price_from)]) : null,
             $listing instanceof Property => $this->cards->property($listing)['price'],
+            $listing instanceof Project => $this->cards->project($listing)['price'],
             $listing instanceof Classified => $this->cards->classifiedPrice($listing),
             $listing instanceof Vacancy => $this->cards->salary($listing),
             default => null,

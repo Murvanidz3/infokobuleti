@@ -8,7 +8,6 @@ use App\Enums\Permission;
 use App\Filament\Resources\Articles\ArticleResource;
 use App\Filament\Resources\Classifieds\ClassifiedResource;
 use App\Filament\Resources\Events\EventResource;
-use App\Filament\Resources\Hotels\HotelResource;
 use App\Filament\Resources\Places\PlaceResource;
 use App\Filament\Resources\Properties\PropertyResource;
 use App\Filament\Resources\Vacancies\VacancyResource;
@@ -170,7 +169,6 @@ class ModerationReview extends Page
         }
 
         $resource = [
-            'hotel' => HotelResource::class,
             'property' => PropertyResource::class,
             'classified' => ClassifiedResource::class,
             'vacancy' => VacancyResource::class,
