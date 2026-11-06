@@ -1,6 +1,7 @@
 <?php
 
 use App\Enums\ListingStatus;
+use App\Enums\Role;
 use App\Exceptions\InvalidStatusTransition;
 use App\Models\Article;
 use App\Models\Classified;
@@ -9,6 +10,7 @@ use App\Models\Place;
 use App\Models\Property;
 use App\Models\User;
 use App\Models\Vacancy;
+use Database\Seeders\RoleSeeder;
 use Illuminate\Support\Carbon;
 use Spatie\Activitylog\Models\Activity;
 
@@ -24,8 +26,8 @@ it('allows only the documented transitions', function (ListingStatus $from, List
         'pending' => ['published', 'rejected', 'draft'],
         'rejected' => ['pending'],
         'published' => ['paused', 'expired', 'archived', 'pending'],
-        'paused' => ['published', 'archived'],
-        'expired' => ['pending', 'archived'],
+        'paused' => ['published', 'pending', 'archived'],
+        'expired' => ['pending', 'published', 'archived'],
         'archived' => ['draft'],
     ];
 
@@ -45,7 +47,8 @@ it('throws on a forbidden transition and leaves the listing untouched', function
 
 it('sets publish and expiry dates per module when a moderator approves', function (string $model, int $days) {
     Carbon::setTestNow('2026-10-25 12:00:00');
-    $moderator = User::factory()->create();
+    $this->seed(RoleSeeder::class);
+    $moderator = User::factory()->staff()->create()->assignRole(Role::Moderator->value);
 
     /** @var Property|Classified|Vacancy|Hotel $listing */
     $listing = $model::factory()->pending()->create();
