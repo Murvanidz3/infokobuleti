@@ -132,7 +132,21 @@ jobs:
             exit 0
           fi
           install -d -m 700 ~/.ssh
-          printf '%s\n' "$SSH_KEY" > ~/.ssh/deploy_key
+          # Rebuild the key from its base64 body so a secret pasted with joined lines,
+          # CRLF endings or extra spaces still loads.
+          body=$(printf '%s' "$SSH_KEY" | tr -d '\r' \
+            | sed -e 's/-----BEGIN OPENSSH PRIVATE KEY-----//' -e 's/-----END OPENSSH PRIVATE KEY-----//' \
+            | tr -d '[:space:]')
+          {
+            echo '-----BEGIN OPENSSH PRIVATE KEY-----'
+            printf '%s' "$body" | fold -w 70
+            echo
+            echo '-----END OPENSSH PRIVATE KEY-----'
+          } > ~/.ssh/deploy_key
           chmod 600 ~/.ssh/deploy_key
-          printf '%s\n' "$KNOWN_HOSTS" > ~/.ssh/known_hosts
-          ssh -i ~/.ssh/deploy_key -p "${PORT:-22}" -o BatchMode=yes "deploy@$HOST" "$TARGET" < "$RUNNER_TEMP/release.tgz"
+          if ! ssh-keygen -y -f ~/.ssh/deploy_key > /dev/null 2>&1; then
+            echo "::error::DEPLOY_SSH_KEY is not a valid OpenSSH private key (body length ${#body}). Paste the whole key again."
+            exit 1
+          fi
+          printf '%s\n' "$KNOWN_HOSTS" | tr -d '\r' > ~/.ssh/known_hosts
+          ssh -i ~/.ssh/deploy_key -o IdentitiesOnly=yes -p "${PORT:-22}" -o BatchMode=yes "deploy@$HOST" "$TARGET" < "$RUNNER_TEMP/release.tgz"
