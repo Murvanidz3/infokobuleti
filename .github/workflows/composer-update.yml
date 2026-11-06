@@ -1,0 +1,64 @@
+# Updates Composer packages on a GitHub runner (packagist is not reachable from the
+# Claude cloud session) and commits the new composer.lock back to the throwaway branch
+# "ops/composer-update" only. It never touches develop or main: the lock is reviewed,
+# cherry-picked and pushed to "develop" separately, so the normal CI (tests, audit,
+# staging deploy) runs on it. Pushes made with GITHUB_TOKEN do not start other workflows.
+#
+# Trigger: push to the throwaway branch "ops/composer-update" (packages listed in
+# .github/composer-update-packages, one per line; default "symfony/*"), or run manually.
+name: Composer update
+
+on:
+  push:
+    branches: ['ops/composer-update']
+  workflow_dispatch:
+    inputs:
+      packages:
+        description: 'Packages to update (space separated, wildcards allowed)'
+        default: 'symfony/*'
+
+permissions:
+  contents: write
+
+jobs:
+  update:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          extensions: pdo_pgsql, pgsql, redis, gd, intl, bcmath, gmp, exif, zip, pcntl, posix
+          coverage: none
+
+      - name: Update packages
+        env:
+          INPUT_PACKAGES: ${{ github.event.inputs.packages }}
+        run: |
+          packages="$INPUT_PACKAGES"
+          if [ -z "$packages" ] && [ -f .github/composer-update-packages ]; then
+            packages=$(grep -vE '^\s*(#|$)' .github/composer-update-packages | tr '\n' ' ')
+          fi
+          packages="${packages:-symfony/*}"
+          echo "Updating: $packages"
+          # shellcheck disable=SC2086
+          composer update $packages --with-dependencies --no-interaction --no-scripts --no-progress
+          git diff --stat composer.lock
+
+      - name: Audit after update
+        run: composer audit --no-interaction --locked || true
+
+      - name: Commit the lock to the ops branch
+        if: github.ref == 'refs/heads/ops/composer-update'
+        run: |
+          if git diff --quiet composer.lock composer.json; then
+            echo "Nothing changed."
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898+github-actions[bot]@users.noreply.github.com'
+          git add composer.lock composer.json
+          git commit -m "Composer: update packages (runner)"
+          git push origin HEAD:refs/heads/ops/composer-update
