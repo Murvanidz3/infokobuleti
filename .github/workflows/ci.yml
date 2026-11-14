@@ -66,7 +66,7 @@ jobs:
           cache: npm
 
       - name: Composer cache
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: ~/.cache/composer
           key: composer-${{ hashFiles('composer.lock') }}
