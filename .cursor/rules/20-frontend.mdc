@@ -1,0 +1,32 @@
+---
+description: Design system for Blade, Livewire, CSS and JS
+globs: resources/views/**,resources/css/**,resources/js/**,app/Livewire/**,app/View/**
+alwaysApply: false
+---
+# Frontend and design — use only what exists
+
+Every page must look like the same product as the homepage.
+Source of truth: resources/css/app.css (@theme tokens), resources/views/components, design-reference/Homepage.dc.html, design-reference/DESIGN-PROMPT.md.
+
+## Tokens (Tailwind classes from @theme — never raw hex, never new tokens)
+- Colors: navy, navy-hover, secondary, line, line-strong, surface-alt, white, coral, coral-hover, coral-pressed, coral-tint, price, sea, tab-hotels, tab-realestate, tab-classifieds, tab-jobs.
+  coral is the ONLY action accent (primary buttons, CTA, hearts, "new" badge). Use coral-pressed for fills with white text. price for prices.
+  sea only for sea temperature. tab-* only for the hero search tabs. No gradients except the hero overlay.
+- Fonts: font-sans (UI), font-serif (headings), font-logo (logo only).
+- Radius: rounded-chip, rounded-field, rounded-button, rounded-tile, rounded-card, rounded-panel, rounded-full for pills.
+- Shadows: shadow-card, shadow-card-soft, shadow-card-hover, shadow-feature-hover, shadow-tile-hover, shadow-cta, shadow-cta-hover, shadow-button-hover.
+- Breakpoints 1240 / 1100 / 720. Touch targets at least 44px.
+
+## Components — reuse before writing markup
+<x-layout.app>, <x-section>, <x-section-header>, <x-page-header>, <x-breadcrumbs>, <x-button>, <x-icon-button>, <x-icon>, <x-badge>, <x-pill>,
+<x-card.hotel|property|classified|job|guide|event|news>, <x-form.input|select|checkbox|field|radio-pills|number-range|date-range|dropzone>,
+<x-empty-state>, <x-pagination>, <x-modal>, <x-bottom-sheet>, <x-segmented>, <x-skeleton>, <x-image>, <x-favorite-button>, <x-cta-banner>.
+Need something new? Compose it from these. A new component only when the prompt asks for one.
+
+## Rules
+- Line icons only via <x-icon> (1.5px stroke). No emoji, no filled icons except the saved heart.
+- Small text on coral-tint uses text-navy (contrast).
+- Images through <x-image> (srcset + placeholder). Respect prefers-reduced-motion.
+- All text through __() / trans_choice() with keys in lang/ka, lang/en, lang/ru.
+- Livewire 4: follow existing components in app/Livewire; validate in the component or a Form object; no N+1 in render().
+- Check the result at 375px, 768px and 1280px widths.

@@ -13,6 +13,8 @@
         "testing-best-practices",
         "configuring-horizon",
         "scout-development",
-        "tailwindcss-development"
+        "tailwindcss-development",
+        "livewire-development",
+        "pennant-development"
     ]
 }

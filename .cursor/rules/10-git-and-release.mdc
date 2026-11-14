@@ -1,0 +1,16 @@
+---
+description: Git, branches and release safety (always on)
+alwaysApply: true
+---
+# Git and release — hard rules
+
+- Start every task from the latest `develop`: `git fetch origin && git switch -c cursor/<short-topic> origin/develop`.
+- One task = one branch = one PR into `develop`. Never open a PR into `main`. Never push to `develop` or `main` directly.
+- Never stack a PR on another unmerged PR branch unless the prompt says so.
+- Commit messages in English, imperative, short: "Add price filter to real estate list".
+- NEVER deploy. NEVER connect to the server (SSH, scp), never run anything in .provision, never run p11-deploy.cmd.
+  Staging (dev.infokobuleti.com) receives only `develop` through GitHub Actions; production only `main` through a release PR the owner approves.
+- NEVER run migrations or seeders against staging or production databases. Locally only.
+- NEVER run destructive commands (migrate:fresh, db:wipe, DROP, TRUNCATE, rm -rf, git push --force, git reset --hard on shared branches).
+- Never commit .env, keys, tokens, dumps, graphify-out/ or anything from .provision.
+- Do not edit .github/workflows, deploy/, composer.json/lock or package.json/lock unless the prompt asks for it.

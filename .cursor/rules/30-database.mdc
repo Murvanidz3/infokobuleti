@@ -1,0 +1,17 @@
+---
+description: Migrations, models and data safety
+globs: database/**,app/Models/**
+alwaysApply: false
+---
+# Database — safe changes only
+
+- Migrations are ADDITIVE and backward compatible: the previous release must keep working after deploy and after a rollback.
+  Add nullable columns or columns with defaults, new tables, new indexes.
+- Never drop or rename a table or column, never delete or rewrite existing rows, unless the prompt explicitly says so and
+  describes how existing data is kept. A destructive change is always a separate, owner-approved PR.
+- Never edit a migration that is already on develop; write a new one. Filename date = today.
+- Every migration has a working down().
+- Enums are varchar columns backed by PHP enums. Money numeric(14,2). Translatable fields jsonb with ka required.
+- Index foreign keys and filter columns. Soft deletes on listings.
+- Update the model, its factory, and the seeder if the prompt touches demo data.
+- Inspect the current schema with Boost `database-schema` first.

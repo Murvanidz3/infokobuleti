@@ -1,0 +1,45 @@
+---
+description: infokobuleti.com core rules (always on)
+alwaysApply: true
+---
+# infokobuleti.com — core rules
+
+All-in-one portal for Kobuleti (Adjara, Georgia): hotels, real estate, classifieds, jobs, city guide, news and events, useful info.
+
+## How to work on a task
+1. Do exactly what the prompt asks. Nothing extra: no refactors, renames, new packages or "improvements" outside the scope.
+2. Before writing code, read the files the prompt names and their siblings. Copy the existing pattern; do not invent a new one.
+3. If the prompt is unclear, conflicts with these rules, or needs a destructive or product-scope change: STOP and ask. Do not guess.
+4. Finish with `composer check` (pint, phpstan, Pest). The task is not done until it is green.
+5. Reply with: what changed (files), how to verify in the browser, `composer check` result, known gaps.
+
+## Stack (never change without the owner's OK)
+Laravel 13, PHP 8.4, PostgreSQL 17 + pgvector + pg_trgm, Redis + Horizon, Scout + Meilisearch,
+Blade + Livewire 4 + Alpine.js + Tailwind CSS v4 (Vite), Filament v5 admin at /admin,
+Socialite (Google) + phone OTP via SMS, spatie (permission, medialibrary, translatable, activitylog, backup),
+laravel/pennant (feature flags), laravel/pulse, dompdf, minishlink/web-push, Pest, Larastan, Pint, Laravel Boost MCP.
+NOT used: Laravel AI SDK, Reverb, Sentry, spatie/laravel-sitemap (sitemaps: App\Services\Seo\SitemapWriter).
+Do not add, remove or upgrade composer or npm packages.
+
+## Code conventions
+- Thin controllers. Logic in app/Actions and app/Services. Form Requests for validation, Policies for authorization.
+- Statuses and types are PHP backed Enums (labels from lang files). Money is numeric, currency GEL/USD/EUR.
+- Every external service (SMS, payments, Telegram, weather, rates, geocoding) sits behind an App\Contracts interface with a fake driver.
+- Queue anything slow (images, SMS, email, search indexing).
+- No N+1: eager load relations; lazy loading is disabled outside production.
+- New features behind a Pennant flag only when the prompt says so (App\Enums\SiteFeature).
+- Code, comments and commit messages in English.
+
+## Language
+- Every UI string comes from lang files: lang/ka (required), lang/en, lang/ru. Add the key to all three.
+- Never hardcode Georgian (or any) UI text in Blade or PHP.
+- Translatable model fields are jsonb {"ka","en","ru"}; ka is required.
+- URLs: / (ka), /en/..., /ru/... — build links with localized_route().
+- Timezone Asia/Tbilisi. Phone format +995 5XX XX XX XX.
+
+## Use Laravel Boost MCP
+- `search-docs` before using a Laravel / Livewire / Filament / Pest API you are not sure about (versions: Laravel 13, Livewire 4, Filament 5, Tailwind 4).
+- `database-schema` before touching models or migrations.
+
+## Local PC
+The owner's PC is Windows with Laravel Herd. Use Herd's PHP 8.4 for php and composer; the XAMPP PHP 8.2 on PATH is too old.

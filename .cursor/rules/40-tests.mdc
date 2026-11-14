@@ -1,0 +1,12 @@
+---
+description: Pest tests
+globs: tests/**
+alwaysApply: false
+---
+# Tests (Pest)
+
+- Every change gets a Pest test in tests/Feature (or tests/Unit for pure logic). Follow sibling tests in the same folder.
+- Test behavior a user or admin sees: status codes, rendered text keys, database state, policies (forbidden cases too).
+- Use factories and the fake drivers (SMS, payments, Telegram, geocoder). Never call real external services.
+- Translations: TranslationsTest checks that ka/en/ru keys match; add keys to all three lang files.
+- Run `composer check` before you say the task is done. Fix failures; do not skip or delete tests.

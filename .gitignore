@@ -28,3 +28,6 @@ Thumbs.db
 /public/robots.txt
 /public/sitemap.xml
 /public/sitemaps
+
+# Local code graph (graphify)
+/graphify-out
