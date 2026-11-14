@@ -16,7 +16,7 @@
             <x-image :src="$image" alt="" loading="eager" fetchpriority="high" />
             @if ($video)
                 <video autoplay muted loop playsinline preload="auto" aria-hidden="true" tabindex="-1" disablepictureinpicture
-                       class="absolute inset-0 size-full scale-[1.04] object-cover blur-[3px] motion-reduce:hidden">
+                       class="absolute inset-0 size-full scale-[1.04] object-cover motion-reduce:hidden">
                     <source src="{{ $video }}" type="video/mp4" media="(prefers-reduced-motion: no-preference)">
                 </video>
             @endif
