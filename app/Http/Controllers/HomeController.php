@@ -22,6 +22,7 @@ class HomeController extends Controller
             'events' => $data->events(),
             'sections' => $data->sections(),
             'heroImage' => $data->heroImage(),
+            'heroVideo' => $data->heroVideo(),
             'schema' => $seo->site(),
         ]);
     }

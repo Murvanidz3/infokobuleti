@@ -1,5 +1,6 @@
 @props([
     'image' => null,
+    'video' => null,
     'overlay' => 0.7,
     'categories' => [],
 ])
@@ -10,9 +11,15 @@
 @endphp
 
 <section {{ $attributes->class(['relative flex min-h-[clamp(560px,48vw,720px)] items-end bg-navy']) }}>
-    @if ($image)
+    @if ($image || $video)
         <div class="absolute inset-0 overflow-hidden">
             <x-image :src="$image" alt="" loading="eager" fetchpriority="high" />
+            @if ($video)
+                <video autoplay muted loop playsinline preload="auto" aria-hidden="true" tabindex="-1" disablepictureinpicture
+                       class="absolute inset-0 size-full scale-[1.04] object-cover blur-[3px] motion-reduce:hidden">
+                    <source src="{{ $video }}" type="video/mp4" media="(prefers-reduced-motion: no-preference)">
+                </video>
+            @endif
         </div>
     @endif
     <div class="pointer-events-none absolute inset-0" style="background: {{ $gradient }}"></div>

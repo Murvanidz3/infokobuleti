@@ -1,5 +1,5 @@
 <x-layout.app :seo="['page' => 'home', 'schema' => $schema]">
-    <x-hero :image="$heroImage" :categories="$categories" />
+    <x-hero :image="$heroImage" :video="$heroVideo" :categories="$categories" />
 
     @foreach ($sections as $section)
         @include('pages.home.'.$section, ['alt' => $loop->odd])

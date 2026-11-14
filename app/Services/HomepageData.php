@@ -22,6 +22,7 @@ use App\Support\Listings\PublicCache;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
 
 /**
@@ -213,6 +214,20 @@ class HomepageData
         $path = $this->settings->get("homepage.hero.{$season}") ?? $this->settings->get('homepage.hero.summer');
 
         return is_string($path) && $path !== '' ? Storage::disk('public')->url($path) : null;
+    }
+
+    /**
+     * Versioned URL of the looping hero clip, or null when it has not been published.
+     */
+    public function heroVideo(): ?string
+    {
+        $path = public_path('media/hero.mp4');
+
+        if (! File::isFile($path)) {
+            return null;
+        }
+
+        return asset('media/hero.mp4').'?v='.File::lastModified($path);
     }
 
     /**

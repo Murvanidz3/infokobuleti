@@ -10,6 +10,7 @@ use App\Models\Vacancy;
 use App\Services\Favorites;
 use App\Services\HomepageData;
 use App\Services\Settings;
+use Illuminate\Support\Facades\File;
 
 dataset('locales', [
     'ka' => ['/', 'ka'],
@@ -37,6 +38,22 @@ it('renders eight hero category tiles in seasonal order and no tabbed search', f
 
     expect($hrefs[1])->toBe(array_map(fn (string $tileUrl): string => e($tileUrl), $urls));
 })->with('locales');
+
+it('plays one silent looping hero video', function () {
+    foreach (['/', '/en', '/ru'] as $url) {
+        $html = $this->get($url)->assertOk()->getContent();
+
+        expect(substr_count($html, '<video'))->toBe(1)
+            ->and($html)->toMatch('/<video\b[^>]*\bautoplay\b[^>]*\bmuted\b[^>]*\bloop\b[^>]*\bplaysinline\b/s')
+            ->and($html)->toMatch('/<source\b[^>]*\bsrc="[^"]*media\/hero\.mp4\?v=\d+"[^>]*type="video\/mp4"/s');
+    }
+});
+
+it('returns no hero video when the file is missing', function () {
+    File::partialMock()->shouldReceive('isFile')->once()->with(public_path('media/hero.mp4'))->andReturn(false);
+
+    expect(app(HomepageData::class)->heroVideo())->toBeNull();
+});
 
 it('renders the homepage in every locale', function (string $url, string $locale) {
     $this->get($url)
