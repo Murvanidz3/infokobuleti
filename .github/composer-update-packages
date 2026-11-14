@@ -1,0 +1,3 @@
+# Packages for the Composer update workflow (one per line)
+laravel/framework
+phpseclib/phpseclib
