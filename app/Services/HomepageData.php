@@ -165,19 +165,6 @@ class HomepageData
     }
 
     /**
-     * Top-level categories for the hero search selects, by module.
-     *
-     * @return array{classifieds: array<string, string>, jobs: array<string, string>}
-     */
-    public function searchOptions(): array
-    {
-        return PublicCache::remember('home.search-options', fn (): array => [
-            'classifieds' => $this->topCategories(CategoryModule::Classifieds),
-            'jobs' => $this->topCategories(CategoryModule::Vacancies),
-        ]);
-    }
-
-    /**
      * "summer" (May-September) or "winter", unless the admin fixed one in Homepage settings.
      */
     public function season(): string
@@ -286,15 +273,5 @@ class HomepageData
         $root = Category::query()->where('module', CategoryModule::Classifieds)->where('slug', $slug)->first();
 
         return $root === null ? [] : [$root->id, ...$root->children()->pluck('id')->all()];
-    }
-
-    /**
-     * @return array<string, string> slug => name
-     */
-    private function topCategories(CategoryModule $module): array
-    {
-        return Category::query()->forModule($module)->whereNull('parent_id')->where('is_active', true)->orderBy('sort')->get()
-            ->mapWithKeys(fn (Category $category): array => [$category->slug => (string) $category->name])
-            ->all();
     }
 }

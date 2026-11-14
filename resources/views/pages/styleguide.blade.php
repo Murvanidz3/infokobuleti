@@ -262,7 +262,7 @@
     </x-section>
 
     <section id="sg-hero" aria-label="{{ $sections['hero'] }}">
-        <x-hero />
+        <x-hero :categories="$categories" />
     </section>
 
     {{-- Forms --}}

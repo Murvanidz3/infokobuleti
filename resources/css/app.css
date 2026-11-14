@@ -240,6 +240,25 @@
     }
 }
 
+/* Hero category tiles: fade in and rise 12px. Stagger with an inline animation-delay. */
+@keyframes tile-rise {
+    from {
+        opacity: 0;
+        transform: translateY(12px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@utility tile-rise {
+    @media (prefers-reduced-motion: no-preference) {
+        animation: tile-rise 0.5s var(--ease-soft) both;
+    }
+}
+
 /* Card lift: shadow always, movement only when the user allows motion. */
 @utility card-lift {
     transition:

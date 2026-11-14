@@ -2,7 +2,7 @@ const prefersReducedMotion = () => window.matchMedia('(prefers-reduced-motion: r
 
 export function registerComponents(Alpine) {
     // The menu icons and the drawer follow aria-expanded / data-open in CSS, so the header needs only
-    // two bind objects (see heroSearch for why inline expressions are avoided).
+    // two bind objects. Inline expressions are avoided because Alpine compiles each one with new Function().
     Alpine.data('siteHeader', () => ({
         scrolled: false,
         open: false,
@@ -58,73 +58,6 @@ export function registerComponents(Alpine) {
 
         close() {
             this.open = false;
-        },
-    }));
-
-    Alpine.data('heroSearch', (initial) => ({
-        tab: initial,
-        shown: initial,
-        fading: false,
-        deal: 'buy',
-        timer: null,
-
-        // Bind objects instead of per-tab inline expressions: Alpine compiles every distinct inline
-        // expression with new Function(), which is the costliest part of starting it on mobile.
-        tabButton: {
-            'x-on:click'() {
-                this.select(this.$el.dataset.tab);
-            },
-            'x-on:keydown'(event) {
-                this.step(event);
-            },
-            ':aria-selected'() {
-                return String(this.tab === this.$el.dataset.tab);
-            },
-            ':tabindex'() {
-                return this.tab === this.$el.dataset.tab ? 0 : -1;
-            },
-        },
-
-        tabPanel: {
-            'x-show'() {
-                return this.shown === this.$el.dataset.tab;
-            },
-        },
-
-        select(id) {
-            if (id === this.tab) {
-                return;
-            }
-
-            this.tab = id;
-            clearTimeout(this.timer);
-
-            if (prefersReducedMotion()) {
-                this.shown = id;
-
-                return;
-            }
-
-            this.fading = true;
-            this.timer = setTimeout(() => {
-                this.shown = id;
-                this.fading = false;
-            }, 170);
-        },
-
-        step(event) {
-            const direction = { ArrowRight: 1, ArrowLeft: -1 }[event.key];
-
-            if (!direction) {
-                return;
-            }
-
-            event.preventDefault();
-            const tabs = Array.from(this.$root.querySelectorAll('[role="tab"]'));
-            const next = tabs[(tabs.indexOf(event.target) + direction + tabs.length) % tabs.length];
-
-            next.focus();
-            next.click();
         },
     }));
 
