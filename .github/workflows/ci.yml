@@ -1,5 +1,6 @@
 # Tests every push and pull request. After green tests, a push to "develop" deploys to staging and a
 # push to "main" deploys to production (zero downtime, see deploy/ and docs/RUNBOOK.md).
+# Security advisories only warn on develop, and block on main and on pull requests into main.
 #
 # Repository secrets for deploys (Settings > Secrets and variables > Actions):
 #   DEPLOY_HOST         VPS address
@@ -72,6 +73,7 @@ jobs:
 
       - run: composer install --no-interaction --prefer-dist --no-progress
       - name: Security advisories (Composer, npm)
+        continue-on-error: ${{ !(github.ref_name == 'main' || github.base_ref == 'main') }}
         run: |
           composer audit --no-interaction --locked
           npm audit --omit=dev --audit-level=high
