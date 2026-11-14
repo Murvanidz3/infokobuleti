@@ -17,6 +17,27 @@ dataset('locales', [
     'ru' => ['/ru', 'ru'],
 ]);
 
+it('renders eight hero category tiles in seasonal order and no tabbed search', function (string $url, string $locale) {
+    app()->setLocale($locale);
+
+    $urls = array_column(app(HomepageData::class)->categories(), 'url');
+
+    $response = $this->get($url)->assertOk();
+    $html = $response->getContent();
+
+    expect(substr_count($html, 'data-category-tile'))->toBe(8)
+        ->and(substr_count($html, 'id="categories-title"'))->toBe(1)
+        ->and($html)->not->toContain('role="tablist"')
+        ->and($html)->not->toContain('id="search-tab-hotels"')
+        ->and($html)->not->toContain('name="check_in"');
+
+    expect(preg_match('/<ul data-hero-categories\b[^>]*>.*?<\/ul>/s', $html, $list))->toBe(1);
+
+    preg_match_all('/href="([^"]*)"/', $list[0], $hrefs);
+
+    expect($hrefs[1])->toBe(array_map(fn (string $tileUrl): string => e($tileUrl), $urls));
+})->with('locales');
+
 it('renders the homepage in every locale', function (string $url, string $locale) {
     $this->get($url)
         ->assertOk()
