@@ -33,7 +33,7 @@ it('renders eight hero category tiles in seasonal order and no tabbed search', f
 
     expect(preg_match('/<ul data-hero-categories\b[^>]*>.*?<\/ul>/s', $html, $list))->toBe(1);
 
-    preg_match_all('/href="([^"]*)"/', $list[1], $hrefs);
+    preg_match_all('/href="([^"]*)"/', $list[0], $hrefs);
 
     expect($hrefs[1])->toBe(array_map(fn (string $tileUrl): string => e($tileUrl), $urls));
 })->with('locales');
