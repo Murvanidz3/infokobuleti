@@ -16,6 +16,10 @@ class FrontendBundleProbe extends Component
 }
 
 beforeEach(function () {
+    // Livewire stores "a component rendered this request" on a static that survives the next
+    // test in this process. Clear it so the homepage is judged on its own.
+    Livewire::flushState();
+
     // A hot file makes @vite print entry names instead of hashed build files.
     $this->hotFile = tempnam(sys_get_temp_dir(), 'vite-hot');
     file_put_contents($this->hotFile, 'http://vite.test');
