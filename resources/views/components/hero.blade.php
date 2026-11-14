@@ -10,7 +10,7 @@
     $gradient = "linear-gradient(to top, {$navy($overlay)} 0%, {$navy($overlay * 0.72)} 45%, {$navy($overlay * 0.43)} 100%)";
 @endphp
 
-<section {{ $attributes->class(['relative flex min-h-[clamp(560px,48vw,720px)] items-end bg-navy']) }}>
+<section {{ $attributes->class(['relative flex min-h-[max(560px,calc(100svh-65px))] items-end bg-navy md:min-h-[max(600px,calc(100svh-79px))]']) }}>
     @if ($image || $video)
         <div class="absolute inset-0 overflow-hidden">
             <x-image :src="$image" alt="" loading="eager" fetchpriority="high" />
@@ -24,7 +24,7 @@
     @endif
     <div class="pointer-events-none absolute inset-0" style="background: {{ $gradient }}"></div>
 
-    <div class="container-page relative pt-[clamp(80px,9vw,140px)] pb-[clamp(40px,5vw,72px)]">
+    <div class="container-page relative pt-14 pb-[clamp(40px,5vw,72px)]">
         <p class="mb-5 inline-flex items-center gap-2 text-sm font-medium text-white/85">
             <x-icon name="pin" :size="16" />
             {{ __('home.hero.location') }}
