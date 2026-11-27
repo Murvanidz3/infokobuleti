@@ -4,7 +4,6 @@ namespace App\Services;
 
 use App\Enums\CategoryModule;
 use App\Enums\PlaceType;
-use App\Enums\PropertyDeal;
 use App\Enums\PropertyType;
 use App\Enums\SiteFeature;
 use App\Models\Article;
@@ -46,9 +45,9 @@ class HomepageData
     public function categories(): array
     {
         $counts = PublicCache::remember('home.counts', fn (): array => [
-            'hotels' => ListingQuery::public(Property::query())->where('deal', PropertyDeal::DailyRent)->where('type', PropertyType::Hotel)->count(),
-            'apartments' => ListingQuery::public(Property::query())->where('type', PropertyType::Apartment)->count(),
-            'houses' => ListingQuery::public(Property::query())->where('type', PropertyType::House)->count(),
+            'hotels' => ListingQuery::public(Property::query()->vacation())->count(),
+            'apartments' => ListingQuery::public(Property::query()->realEstate())->where('type', PropertyType::Apartment)->count(),
+            'houses' => ListingQuery::public(Property::query()->realEstate())->where('type', PropertyType::House)->count(),
             'cars' => ListingQuery::public(Classified::query())->whereIn('category_id', $this->categoryTree('cars'))->count(),
             'services' => ListingQuery::public(Classified::query())->whereIn('category_id', $this->categoryTree('services'))->count(),
             'jobs' => ListingQuery::public(Vacancy::query())->count(),
@@ -85,7 +84,7 @@ class HomepageData
     public function hotels(): array
     {
         return $this->withSaved(PublicCache::remember('home.hotels.'.Property::rotationSeed(), fn (): array => $this->curated(
-            Property::query()->where('deal', PropertyDeal::DailyRent)->where('type', PropertyType::Hotel),
+            Property::query()->vacation(),
             'homepage.featured_hotels',
             8,
             withPaidSlots: true,
@@ -98,7 +97,7 @@ class HomepageData
     public function properties(): array
     {
         return $this->withSaved(PublicCache::remember('home.properties.'.Property::rotationSeed(), fn (): array => $this->curated(
-            Property::query()->where('type', '!=', PropertyType::Hotel), 'homepage.featured_properties', 6,
+            Property::query()->realEstate(), 'homepage.featured_properties', 6,
         )->map(fn (Property $property): array => $this->cards->property($property))->all()));
     }
 

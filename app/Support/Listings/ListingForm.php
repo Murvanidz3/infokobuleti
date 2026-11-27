@@ -3,15 +3,20 @@
 namespace App\Support\Listings;
 
 use App\Enums\ApplyMethod;
+use App\Enums\CommercialSubtype;
 use App\Enums\Currency;
 use App\Enums\ListedBy;
+use App\Enums\PropertyDeal;
+use App\Enums\PropertyType;
 use App\Enums\SalaryPeriod;
+use App\Enums\VacationType;
 use App\Listings\Registry;
 use App\Models\Category;
 use App\Models\Classified;
 use App\Models\Property;
 use App\Models\User;
 use App\Models\Vacancy;
+use App\Support\AttributeSchema;
 use App\Support\Geo\SeaDistance;
 use App\Support\GeorgianPhone;
 use Illuminate\Database\Eloquent\Model;
@@ -64,9 +69,12 @@ final class ListingForm
 
         return $common + match ($type) {
             'property' => [
-                'deal' => '', 'property_type' => '', 'area_m2' => '', 'land_area_m2' => '', 'rooms' => '', 'bedrooms' => '',
+                'rubric' => 'real_estate', 'deal' => '', 'property_type' => '', 'commercial_subtype' => '',
+                'vacation_type' => '', 'area_m2' => '', 'land_area_m2' => '', 'rooms' => '', 'bedrooms' => '',
                 'bathrooms' => '', 'floor' => '', 'total_floors' => '', 'condition' => '', 'building_status' => '',
                 'cadastral_code' => '', 'listed_by' => ListedBy::Owner->value, 'features' => [],
+                'purpose' => '', 'utilities' => [], 'guests' => '', 'distance_to_sea_m' => '',
+                'check_in' => '14:00', 'check_out' => '12:00', 'stars' => '', 'rooms_count' => '', 'website' => '',
                 'price' => '', 'currency' => Currency::USD->value,
             ],
             'classified' => [
@@ -106,15 +114,7 @@ final class ListingForm
         ];
 
         return $form + match (true) {
-            $listing instanceof Property => [
-                'deal' => $value('deal'), 'property_type' => $value('type'), 'area_m2' => self::number($listing->getAttribute('area_m2')),
-                'land_area_m2' => self::number($listing->getAttribute('land_area_m2')), 'rooms' => $value('rooms'), 'bedrooms' => $value('bedrooms'),
-                'bathrooms' => $value('bathrooms'), 'floor' => $value('floor'), 'total_floors' => $value('total_floors'),
-                'condition' => $value('condition'), 'building_status' => $value('building_status'), 'cadastral_code' => $value('cadastral_code'),
-                'listed_by' => $value('listed_by'),
-                'features' => $listing->features()->pluck('amenities.id')->map(fn (mixed $id): string => (string) $id)->all(),
-                'price' => self::number($listing->getAttribute('price')), 'currency' => $value('currency'),
-            ],
+            $listing instanceof Property => self::propertyForm($listing),
             $listing instanceof Classified => [
                 'parent_category_id' => self::string(Category::query()->whereKey($listing->category_id)->value('parent_id')),
                 'category_id' => $value('category_id'), 'condition' => $value('condition'),
@@ -195,21 +195,32 @@ final class ListingForm
     }
 
     /**
-     * Human names for validation messages.
+     * Human names for validation messages. Classified schema fields use their translated label.
      *
+     * @param  array<string, mixed>|null  $form
      * @return array<string, string>
      */
-    public static function validationAttributes(): array
+    public static function validationAttributes(?array $form = null): array
     {
         $names = [];
 
         foreach (__('account.wizard.fields') as $key => $label) {
-            $names['form.'.$key] = (string) $label;
+            if (is_string($label)) {
+                $names['form.'.$key] = $label;
+            }
         }
 
         foreach (['ka', 'en', 'ru'] as $locale) {
             $names["form.title.{$locale}"] = __('account.wizard.fields.title').' ('.strtoupper($locale).')';
             $names["form.description.{$locale}"] = __('account.wizard.fields.description').' ('.strtoupper($locale).')';
+        }
+
+        $category = Category::query()->find(self::int($form['category_id'] ?? null));
+
+        if ($category !== null) {
+            foreach ($category->schema()->fields() as $field) {
+                $names['form.attribute_values.'.$field['key']] = AttributeSchema::label($field);
+            }
         }
 
         return $names;
@@ -234,8 +245,13 @@ final class ListingForm
      */
     public static function attributes(string $type, array $form): array
     {
+        $form = self::normalize($type, $form);
         $lat = self::float($form['lat'] ?? null);
         $lng = self::float($form['lng'] ?? null);
+        $visible = self::registry()->forForm($type, $form)->visibleFieldNames($form);
+        $keep = function (string $name, mixed $value) use ($visible): mixed {
+            return in_array($name, $visible, true) ? $value : null;
+        };
 
         $common = [
             'location_id' => self::int($form['location_id'] ?? null),
@@ -244,29 +260,10 @@ final class ListingForm
         ];
 
         return $common + match ($type) {
-            'property' => [
-                'deal' => $form['deal'],
-                'type' => $form['property_type'],
-                'area_m2' => self::float($form['area_m2'] ?? null),
-                'land_area_m2' => self::float($form['land_area_m2'] ?? null),
-                'rooms' => self::int($form['rooms'] ?? null),
-                'bedrooms' => self::int($form['bedrooms'] ?? null),
-                'bathrooms' => self::int($form['bathrooms'] ?? null),
-                'floor' => self::int($form['floor'] ?? null),
-                'total_floors' => self::int($form['total_floors'] ?? null),
-                'condition' => self::nullable($form['condition'] ?? null),
-                'building_status' => self::nullable($form['building_status'] ?? null),
-                'cadastral_code' => self::nullable($form['cadastral_code'] ?? null),
-                'listed_by' => $form['listed_by'] ?: ListedBy::Owner->value,
-                'distance_to_sea_m' => SeaDistance::meters($lat, $lng),
-                'price' => (float) $form['price'],
-                'currency' => $form['currency'],
-                'contact_name' => self::nullable($form['contact_name'] ?? null),
-                'contact_phone' => self::phone($form['contact_phone'] ?? null),
-            ],
+            'property' => self::propertyAttributes($form, $keep, $lat, $lng),
             'classified' => [
                 'category_id' => self::int($form['category_id']),
-                'condition' => self::nullable($form['condition'] ?? null),
+                'condition' => self::nullable($keep('condition', $form['condition'] ?? null)),
                 'attribute_values' => self::attributeValues($form),
                 'price' => self::float($form['price'] ?? null),
                 'currency' => $form['currency'] ?: Currency::GEL->value,
@@ -325,6 +322,157 @@ final class ListingForm
         }
 
         return array_filter($values, fn (mixed $value): bool => $value !== null);
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private static function propertyForm(Property $listing): array
+    {
+        $value = fn (string $field): string => self::string($listing->getAttribute($field));
+        $clock = function (string $field) use ($listing): string {
+            $raw = $listing->getAttribute($field);
+
+            if ($raw === null || $raw === '') {
+                return '';
+            }
+
+            return substr((string) $raw, 0, 5);
+        };
+        $vacation = $listing->isVacation();
+
+        return [
+            'rubric' => $vacation ? 'vacation' : 'real_estate',
+            'deal' => $value('deal'),
+            'property_type' => $value('type'),
+            'commercial_subtype' => $value('commercial_subtype'),
+            'vacation_type' => $value('vacation_type'),
+            'area_m2' => self::number($listing->getAttribute('area_m2')),
+            'land_area_m2' => self::number($listing->getAttribute('land_area_m2')),
+            'rooms' => $value('rooms'),
+            'bedrooms' => $value('bedrooms'),
+            'bathrooms' => $value('bathrooms'),
+            'floor' => $value('floor'),
+            'total_floors' => $value('total_floors'),
+            'condition' => $value('condition'),
+            'building_status' => $value('building_status'),
+            'cadastral_code' => $value('cadastral_code'),
+            'listed_by' => $value('listed_by'),
+            'features' => $listing->features()->pluck('amenities.id')->map(fn (mixed $id): string => (string) $id)->all(),
+            'purpose' => $value('purpose'),
+            'utilities' => array_values($listing->utilities ?? []),
+            'guests' => $value('guests'),
+            'distance_to_sea_m' => $vacation ? $value('distance_to_sea_m') : '',
+            'check_in' => $clock('check_in'),
+            'check_out' => $clock('check_out'),
+            'stars' => $value('stars'),
+            'rooms_count' => $value('rooms_count'),
+            'website' => $value('website'),
+            'price' => self::number($listing->getAttribute('price')),
+            'currency' => $value('currency'),
+        ];
+    }
+
+    /**
+     * Bring a draft onto the current rubric: a hotel-as-a-business becomes commercial, and a
+     * daily-rent hotel becomes a vacation stay. Stored columns are not renamed here.
+     *
+     * @param  array<string, mixed>  $form
+     * @return array<string, mixed>
+     */
+    public static function normalize(string $type, array $form): array
+    {
+        if ($type !== 'property') {
+            return $form;
+        }
+
+        if (($form['property_type'] ?? '') === PropertyType::HotelBusiness->value) {
+            $form['property_type'] = PropertyType::Commercial->value;
+            $form['commercial_subtype'] = $form['commercial_subtype'] ?: CommercialSubtype::HotelBusiness->value;
+            $form['rubric'] = 'real_estate';
+        }
+
+        $legacyHotel = ($form['property_type'] ?? '') === PropertyType::Hotel->value
+            && ($form['deal'] ?? '') === PropertyDeal::DailyRent->value;
+
+        if (($form['rubric'] ?? '') === '' && (filled($form['vacation_type'] ?? null) || $legacyHotel)) {
+            $form['rubric'] = 'vacation';
+        }
+
+        if (($form['rubric'] ?? '') === '') {
+            $form['rubric'] = 'real_estate';
+        }
+
+        if ($form['rubric'] === 'vacation') {
+            $form['deal'] = PropertyDeal::DailyRent->value;
+
+            if (blank($form['vacation_type'] ?? null) && in_array($form['property_type'] ?? '', [
+                PropertyType::Hotel->value,
+                PropertyType::Apartment->value,
+                PropertyType::House->value,
+            ], true)) {
+                $form['vacation_type'] = (string) $form['property_type'];
+            }
+        }
+
+        return $form;
+    }
+
+    /**
+     * @param  array<string, mixed>  $form
+     * @param  callable(string, mixed): mixed  $keep
+     * @return array<string, mixed>
+     */
+    private static function propertyAttributes(array $form, callable $keep, ?float $lat, ?float $lng): array
+    {
+        $vacation = self::registry()->isVacation($form);
+        $vacationType = $vacation ? VacationType::tryFrom((string) ($form['vacation_type'] ?? '')) : null;
+        $type = $vacationType instanceof VacationType
+            ? $vacationType->storedPropertyType()->value
+            : (string) ($form['property_type'] ?: PropertyType::Apartment->value);
+
+        if ($type === PropertyType::HotelBusiness->value) {
+            $type = PropertyType::Commercial->value;
+        }
+
+        $utilities = array_values(array_filter(
+            (array) $keep('utilities', $form['utilities'] ?? []),
+            fn (mixed $item): bool => is_string($item) && $item !== '',
+        ));
+        $enteredDistance = self::int($keep('distance_to_sea_m', $form['distance_to_sea_m'] ?? null));
+
+        return [
+            'deal' => $vacation ? PropertyDeal::DailyRent->value : (string) $form['deal'],
+            'type' => $type,
+            'commercial_subtype' => self::nullable($keep('commercial_subtype', $form['commercial_subtype'] ?? null)),
+            'vacation_type' => $vacationType?->value,
+            'purpose' => self::nullable($keep('purpose', $form['purpose'] ?? null)),
+            'utilities' => $utilities === [] ? null : $utilities,
+            'area_m2' => self::float($keep('area_m2', $form['area_m2'] ?? null)),
+            'land_area_m2' => self::float($keep('land_area_m2', $form['land_area_m2'] ?? null)),
+            'rooms' => self::int($keep('rooms', $form['rooms'] ?? null)),
+            'bedrooms' => self::int($keep('bedrooms', $form['bedrooms'] ?? null)),
+            'bathrooms' => self::int($keep('bathrooms', $form['bathrooms'] ?? null)),
+            'floor' => self::int($keep('floor', $form['floor'] ?? null)),
+            'total_floors' => self::int($keep('total_floors', $form['total_floors'] ?? null)),
+            'condition' => self::nullable($keep('condition', $form['condition'] ?? null)),
+            'building_status' => self::nullable($keep('building_status', $form['building_status'] ?? null)),
+            'cadastral_code' => self::nullable($keep('cadastral_code', $form['cadastral_code'] ?? null)),
+            'listed_by' => in_array('listed_by', self::registry()->forForm('property', $form)->visibleFieldNames($form), true)
+                ? ((string) ($form['listed_by'] ?: ListedBy::Owner->value))
+                : ListedBy::Owner->value,
+            'guests' => self::int($keep('guests', $form['guests'] ?? null)),
+            'distance_to_sea_m' => $vacation && $enteredDistance !== null ? $enteredDistance : SeaDistance::meters($lat, $lng),
+            'check_in' => self::nullable($keep('check_in', $form['check_in'] ?? null)),
+            'check_out' => self::nullable($keep('check_out', $form['check_out'] ?? null)),
+            'stars' => self::int($keep('stars', $form['stars'] ?? null)),
+            'rooms_count' => self::int($keep('rooms_count', $form['rooms_count'] ?? null)),
+            'website' => self::nullable($keep('website', $form['website'] ?? null)),
+            'price' => (float) $form['price'],
+            'currency' => $form['currency'],
+            'contact_name' => self::nullable($form['contact_name'] ?? null),
+            'contact_phone' => self::phone($form['contact_phone'] ?? null),
+        ];
     }
 
     private static function registry(): Registry

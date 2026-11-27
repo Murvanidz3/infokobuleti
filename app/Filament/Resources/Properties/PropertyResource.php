@@ -4,11 +4,14 @@ namespace App\Filament\Resources\Properties;
 
 use App\Enums\AmenityScope;
 use App\Enums\BuildingStatus;
+use App\Enums\CommercialSubtype;
 use App\Enums\Currency;
+use App\Enums\LandPurpose;
 use App\Enums\ListedBy;
 use App\Enums\PropertyCondition;
 use App\Enums\PropertyDeal;
 use App\Enums\PropertyType;
+use App\Enums\VacationType;
 use App\Filament\Resources\ListingResource;
 use App\Filament\Support\ListingAdmin;
 use App\Filament\Support\Translatable;
@@ -52,6 +55,15 @@ class PropertyResource extends ListingResource
                 ->schema([
                     Select::make('deal')->options(PropertyDeal::class)->required(),
                     Select::make('type')->options(PropertyType::class)->required(),
+                    Select::make('commercial_subtype')->options(CommercialSubtype::class),
+                    Select::make('vacation_type')->options(VacationType::class),
+                    Select::make('purpose')->options(LandPurpose::class),
+                    TextInput::make('guests')->numeric()->minValue(1)->maxValue(100),
+                    TextInput::make('stars')->numeric()->minValue(1)->maxValue(5),
+                    TextInput::make('rooms_count')->numeric()->minValue(1),
+                    TextInput::make('check_in')->placeholder('14:00'),
+                    TextInput::make('check_out')->placeholder('12:00'),
+                    TextInput::make('website')->url()->maxLength(255),
                     TextInput::make('price')->numeric()->minValue(0)->required(),
                     Select::make('currency')->options(Currency::class)->default(Currency::GEL->value)->required(),
                     TextInput::make('area_m2')->numeric()->minValue(0)->suffix('m²'),

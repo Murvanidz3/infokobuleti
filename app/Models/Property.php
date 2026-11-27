@@ -5,10 +5,13 @@ namespace App\Models;
 use App\Contracts\Listing;
 use App\Enums\AmenityScope;
 use App\Enums\BuildingStatus;
+use App\Enums\CommercialSubtype;
+use App\Enums\LandPurpose;
 use App\Enums\ListedBy;
 use App\Enums\PropertyCondition;
 use App\Enums\PropertyDeal;
 use App\Enums\PropertyType;
+use App\Enums\VacationType;
 use App\Models\Concerns\Favoritable;
 use App\Models\Concerns\HasDailyStats;
 use App\Models\Concerns\HasLocation;
@@ -23,6 +26,7 @@ use App\Models\Concerns\Reportable;
 use App\Search\SearchableListing;
 use Database\Factories\PropertyFactory;
 use Illuminate\Database\Eloquent\Attributes\Guarded;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -56,10 +60,52 @@ class Property extends Model implements Listing, SearchableListing
             'building_status' => BuildingStatus::class,
             'owner_verified_at' => 'datetime',
             'listed_by' => ListedBy::class,
+            'commercial_subtype' => CommercialSubtype::class,
+            'vacation_type' => VacationType::class,
+            'purpose' => LandPurpose::class,
+            'utilities' => 'array',
             'area_m2' => 'float',
             'land_area_m2' => 'float',
             'price_per_m2' => 'float',
+            'guests' => 'integer',
+            'stars' => 'integer',
+            'rooms_count' => 'integer',
         ];
+    }
+
+    /**
+     * A daily-rent stay: an explicit vacation type, or a legacy hotel that predates that column.
+     *
+     * @param  Builder<Property>  $query
+     */
+    public function scopeVacation(Builder $query): void
+    {
+        $query->where(function (Builder $query): void {
+            $query->whereNotNull('vacation_type')
+                ->orWhere(fn (Builder $query) => $query
+                    ->where('type', PropertyType::Hotel->value)
+                    ->where('deal', PropertyDeal::DailyRent->value));
+        });
+    }
+
+    /**
+     * Sale and monthly rent. Legacy daily-rent hotels stay on the vacation listing.
+     *
+     * @param  Builder<Property>  $query
+     */
+    public function scopeRealEstate(Builder $query): void
+    {
+        $query->whereNull('vacation_type')
+            ->where(function (Builder $query): void {
+                $query->where('type', '!=', PropertyType::Hotel->value)
+                    ->orWhere('deal', '!=', PropertyDeal::DailyRent->value);
+            });
+    }
+
+    public function isVacation(): bool
+    {
+        return $this->vacation_type !== null
+            || ($this->type === PropertyType::Hotel && $this->deal === PropertyDeal::DailyRent);
     }
 
     /**

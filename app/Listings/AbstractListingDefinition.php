@@ -37,4 +37,23 @@ abstract class AbstractListingDefinition implements ListingDefinition
 
         return $rules;
     }
+
+    /**
+     * @param  array<string, mixed>  $form
+     * @return list<string>
+     */
+    public function visibleFieldNames(array $form): array
+    {
+        $names = [];
+
+        foreach ($this->steps() as $step) {
+            foreach ($step->fields as $field) {
+                if ($field->visible($form)) {
+                    $names[] = $field->name;
+                }
+            }
+        }
+
+        return $names;
+    }
 }

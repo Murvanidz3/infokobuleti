@@ -14,6 +14,11 @@ use App\Listings\Support\SharedFields;
 
 abstract class AbstractClassifiedDefinition extends AbstractListingDefinition
 {
+    protected function asksForCondition(): bool
+    {
+        return true;
+    }
+
     /**
      * @return list<Step>
      */
@@ -23,7 +28,7 @@ abstract class AbstractClassifiedDefinition extends AbstractListingDefinition
             new Step('type', 1, SharedFields::classifiedType()),
             new Step('details', 2, [
                 ...SharedFields::titleAndDescription(),
-                ...SharedFields::classifiedSpecifics(),
+                ...SharedFields::classifiedSpecifics($this->asksForCondition()),
             ]),
             new Step('location', 3, SharedFields::location($this->location())),
             new Step('photos', 4, [SharedFields::photos($this->media())]),

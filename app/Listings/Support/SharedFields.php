@@ -5,16 +5,20 @@ namespace App\Listings\Support;
 use App\Enums\ApplyMethod;
 use App\Enums\BuildingStatus;
 use App\Enums\CategoryModule;
+use App\Enums\CommercialSubtype;
 use App\Enums\Currency;
 use App\Enums\EmploymentType;
 use App\Enums\Experience;
 use App\Enums\ItemCondition;
+use App\Enums\LandPurpose;
+use App\Enums\LandUtility;
 use App\Enums\ListedBy;
 use App\Enums\PropertyCondition;
 use App\Enums\PropertyDeal;
 use App\Enums\PropertyType;
 use App\Enums\SalaryPeriod;
 use App\Enums\VacancyBenefit;
+use App\Enums\VacationType;
 use App\Listings\Field;
 use App\Listings\FieldOptions;
 use App\Listings\FieldType;
@@ -61,9 +65,11 @@ final class SharedFields
     }
 
     /**
+     * Sale or monthly rent, then one of the four real-estate types. Daily rent is a vacation listing.
+     *
      * @return list<Field>
      */
-    public static function propertyType(): array
+    public static function realEstateType(): array
     {
         return [
             new Field(
@@ -71,7 +77,7 @@ final class SharedFields
                 type: FieldType::Select,
                 required: true,
                 rules: fn (array $form): array => [
-                    'deal' => ['required', Rule::enum(PropertyDeal::class)],
+                    'deal' => ['required', Rule::in([PropertyDeal::Sale->value, PropertyDeal::Rent->value])],
                 ],
                 options: FieldOptions::Deals,
             ),
@@ -80,125 +86,290 @@ final class SharedFields
                 type: FieldType::Select,
                 required: true,
                 rules: fn (array $form): array => [
-                    'property_type' => ['required', Rule::enum(PropertyType::class)],
+                    'property_type' => ['required', Rule::in([
+                        PropertyType::Apartment->value,
+                        PropertyType::House->value,
+                        PropertyType::Land->value,
+                        PropertyType::Commercial->value,
+                    ])],
                 ],
                 options: FieldOptions::PropertyTypes,
             ),
         ];
     }
 
-    /**
-     * Apartment-shaped property facts. Land, commercial, hotel and hotel-as-a-business still
-     * include every one of these; the definition classes mark that with TODO PR2.
-     *
-     * @param  list<string>  $amenityScopes
-     * @return list<Field>
-     */
-    public static function propertySpecifics(bool $areaRequired, bool $landAreaRequired, array $amenityScopes): array
+    public static function commercialSubtype(): Field
     {
-        return [
-            new Field(
-                name: 'area_m2',
-                type: FieldType::Number,
-                required: $areaRequired,
-                rules: fn (array $form): array => [
-                    'area_m2' => [$areaRequired ? 'required' : 'nullable', 'numeric', 'between:1,100000'],
-                ],
-            ),
-            new Field(
-                name: 'land_area_m2',
-                type: FieldType::Number,
-                required: $landAreaRequired,
-                rules: fn (array $form): array => [
-                    'land_area_m2' => [$landAreaRequired ? 'required' : 'nullable', 'numeric', 'between:1,10000000'],
-                ],
-            ),
-            new Field(
-                name: 'rooms',
-                type: FieldType::Integer,
-                required: false,
-                rules: fn (array $form): array => [
-                    'rooms' => ['nullable', 'integer', 'between:1,50'],
-                ],
-            ),
-            new Field(
-                name: 'bedrooms',
-                type: FieldType::Integer,
-                required: false,
-                rules: fn (array $form): array => [
-                    'bedrooms' => ['nullable', 'integer', 'between:0,50'],
-                ],
-            ),
-            new Field(
-                name: 'bathrooms',
-                type: FieldType::Integer,
-                required: false,
-                rules: fn (array $form): array => [
-                    'bathrooms' => ['nullable', 'integer', 'between:0,20'],
-                ],
-            ),
-            new Field(
-                name: 'floor',
-                type: FieldType::Integer,
-                required: false,
-                rules: fn (array $form): array => [
-                    'floor' => ['nullable', 'integer', 'between:-3,100'],
-                ],
-            ),
-            new Field(
-                name: 'total_floors',
-                type: FieldType::Integer,
-                required: false,
-                rules: fn (array $form): array => [
-                    'total_floors' => ['nullable', 'integer', 'between:1,100', Constraints::notBelow($form['floor'] ?? null)],
-                ],
-            ),
-            new Field(
-                name: 'condition',
-                type: FieldType::Select,
-                required: false,
-                rules: fn (array $form): array => [
-                    'condition' => ['nullable', Rule::enum(PropertyCondition::class)],
-                ],
-                options: FieldOptions::PropertyConditions,
-            ),
-            new Field(
-                name: 'building_status',
-                type: FieldType::Select,
-                required: false,
-                rules: fn (array $form): array => [
-                    'building_status' => ['nullable', Rule::enum(BuildingStatus::class)],
-                ],
-                options: FieldOptions::BuildingStatuses,
-            ),
-            new Field(
-                name: 'cadastral_code',
-                type: FieldType::Text,
-                required: false,
-                rules: fn (array $form): array => [
-                    'cadastral_code' => ['nullable', 'string', 'max:32', 'regex:/^[\d.\/-]+$/'],
-                ],
-            ),
-            new Field(
-                name: 'listed_by',
-                type: FieldType::Select,
-                required: true,
-                rules: fn (array $form): array => [
-                    'listed_by' => ['required', Rule::enum(ListedBy::class)],
-                ],
-                options: FieldOptions::ListedBy,
-            ),
-            new Field(
-                name: 'features',
-                type: FieldType::Multiselect,
-                required: false,
-                rules: fn (array $form): array => [
-                    'features' => ['array'],
-                    'features.*' => [Rule::exists('amenities', 'id')->whereIn('scope', $amenityScopes)],
-                ],
-                options: FieldOptions::PropertyFeatures,
-            ),
-        ];
+        return new Field(
+            name: 'commercial_subtype',
+            type: FieldType::Select,
+            required: true,
+            rules: fn (array $form): array => [
+                'commercial_subtype' => ['required', Rule::enum(CommercialSubtype::class)],
+            ],
+            options: FieldOptions::CommercialSubtypes,
+        );
+    }
+
+    public static function vacationType(): Field
+    {
+        return new Field(
+            name: 'vacation_type',
+            type: FieldType::Select,
+            required: true,
+            rules: fn (array $form): array => [
+                'vacation_type' => ['required', Rule::enum(VacationType::class)],
+            ],
+            options: FieldOptions::VacationTypes,
+        );
+    }
+
+    public static function area(bool $required): Field
+    {
+        return new Field(
+            name: 'area_m2',
+            type: FieldType::Number,
+            required: $required,
+            rules: fn (array $form): array => [
+                'area_m2' => [$required ? 'required' : 'nullable', 'numeric', 'between:1,100000'],
+            ],
+        );
+    }
+
+    public static function landArea(bool $required): Field
+    {
+        return new Field(
+            name: 'land_area_m2',
+            type: FieldType::Number,
+            required: $required,
+            rules: fn (array $form): array => [
+                'land_area_m2' => [$required ? 'required' : 'nullable', 'numeric', 'between:1,10000000'],
+            ],
+        );
+    }
+
+    public static function rooms(): Field
+    {
+        return self::wholeNumber('rooms', 1, 50);
+    }
+
+    public static function bedrooms(): Field
+    {
+        return self::wholeNumber('bedrooms', 0, 50);
+    }
+
+    public static function bathrooms(): Field
+    {
+        return self::wholeNumber('bathrooms', 0, 20);
+    }
+
+    public static function floor(): Field
+    {
+        return self::wholeNumber('floor', -3, 100);
+    }
+
+    public static function totalFloors(bool $notBelowFloor = true): Field
+    {
+        return new Field(
+            name: 'total_floors',
+            type: FieldType::Integer,
+            required: false,
+            rules: fn (array $form): array => [
+                'total_floors' => ['nullable', 'integer', 'between:1,100', ...($notBelowFloor ? [Constraints::notBelow($form['floor'] ?? null)] : [])],
+            ],
+        );
+    }
+
+    public static function condition(): Field
+    {
+        return new Field(
+            name: 'condition',
+            type: FieldType::Select,
+            required: false,
+            rules: fn (array $form): array => [
+                'condition' => ['nullable', Rule::enum(PropertyCondition::class)],
+            ],
+            options: FieldOptions::PropertyConditions,
+        );
+    }
+
+    public static function buildingStatus(): Field
+    {
+        return new Field(
+            name: 'building_status',
+            type: FieldType::Select,
+            required: false,
+            rules: fn (array $form): array => [
+                'building_status' => ['nullable', Rule::enum(BuildingStatus::class)],
+            ],
+            options: FieldOptions::BuildingStatuses,
+        );
+    }
+
+    public static function cadastralCode(): Field
+    {
+        return new Field(
+            name: 'cadastral_code',
+            type: FieldType::Text,
+            required: false,
+            rules: fn (array $form): array => [
+                'cadastral_code' => ['nullable', 'string', 'max:32', 'regex:/^[\d.\/-]+$/'],
+            ],
+        );
+    }
+
+    public static function listedBy(): Field
+    {
+        return new Field(
+            name: 'listed_by',
+            type: FieldType::Select,
+            required: true,
+            rules: fn (array $form): array => [
+                'listed_by' => ['required', Rule::enum(ListedBy::class)],
+            ],
+            options: FieldOptions::ListedBy,
+        );
+    }
+
+    /**
+     * @param  list<string>  $amenityScopes
+     */
+    public static function features(array $amenityScopes): Field
+    {
+        return new Field(
+            name: 'features',
+            type: FieldType::Multiselect,
+            required: false,
+            rules: fn (array $form): array => [
+                'features' => ['array'],
+                'features.*' => [Rule::exists('amenities', 'id')->whereIn('scope', $amenityScopes)],
+            ],
+            options: FieldOptions::PropertyFeatures,
+        );
+    }
+
+    public static function landPurpose(): Field
+    {
+        return new Field(
+            name: 'purpose',
+            type: FieldType::Select,
+            required: true,
+            rules: fn (array $form): array => [
+                'purpose' => ['required', Rule::enum(LandPurpose::class)],
+            ],
+            options: FieldOptions::LandPurposes,
+        );
+    }
+
+    public static function landUtilities(): Field
+    {
+        return new Field(
+            name: 'utilities',
+            type: FieldType::Multiselect,
+            required: false,
+            rules: fn (array $form): array => [
+                'utilities' => ['array'],
+                'utilities.*' => [Rule::enum(LandUtility::class)],
+            ],
+            options: FieldOptions::LandUtilities,
+        );
+    }
+
+    public static function guests(): Field
+    {
+        return self::wholeNumber('guests', 1, 100);
+    }
+
+    /**
+     * Metres to the sea. The column is the existing distance_to_sea_m.
+     */
+    public static function distanceToSea(): Field
+    {
+        return new Field(
+            name: 'distance_to_sea_m',
+            type: FieldType::Integer,
+            required: false,
+            rules: fn (array $form): array => [
+                'distance_to_sea_m' => ['nullable', 'integer', 'between:0,100000'],
+            ],
+        );
+    }
+
+    public static function checkIn(): Field
+    {
+        return self::clock('check_in');
+    }
+
+    public static function checkOut(): Field
+    {
+        return self::clock('check_out');
+    }
+
+    public static function stars(): Field
+    {
+        return new Field(
+            name: 'stars',
+            type: FieldType::Select,
+            required: false,
+            rules: fn (array $form): array => [
+                'stars' => ['nullable', 'integer', 'between:1,5'],
+            ],
+            options: FieldOptions::Stars,
+            showWhen: ShowWhen::equals('vacation_type', VacationType::Hotel->value),
+        );
+    }
+
+    public static function roomsCount(): Field
+    {
+        return new Field(
+            name: 'rooms_count',
+            type: FieldType::Integer,
+            required: false,
+            rules: fn (array $form): array => [
+                'rooms_count' => ['nullable', 'integer', 'between:1,1000'],
+            ],
+            showWhen: ShowWhen::in('vacation_type', [
+                VacationType::Hotel->value,
+                VacationType::Guesthouse->value,
+                VacationType::Hostel->value,
+            ]),
+        );
+    }
+
+    public static function website(): Field
+    {
+        return new Field(
+            name: 'website',
+            type: FieldType::Text,
+            required: false,
+            rules: fn (array $form): array => [
+                'website' => ['nullable', 'url', 'max:255'],
+            ],
+        );
+    }
+
+    private static function wholeNumber(string $name, int $min, int $max): Field
+    {
+        return new Field(
+            name: $name,
+            type: FieldType::Integer,
+            required: false,
+            rules: fn (array $form): array => [
+                $name => ['nullable', 'integer', 'between:'.$min.','.$max],
+            ],
+        );
+    }
+
+    private static function clock(string $name): Field
+    {
+        return new Field(
+            name: $name,
+            type: FieldType::Text,
+            required: false,
+            rules: fn (array $form): array => [
+                $name => ['nullable', 'date_format:H:i'],
+            ],
+        );
     }
 
     /**
@@ -227,14 +398,16 @@ final class SharedFields
     }
 
     /**
-     * Item condition plus the category schema. Services include the condition field as well.
+     * Category schema, and item condition for goods. Services omit condition.
      *
      * @return list<Field>
      */
-    public static function classifiedSpecifics(): array
+    public static function classifiedSpecifics(bool $condition = true): array
     {
-        return [
-            new Field(
+        $fields = [];
+
+        if ($condition) {
+            $fields[] = new Field(
                 name: 'condition',
                 type: FieldType::Select,
                 required: false,
@@ -242,15 +415,18 @@ final class SharedFields
                     'condition' => ['nullable', Rule::enum(ItemCondition::class)],
                 ],
                 options: FieldOptions::ItemConditions,
-            ),
-            new Field(
-                name: 'attribute_values',
-                type: FieldType::Schema,
-                required: false,
-                rules: fn (array $form): array => Constraints::schemaRules($form),
-                options: FieldOptions::CategorySchema,
-            ),
-        ];
+            );
+        }
+
+        $fields[] = new Field(
+            name: 'attribute_values',
+            type: FieldType::Schema,
+            required: false,
+            rules: fn (array $form): array => Constraints::schemaRules($form),
+            options: FieldOptions::CategorySchema,
+        );
+
+        return $fields;
     }
 
     /**

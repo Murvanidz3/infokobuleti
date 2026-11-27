@@ -18,14 +18,30 @@ if (! function_exists('localized_route')) {
 
 if (! function_exists('daily_rent_hotels_url')) {
     /**
-     * Daily-rent listings whose type is hotel (the old /hotels index).
+     * The vacation listing (daily-rent stays). /hotels redirects here.
      */
     function daily_rent_hotels_url(?string $locale = null): string
     {
         return localized_route('real-estate.index', [
-            'deal' => 'daily_rent',
-            'type' => ['hotel'],
+            'rubric' => 'vacation',
         ], $locale);
+    }
+}
+
+if (! function_exists('viewing_vacation_index')) {
+    /**
+     * The real-estate index is showing vacation stays: the vacation rubric, or the old
+     * daily-rent hotel URL.
+     */
+    function viewing_vacation_index(): bool
+    {
+        if (request('rubric') === 'vacation') {
+            return true;
+        }
+
+        $types = array_values(array_filter(Arr::wrap(request('type')), fn (mixed $type): bool => is_string($type) && $type !== ''));
+
+        return request('deal') === 'daily_rent' && $types !== [] && array_diff($types, ['hotel']) === [];
     }
 }
 
@@ -49,15 +65,13 @@ if (! function_exists('nav_link')) {
             $patterns[] = '*.'.$wild;
         }
 
-        $hotelIndex = request()->routeIs('real-estate.index', '*.real-estate.index')
-            && request('deal') === 'daily_rent'
-            && in_array('hotel', Arr::wrap(request('type')), true);
+        $vacationIndex = request()->routeIs('real-estate.index', '*.real-estate.index') && viewing_vacation_index();
 
         $current = request()->routeIs(...$patterns);
 
         if ($key === 'hotels') {
-            $current = $hotelIndex;
-        } elseif ($key === 'real_estate' && $hotelIndex) {
+            $current = $vacationIndex;
+        } elseif ($key === 'real_estate' && $vacationIndex) {
             $current = false;
         }
 

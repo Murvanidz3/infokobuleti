@@ -2,22 +2,35 @@
 
 namespace App\Listings\Definitions;
 
+use App\Listings\Field;
+use App\Listings\Support\SharedFields;
+
 final class LandDefinition extends AbstractPropertyDefinition
 {
-    // TODO PR2: land still shows apartment fields (rooms, bedrooms, bathrooms, floor, total floors, condition, building status, amenities).
-
     public function key(): string
     {
         return 'property.land';
     }
 
-    protected function areaRequired(): bool
+    /**
+     * @return list<Field>
+     */
+    protected function typeFields(): array
     {
-        return false;
+        return SharedFields::realEstateType();
     }
 
-    protected function landAreaRequired(): bool
+    /**
+     * Plot size, purpose and utilities. No rooms, floor, condition or building status.
+     *
+     * @return list<Field>
+     */
+    protected function detailFields(): array
     {
-        return true;
+        return [
+            SharedFields::landArea(required: true),
+            SharedFields::landPurpose(),
+            SharedFields::landUtilities(),
+        ];
     }
 }

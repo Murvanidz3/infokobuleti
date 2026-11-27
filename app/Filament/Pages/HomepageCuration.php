@@ -4,8 +4,6 @@ namespace App\Filament\Pages;
 
 use App\Enums\ListingStatus;
 use App\Enums\Permission;
-use App\Enums\PropertyDeal;
-use App\Enums\PropertyType;
 use App\Filament\NavigationGroup;
 use App\Filament\Support\ChecksPermission;
 use App\Filament\Support\Translatable;
@@ -84,11 +82,11 @@ class HomepageCuration extends Page
                     Select::make('featured_hotels')->label(__('admin.resources.hotels.plural'))
                         ->multiple()->maxItems(12)->searchable()
                         ->options(fn (): array => self::options(
-                            Property::query()->where('deal', PropertyDeal::DailyRent)->where('type', PropertyType::Hotel),
+                            Property::query()->vacation(),
                         )),
                     Select::make('featured_properties')->label(__('admin.resources.properties.plural'))
                         ->multiple()->maxItems(12)->searchable()
-                        ->options(fn (): array => self::options(Property::query()->where('type', '!=', PropertyType::Hotel))),
+                        ->options(fn (): array => self::options(Property::query()->realEstate())),
                 ]),
                 Section::make(__('admin.homepage.hero'))->schema([
                     ToggleButtons::make('season')->label(__('admin.homepage.season'))->inline()->options([

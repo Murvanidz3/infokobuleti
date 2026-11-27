@@ -12,6 +12,8 @@ final readonly class ShowWhen
 
     public const string EQUALS = 'equals';
 
+    public const string IN = 'in';
+
     public function __construct(
         public string $mode,
         public ?string $field = null,
@@ -29,6 +31,14 @@ final readonly class ShowWhen
     }
 
     /**
+     * @param  list<string>  $values
+     */
+    public static function in(string $field, array $values): self
+    {
+        return new self(self::IN, $field, $values);
+    }
+
+    /**
      * @param  array<string, mixed>  $form
      */
     public function visible(array $form): bool
@@ -37,6 +47,12 @@ final readonly class ShowWhen
             return true;
         }
 
-        return (string) ($form[$this->field] ?? '') === (string) $this->value;
+        $current = (string) ($form[$this->field] ?? '');
+
+        if ($this->mode === self::IN) {
+            return in_array($current, array_map(strval(...), (array) $this->value), true);
+        }
+
+        return $current === (string) $this->value;
     }
 }
