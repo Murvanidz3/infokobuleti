@@ -89,7 +89,7 @@ html.fi.dark {
     --gray-800: #1a1b21;
     --gray-900: #111219;
     --gray-950: #111219;
-    --ik-bg: #111219;
+    --ik-bg: #0b0d10;
     --ik-card: #0c0d11;
     --ik-border: #29292c;
     --ik-text: #dbdbdb;
@@ -116,8 +116,8 @@ html.fi.dark {
     --ik-success: #6beba4;
     --ik-danger: #f52525;
     --ik-warning: #e7ea68;
-    --ik-side-bg: #15161e;
-    --ik-side-border: #29292c;
+    --ik-side-bg: #0e1014;
+    --ik-side-border: rgba(255, 255, 255, 0.06);
     --ik-side-heading: #dbdbdb;
     --ik-side-heading-active: #fff;
     --ik-side-item: #b5b5b8;
@@ -158,60 +158,19 @@ html.fi :focus-visible {
     outline-offset: 2px;
 }
 
-/* Teal glow and grain behind the top of the content, not the sidebar. */
-html.fi .fi-body::before,
-html.fi .fi-body::after {
+/* One soft accent glow. No grain, no pixel grid, no blotchy top gradient. */
+html.fi.dark .fi-body::before {
     content: '';
     position: fixed;
     z-index: -1;
-    top: 0;
-    right: 0;
-    left: 0;
-    height: 220px;
+    top: -14rem;
+    left: 35%;
+    width: 52rem;
+    height: 32rem;
+    border-radius: 999px;
+    background: rgba(0, 201, 255, 0.05);
+    filter: blur(90px);
     pointer-events: none;
-}
-
-html.fi .fi-body::before {
-    background:
-        radial-gradient(ellipse 70% 120% at 18% -10%, rgba(146, 254, 157, 0.16), transparent 58%),
-        radial-gradient(ellipse 60% 140% at 78% -20%, rgba(0, 201, 255, 0.14), transparent 55%);
-}
-
-html.fi.dark .fi-body::before {
-    background:
-        radial-gradient(ellipse 70% 120% at 18% -10%, rgba(146, 254, 157, 0.28), transparent 58%),
-        radial-gradient(ellipse 60% 140% at 78% -20%, rgba(0, 201, 255, 0.32), transparent 55%);
-}
-
-html.fi .fi-body::after {
-    opacity: 0.1;
-    background-image: radial-gradient(rgba(10, 26, 47, 0.45) 0.6px, transparent 0.65px);
-    background-size: 3px 3px;
-}
-
-html.fi.dark .fi-body::after {
-    opacity: 0.22;
-    background-image: radial-gradient(rgba(255, 255, 255, 0.55) 0.6px, transparent 0.65px);
-}
-
-@media (min-width: 1024px) {
-    html.fi .fi-body.fi-body-has-navigation::before,
-    html.fi .fi-body.fi-body-has-navigation::after {
-        left: var(--collapsed-sidebar-width);
-        transition: left 200ms ease;
-    }
-
-    html.fi.ik-sidebar-desktop-open .fi-body.fi-body-has-navigation::before,
-    html.fi.ik-sidebar-desktop-open .fi-body.fi-body-has-navigation::after,
-    html.fi .fi-body.fi-body-has-navigation:has(.fi-sidebar.fi-sidebar-open)::before,
-    html.fi .fi-body.fi-body-has-navigation:has(.fi-sidebar.fi-sidebar-open)::after {
-        left: var(--sidebar-width);
-    }
-
-    html.fi .fi-body.fi-body-has-navigation:has(.fi-sidebar:not(.fi-sidebar-open))::before,
-    html.fi .fi-body.fi-body-has-navigation:has(.fi-sidebar:not(.fi-sidebar-open))::after {
-        left: var(--collapsed-sidebar-width);
-    }
 }
 
 /* Content fades in after an SPA navigation. The shell stays put. */
@@ -246,11 +205,36 @@ html.fi {
 html.fi .fi-sidebar {
     background: var(--ik-side-bg);
     border-inline-end: 1px solid var(--ik-side-border);
+    box-shadow: none;
+}
+
+html.fi .fi-sidebar-header,
+html.fi .fi-sidebar-header-ctn {
+    overflow: visible;
+    background: transparent;
+    box-shadow: none;
+    border: 0;
+    --tw-ring-shadow: 0 0 #0000;
 }
 
 html.fi .fi-sidebar-header {
-    background: transparent;
-    box-shadow: none;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    height: auto;
+    min-height: 0;
+    padding: 20px 14px 0;
+}
+
+html.fi .fi-sidebar-header .fi-logo {
+    margin-inline-start: 0;
+    height: auto !important;
+}
+
+html.fi .fi-sidebar-open-collapse-sidebar-btn,
+html.fi .fi-sidebar-close-collapse-sidebar-btn {
+    display: none !important;
 }
 
 html.fi .fi-sidebar-header-logo-ctn a {
@@ -495,9 +479,32 @@ html.fi .fi-sidebar .fi-badge {
 }
 
 html.fi .fi-sidebar-footer {
+    position: relative;
     margin: 0 0.75rem 0.75rem;
     border: 0;
     padding: 0;
+}
+
+html.fi .fi-sidebar.fi-sidebar-open .ik-sidebar-tools {
+    position: absolute;
+    z-index: 2;
+    top: 50%;
+    inset-inline-end: 2.35rem;
+    display: flex;
+    transform: translateY(-50%);
+}
+
+html.fi .fi-sidebar.fi-sidebar-open .fi-user-menu-trigger {
+    position: relative;
+    padding-inline-end: 6.4rem;
+}
+
+html.fi .fi-sidebar.fi-sidebar-open .fi-user-menu-trigger > .fi-icon {
+    position: absolute;
+    top: 50%;
+    inset-inline-end: 0.65rem;
+    margin: 0;
+    transform: translateY(-50%);
 }
 
 html.fi .fi-sidebar .fi-user-menu-trigger {
@@ -518,7 +525,12 @@ html.fi .fi-sidebar .fi-user-menu-trigger:hover {
 
 html.fi .fi-sidebar .fi-user-menu-trigger .fi-tenant-menu-trigger-text,
 html.fi .fi-sidebar .fi-user-menu-trigger .fi-user-menu-trigger-text {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
     color: var(--ik-side-heading-active);
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 html.fi .ik-admin-brand {
@@ -619,31 +631,6 @@ html.fi .ik-sidebar-pin:focus-visible::after {
         transition: width 200ms ease, opacity 150ms ease;
     }
 
-    html.fi .fi-topbar-start {
-        display: none;
-    }
-
-    html.fi .fi-sidebar-header-ctn {
-        overflow: visible;
-    }
-
-    html.fi .fi-body-has-topbar .fi-sidebar-header {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 8px;
-        height: auto;
-        min-height: 3.25rem;
-        background: transparent;
-        padding: 12px 14px 6px;
-        box-shadow: none;
-        --tw-ring-shadow: 0 0 #0000;
-    }
-
-    html.fi .fi-sidebar .fi-logo {
-        height: auto !important;
-    }
-
     html.fi .ik-sidebar-pin {
         display: inline-flex;
     }
@@ -733,7 +720,34 @@ html.fi .ik-sidebar-pin:focus-visible::after {
     }
 
     html.fi .fi-sidebar:not(.fi-sidebar-open) .fi-sidebar-footer {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 6px;
         margin-inline: 8px;
+    }
+
+    html.fi .fi-sidebar:not(.fi-sidebar-open) .ik-sidebar-tools {
+        position: static;
+        flex-direction: column;
+        gap: 6px;
+        transform: none;
+    }
+
+    html.fi .fi-sidebar:not(.fi-sidebar-open) .fi-user-menu-trigger > .fi-icon {
+        position: static;
+        transform: none;
+    }
+
+    html.fi .fi-sidebar:not(.fi-sidebar-open) .ik-sidebar-tool-badge {
+        top: 4px;
+        inset-inline-end: 4px;
+        width: 8px;
+        min-width: 8px;
+        height: 8px;
+        padding: 0;
+        overflow: hidden;
+        font-size: 0;
     }
 
     html.fi .fi-sidebar:not(.fi-sidebar-open) .fi-user-avatar {
@@ -745,48 +759,143 @@ html.fi .ik-sidebar-pin:focus-visible::after {
 @media (prefers-reduced-motion: reduce) {
     html.fi .fi-sidebar,
     html.fi .fi-sidebar *,
-    html.fi .fi-main-ctn,
-    html.fi .fi-body.fi-body-has-navigation::before,
-    html.fi .fi-body.fi-body-has-navigation::after {
+    html.fi .fi-main-ctn {
         transition: none !important;
         animation: none !important;
     }
 }
 
-/* Top bar */
-html.fi .fi-topbar-ctn,
-html.fi .fi-topbar {
-    background: transparent;
-    box-shadow: none;
-    --tw-ring-shadow: 0 0 #0000;
+/* Page heading sits on the same row as the sidebar logo. */
+html.fi .fi-page-header-main-ctn {
+    padding-top: 24px;
+    padding-bottom: 1.75rem;
 }
 
-html.fi .fi-topbar .fi-global-search {
-    width: min(28rem, 46vw);
+html.fi .fi-layout-sidebar-toggle-btn-ctn {
+    position: fixed;
+    z-index: 25;
+    top: 12px;
+    inset-inline-start: 12px;
+    padding: 0;
 }
 
-html.fi .fi-topbar .fi-input-wrp,
-html.fi .fi-topbar-database-notifications-btn {
-    border: 1px solid var(--ik-topbar-border);
+html.fi .fi-layout-sidebar-toggle-btn {
+    width: 44px;
+    height: 44px;
+    border: 1px solid var(--ik-side-border);
     border-radius: 12px;
-    background: var(--ik-topbar-bg);
+    background: var(--ik-side-bg);
+    color: var(--ik-heading);
+}
+
+@media (max-width: 1023px) {
+    html.fi .fi-header {
+        min-height: 44px;
+        padding-inline-start: 52px;
+    }
+}
+
+/* Profile-block search and notifications. */
+html.fi .ik-sidebar-tools,
+html.fi .ik-sidebar-notifications,
+html.fi .ik-sidebar-notifications > div,
+html.fi .ik-sidebar-notifications .fi-no-database,
+html.fi .ik-sidebar-tools .fi-modal-trigger {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+}
+
+html.fi .ik-sidebar-tool {
+    position: relative;
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    margin: 0;
+    border: 0;
+    border-radius: 8px;
+    background: transparent;
+    padding: 0;
+    color: var(--ik-side-pin);
+    cursor: pointer;
+}
+
+html.fi .ik-sidebar-tool .fi-icon {
+    width: 16px;
+    height: 16px;
+}
+
+html.fi .ik-sidebar-tool:hover {
+    background: var(--ik-side-pin-hover-bg);
+    color: var(--ik-side-pin-hover);
+}
+
+html.fi .ik-sidebar-tool:focus-visible {
+    outline: 2px solid var(--ik-accent-to);
+    outline-offset: 2px;
+}
+
+html.fi .ik-sidebar-tool-badge {
+    position: absolute;
+    top: 1px;
+    inset-inline-end: 1px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 14px;
+    height: 14px;
+    border-radius: 999px;
+    background: var(--ik-accent-to);
+    padding-inline: 3px;
+    color: #0b0d10;
+    font-size: 9px;
+    font-weight: 700;
+    line-height: 1;
+    pointer-events: none;
+}
+
+html.fi .ik-sidebar-tool::after {
+    content: attr(data-tip);
+    position: absolute;
+    z-index: 40;
+    bottom: calc(100% + 8px);
+    left: 50%;
+    border-radius: 8px;
+    background: var(--ik-heading);
+    padding: 4px 8px;
+    color: var(--ik-bg);
+    font-size: 12px;
+    font-weight: 500;
+    line-height: 1.3;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transform: translateX(-50%);
+    transition: opacity 150ms ease;
+}
+
+html.fi .ik-sidebar-tool:hover::after,
+html.fi .ik-sidebar-tool:focus-visible::after {
+    opacity: 1;
+}
+
+html.fi #ik-admin-search .fi-global-search-ctn,
+html.fi #ik-admin-search .fi-global-search {
+    display: block;
+    width: 100%;
+    margin: 0;
+}
+
+html.fi #ik-admin-search .fi-global-search-results-ctn {
+    position: static;
+    width: 100%;
+    max-width: none;
+    margin-top: 0.75rem;
+    inset: auto;
     box-shadow: none;
-    backdrop-filter: blur(16px);
-}
-
-html.fi .fi-topbar-database-notifications-btn,
-html.fi .fi-topbar-open-sidebar-btn,
-html.fi .fi-topbar-close-sidebar-btn {
-    min-width: 44px;
-    min-height: 44px;
-}
-
-html.fi .fi-topbar .fi-input {
-    color: var(--ik-topbar-text);
-}
-
-html.fi .fi-topbar .fi-input::placeholder {
-    color: var(--ik-muted);
 }
 
 /* Cards, tables, charts */

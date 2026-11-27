@@ -22,6 +22,8 @@ return [
         'collapse' => 'მენიუს ჩაკეცვა',
         'expand' => 'მენიუს გაშლა',
     ],
+    'search' => 'ძიება',
+    'notifications' => 'შეტყობინებები',
     'resources' => [
         'redirects' => [
             'singular' => 'გადამისამართება',

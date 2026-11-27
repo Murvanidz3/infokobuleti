@@ -22,6 +22,8 @@ return [
         'collapse' => 'Collapse menu',
         'expand' => 'Expand menu',
     ],
+    'search' => 'Search',
+    'notifications' => 'Notifications',
     'resources' => [
         'redirects' => [
             'singular' => 'redirect',

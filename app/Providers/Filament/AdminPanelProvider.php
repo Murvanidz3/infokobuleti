@@ -12,6 +12,7 @@ use App\Http\Middleware\SetAdminLocale;
 use App\Http\Middleware\TrackUserSessions;
 use Filament\Actions\Action;
 use Filament\Enums\DatabaseNotificationsPosition;
+use Filament\Enums\GlobalSearchPosition;
 use Filament\Enums\ThemeMode;
 use Filament\Enums\UserMenuPosition;
 use Filament\FontProviders\LocalFontProvider;
@@ -36,6 +37,7 @@ use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\Support\Facades\Lang;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\View;
 use Illuminate\Support\Facades\Vite;
 use Illuminate\Support\Str;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
@@ -84,6 +86,7 @@ class AdminPanelProvider extends PanelProvider
             ->sidebarCollapsibleOnDesktop()
             ->sidebarWidth('18.5rem')
             ->collapsedSidebarWidth('4.5rem')
+            ->topbar(false)
             ->maxContentWidth('full')
             ->navigationGroups(collect(NavigationGroup::cases())->mapWithKeys(fn (NavigationGroup $group): array => [
                 // Labels are resolved per request, after the admin language is applied.
@@ -94,6 +97,10 @@ class AdminPanelProvider extends PanelProvider
                     ->label(fn (): string => $group->getLabel())
                     ->extraSidebarAttributes(['data-nav-group' => $group->value]),
             ])->all())
+            // Search and the bell render in the sidebar profile block, not a top bar.
+            // Topbar position keeps Filament from also dropping them into the sidebar header.
+            ->globalSearch(position: GlobalSearchPosition::Topbar)
+            ->globalSearchKeyBindings(['mod+k'])
             ->databaseNotifications(position: DatabaseNotificationsPosition::Topbar)
             ->userMenu(position: UserMenuPosition::Sidebar)
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\Filament\Resources')
@@ -145,6 +152,14 @@ class AdminPanelProvider extends PanelProvider
 
     public function boot(): void
     {
+        // Icon-only bell. Filament still owns the slide-over; this view only replaces the trigger.
+        View::prependNamespace('filament-panels', resource_path('views/filament/panel'));
+
+        FilamentView::registerRenderHook(
+            PanelsRenderHook::USER_MENU_BEFORE,
+            fn (): string => view('filament.hooks.sidebar-tools')->render(),
+        );
+
         FilamentView::registerRenderHook(
             PanelsRenderHook::HEAD_START,
             fn (): string => view('filament.hooks.sidebar-persist')->render(),

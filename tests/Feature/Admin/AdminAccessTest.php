@@ -106,6 +106,27 @@ it('navigates inside the admin without a full reload and preloads the georgian f
     expect($account[0] ?? 'missing account link')->not->toContain('wire:navigate');
 });
 
+it('renders search and notification triggers in the sidebar footer', function () {
+    $html = $this->actingAs(staffWith(Role::Admin))->get('/admin')->assertOk()->getContent();
+
+    expect($html)->not->toContain('fi-body-has-topbar')
+        ->and($html)->toContain('fi-layout-sidebar-toggle-btn')
+        ->and($html)->toContain('x-mousetrap.global.mod-k')
+        ->and($html)->toContain('ik-admin-search')
+        ->and($html)->toContain('fi-global-search');
+
+    $footer = (string) str($html)->after('class="fi-sidebar-footer"')->before('fi-main-ctn');
+
+    expect($footer)->toContain('ik-sidebar-tools')
+        ->and($footer)->toContain('ik-sidebar-search-btn')
+        ->and($footer)->toContain('ik-sidebar-notifications-btn')
+        ->and($footer)->toContain(__('admin.search', [], 'ka'))
+        ->and($footer)->toContain(__('admin.notifications', [], 'ka'))
+        ->and($footer)->toContain('⌘K / Ctrl+K')
+        ->and($footer)->toContain('fi-user-menu')
+        ->and($footer)->toContain('fi-theme-switcher');
+});
+
 it('renders a desktop control that collapses the sidebar to an icon rail', function () {
     $html = $this->actingAs(staffWith(Role::Admin))->get('/admin')->assertOk()->getContent();
 

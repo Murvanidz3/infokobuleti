@@ -22,6 +22,8 @@ return [
         'collapse' => 'Свернуть меню',
         'expand' => 'Развернуть меню',
     ],
+    'search' => 'Поиск',
+    'notifications' => 'Уведомления',
     'resources' => [
         'redirects' => [
             'singular' => 'редирект',
