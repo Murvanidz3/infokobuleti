@@ -8,17 +8,22 @@ use App\Enums\AmenityScope;
 use App\Enums\ApplyMethod;
 use App\Enums\BuildingStatus;
 use App\Enums\CategoryModule;
+use App\Enums\CommercialSubtype;
 use App\Enums\Currency;
 use App\Enums\EmploymentType;
 use App\Enums\Experience;
 use App\Enums\ItemCondition;
+use App\Enums\LandPurpose;
+use App\Enums\LandUtility;
 use App\Enums\ListedBy;
 use App\Enums\PropertyCondition;
 use App\Enums\PropertyDeal;
 use App\Enums\PropertyType;
 use App\Enums\SalaryPeriod;
 use App\Enums\VacancyBenefit;
+use App\Enums\VacationType;
 use App\Exceptions\ListingLimitReached;
+use App\Listings\Registry;
 use App\Models\Amenity;
 use App\Models\Category;
 use App\Models\ListingDraft;
@@ -131,7 +136,12 @@ class ListingWizard extends Component
     {
         abort_unless(in_array($type, ListingForm::TYPES, true), 404);
 
-        if ($this->editType !== null || $type === $this->type) {
+        if ($this->editType !== null) {
+            return;
+        }
+
+        // Vacation is stored as a property. Clicking real estate again must leave that rubric.
+        if ($type === $this->type && ! ($type === 'property' && ($this->form['rubric'] ?? '') === 'vacation')) {
             return;
         }
 
@@ -142,9 +152,9 @@ class ListingWizard extends Component
     }
 
     /**
-     * The hotel card starts a daily-rent property of type hotel. There is no rooms step.
+     * Vacation is always a daily-rent stay. The deal is not asked.
      */
-    public function chooseHotel(): void
+    public function chooseVacation(): void
     {
         if ($this->editType !== null) {
             return;
@@ -152,11 +162,21 @@ class ListingWizard extends Component
 
         $this->type = 'property';
         $this->form = ListingForm::defaults('property', $this->user());
+        $this->form['rubric'] = 'vacation';
         $this->form['deal'] = PropertyDeal::DailyRent->value;
-        $this->form['property_type'] = PropertyType::Hotel->value;
         $this->form['currency'] = Currency::GEL->value;
+        $this->form['check_in'] = '14:00';
+        $this->form['check_out'] = '12:00';
         $this->resetValidation();
         $this->persist();
+    }
+
+    /**
+     * Kept so an older draft client that still calls the hotel tile reaches the vacation rubric.
+     */
+    public function chooseHotel(): void
+    {
+        $this->chooseVacation();
     }
 
     public function updated(string $property, mixed $value): void
@@ -174,6 +194,10 @@ class ListingWizard extends Component
 
         if ($property === 'form.category_id' && $this->type === 'classified') {
             $this->form['attribute_values'] = [];
+        }
+
+        if (in_array($property, ['form.category_id', 'form.parent_category_id'], true) && filled($this->form['category_id'] ?? null)) {
+            $this->resetErrorBag('form.category_id');
         }
 
         $this->persist();
@@ -392,7 +416,7 @@ class ListingWizard extends Component
      */
     protected function validationAttributes(): array
     {
-        return ListingForm::validationAttributes();
+        return ListingForm::validationAttributes($this->form);
     }
 
     private function validateStep(string $step): void
@@ -406,7 +430,7 @@ class ListingWizard extends Component
         $rules = ListingForm::rules($this->type, $step, $this->form);
 
         if ($rules !== []) {
-            $this->validate($rules, [], ListingForm::validationAttributes());
+            $this->validate($rules, [], ListingForm::validationAttributes($this->form));
         }
     }
 
@@ -449,7 +473,9 @@ class ListingWizard extends Component
         unset($data['_reached']);
 
         $this->type = (string) $draft->listing_type;
-        $this->form = $this->type !== '' ? array_replace(ListingForm::defaults($this->type, $this->user()), $data) : [];
+        $this->form = $this->type !== ''
+            ? ListingForm::normalize($this->type, array_replace(ListingForm::defaults($this->type, $this->user()), $data))
+            : [];
         $this->step = $this->type !== '' ? max(1, min($this->reached, $draft->step)) : 1;
 
         if ($this->editType === null) {
@@ -509,13 +535,23 @@ class ListingWizard extends Component
 
         return $common + match ($this->type) {
             'property' => [
-                'deals' => PropertyDeal::options(),
-                'propertyTypes' => PropertyType::options(),
+                'deals' => collect(PropertyDeal::options())->only([PropertyDeal::Sale->value, PropertyDeal::Rent->value])->all(),
+                'propertyTypes' => collect(PropertyType::options())->only([
+                    PropertyType::Apartment->value,
+                    PropertyType::House->value,
+                    PropertyType::Land->value,
+                    PropertyType::Commercial->value,
+                ])->all(),
+                'commercialSubtypes' => CommercialSubtype::options(),
+                'vacationTypes' => VacationType::options(),
+                'purposes' => LandPurpose::options(),
+                'utilities' => LandUtility::options(),
+                'stars' => collect(range(1, 5))->mapWithKeys(fn (int $star): array => [(string) $star => (string) $star])->all(),
                 'conditions' => PropertyCondition::options(),
                 'buildingStatuses' => BuildingStatus::options(),
                 'listedBy' => ListedBy::options(),
                 'features' => $this->amenities(
-                    ($this->form['property_type'] ?? '') === PropertyType::Hotel->value
+                    ($this->form['rubric'] ?? '') === 'vacation'
                         ? [AmenityScope::Property, AmenityScope::Hotel]
                         : [AmenityScope::Property],
                 ),
@@ -624,15 +660,26 @@ class ListingWizard extends Component
         ];
 
         $pairs = [...$pairs, ...match ($this->type) {
-            'property' => [
+            'property' => ($form['rubric'] ?? '') === 'vacation' ? [
+                [__('account.wizard.fields.vacation_type'), $options['vacationTypes'][$form['vacation_type'] ?? ''] ?? null],
+                [__('account.wizard.fields.price'), $money($form['price'], 'currency')],
+                [__('account.wizard.fields.guests'), $form['guests'] ?? null],
+                [__('account.wizard.fields.bedrooms'), $form['bedrooms'] ?? null],
+                [__('account.wizard.fields.distance_to_sea_m'), filled($form['distance_to_sea_m'] ?? null) ? $form['distance_to_sea_m'].' m' : null],
+                [__('account.wizard.fields.stars'), $options['stars'][(string) ($form['stars'] ?? '')] ?? null],
+                [__('account.wizard.fields.rooms_count'), $form['rooms_count'] ?? null],
+            ] : [
                 [__('account.wizard.fields.deal'), $options['deals'][$form['deal']] ?? null],
                 [__('account.wizard.fields.property_type'), $options['propertyTypes'][$form['property_type']] ?? null],
+                [__('account.wizard.fields.commercial_subtype'), $options['commercialSubtypes'][$form['commercial_subtype'] ?? ''] ?? null],
                 [__('account.wizard.fields.price'), $money($form['price'], 'currency')],
                 [__('account.wizard.fields.area_m2'), filled($form['area_m2']) ? $form['area_m2'].' m²' : null],
                 [__('account.wizard.fields.land_area_m2'), filled($form['land_area_m2']) ? $form['land_area_m2'].' m²' : null],
-                [__('account.wizard.fields.rooms'), $form['rooms']],
-                [__('account.wizard.fields.floor'), filled($form['floor']) ? $form['floor'].(filled($form['total_floors']) ? ' / '.$form['total_floors'] : '') : null],
-                [__('account.wizard.fields.condition'), $options['conditions'][$form['condition']] ?? null],
+                [__('account.wizard.fields.rooms'), $form['rooms'] ?? null],
+                [__('account.wizard.fields.floor'), filled($form['floor'] ?? null) ? $form['floor'].(filled($form['total_floors'] ?? null) ? ' / '.$form['total_floors'] : '') : null],
+                [__('account.wizard.fields.condition'), $options['conditions'][$form['condition'] ?? ''] ?? null],
+                [__('account.wizard.fields.purpose'), $options['purposes'][$form['purpose'] ?? ''] ?? null],
+                [__('account.wizard.fields.utilities'), $chosen($options['utilities'], $form['utilities'] ?? [])],
                 [__('account.wizard.fields.features'), $chosen($options['features'], $form['features'] ?? [])],
             ],
             'classified' => [
@@ -653,6 +700,10 @@ class ListingWizard extends Component
             ],
             default => [],
         }];
+
+        if ($this->type !== 'vacancy') {
+            $pairs[] = [__('account.wizard.fields.contact_name'), $form['contact_name'] ?? null];
+        }
 
         $pairs[] = [__('account.wizard.fields.contact_phone'), $this->type === 'vacancy' ? ($form['apply_phone'] ?? null) : ($form['contact_phone'] ?? null)];
 
@@ -681,6 +732,20 @@ class ListingWizard extends Component
             is_bool($value) => $value ? __('account.wizard.yes') : null,
             default => ($field['choices'][(string) $value] ?? (string) $value).($field['unit'] ? ' '.$field['unit'] : ''),
         };
+    }
+
+    /**
+     * Whether the current listing definition shows this field.
+     */
+    public function shows(string $field): bool
+    {
+        if ($this->type === '') {
+            return false;
+        }
+
+        $form = ListingForm::normalize($this->type, $this->form);
+
+        return in_array($field, app(Registry::class)->forForm($this->type, $form)->visibleFieldNames($form), true);
     }
 
     private function user(): User

@@ -24,6 +24,11 @@
         @if ($priceInsight ?? null)
             <x-insights.price :insight="$priceInsight" owner />
         @endif
+        @if ($type === 'property' && $this->shows('website'))
+            <x-form.field :label="__('account.wizard.fields.website')" for="wizard-website" :error="$errors->first('form.website')" optional>
+                <input id="wizard-website" type="url" inputmode="url" wire:model.blur="form.website" maxlength="255" class="{{ $control }} {{ $border('form.website') }}" placeholder="https://">
+            </x-form.field>
+        @endif
         @php
             $fields = [
             $input('contact_name', __('account.wizard.fields.contact_name'), 'text', ['autocomplete' => 'name', 'maxlength' => 120], true),

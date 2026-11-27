@@ -2,21 +2,22 @@
 
 namespace App\Listings;
 
+use App\Enums\PropertyDeal;
+use App\Enums\PropertyType;
 use App\Listings\Definitions\ApartmentDefinition;
 use App\Listings\Definitions\ClassifiedGoodsDefinition;
 use App\Listings\Definitions\ClassifiedServiceDefinition;
 use App\Listings\Definitions\CommercialDefinition;
-use App\Listings\Definitions\HotelBusinessDefinition;
-use App\Listings\Definitions\HotelDefinition;
 use App\Listings\Definitions\HouseDefinition;
 use App\Listings\Definitions\LandDefinition;
 use App\Listings\Definitions\VacancyDefinition;
+use App\Listings\Definitions\VacationDefinition;
 use App\Models\Category;
 use InvalidArgumentException;
 
 /**
- * Per-type listing definitions. The shapes mirror the add-listing wizard: same steps, same
- * fields, same rules. Quirks kept on purpose are marked TODO PR2 on the definition classes.
+ * Per-type listing definitions. Real estate is sale or monthly rent. Vacation is always daily
+ * rent and is its own definition, even though both are stored on properties.
  */
 final class Registry
 {
@@ -55,8 +56,7 @@ final class Registry
             new HouseDefinition,
             new LandDefinition,
             new CommercialDefinition,
-            new HotelBusinessDefinition,
-            new HotelDefinition,
+            new VacationDefinition,
             new ClassifiedGoodsDefinition,
             new ClassifiedServiceDefinition,
             new VacancyDefinition,
@@ -102,8 +102,8 @@ final class Registry
     }
 
     /**
-     * The definition for a wizard form. An unknown property type uses the apartment rules,
-     * which is what the wizard did before this registry existed.
+     * The definition for a wizard form. An unknown real-estate type uses the apartment rules.
+     * A vacation form (rubric, vacation type, or a legacy daily-rent hotel) uses the vacation rules.
      *
      * @param  array<string, mixed>  $form
      */
@@ -120,10 +120,32 @@ final class Registry
     }
 
     /**
+     * Whether this form is a daily-rent stay rather than a sale or monthly rent.
+     *
+     * @param  array<string, mixed>  $form
+     */
+    public function isVacation(array $form): bool
+    {
+        return $this->propertyKey($form) === 'property.vacation';
+    }
+
+    /**
      * @param  array<string, mixed>  $form
      */
     private function propertyKey(array $form): string
     {
+        if (($form['rubric'] ?? '') === 'vacation' || filled($form['vacation_type'] ?? null)) {
+            return 'property.vacation';
+        }
+
+        if (($form['property_type'] ?? '') === PropertyType::Hotel->value && ($form['deal'] ?? '') === PropertyDeal::DailyRent->value) {
+            return 'property.vacation';
+        }
+
+        if (($form['property_type'] ?? '') === PropertyType::HotelBusiness->value) {
+            return 'property.commercial';
+        }
+
         $key = 'property.'.(string) ($form['property_type'] ?? '');
 
         return array_key_exists($key, $this->definitions) ? $key : 'property.apartment';

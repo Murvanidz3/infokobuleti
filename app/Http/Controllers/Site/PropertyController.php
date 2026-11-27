@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Site;
 
+use App\Enums\LandUtility;
 use App\Enums\PropertyDeal;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\Site\Concerns\ShowsListing;
@@ -38,7 +39,15 @@ class PropertyController extends Controller
         $currency = $cards->currency($property->currency);
         $facts = array_values(array_filter([
             ['icon' => 'tag', 'label' => __('home.search.fields.deal'), 'value' => (string) $property->deal->getLabel()],
-            ['icon' => 'building', 'label' => __('site.filters.type'), 'value' => (string) $property->type->getLabel()],
+            ['icon' => 'building', 'label' => __('site.filters.type'), 'value' => (string) ($property->vacation_type?->getLabel() ?? $property->type->getLabel())],
+            $property->commercial_subtype !== null ? ['icon' => 'building', 'label' => __('account.wizard.fields.commercial_subtype'), 'value' => (string) $property->commercial_subtype->getLabel()] : null,
+            $property->purpose !== null ? ['icon' => 'tag', 'label' => __('account.wizard.fields.purpose'), 'value' => (string) $property->purpose->getLabel()] : null,
+            filled($property->utilities) ? ['icon' => 'wrench', 'label' => __('account.wizard.fields.utilities'), 'value' => collect($property->utilities)->map(fn (string $utility): string => (string) (LandUtility::tryFrom($utility)?->getLabel() ?? $utility))->implode(', ')] : null,
+            $property->guests !== null ? ['icon' => 'users', 'label' => __('account.wizard.fields.guests'), 'value' => (string) $property->guests] : null,
+            $property->stars !== null ? ['icon' => 'star', 'label' => __('account.wizard.fields.stars'), 'value' => (string) $property->stars] : null,
+            $property->rooms_count !== null ? ['icon' => 'door', 'label' => __('account.wizard.fields.rooms_count'), 'value' => (string) $property->rooms_count] : null,
+            $property->check_in !== null ? ['icon' => 'clock', 'label' => __('account.wizard.fields.check_in'), 'value' => substr((string) $property->check_in, 0, 5)] : null,
+            $property->check_out !== null ? ['icon' => 'clock', 'label' => __('account.wizard.fields.check_out'), 'value' => substr((string) $property->check_out, 0, 5)] : null,
             $property->area_m2 !== null ? ['icon' => 'area', 'label' => __('site.filters.area'), 'value' => __('listing.area', ['value' => $price->number((float) $property->area_m2)])] : null,
             $property->land_area_m2 !== null ? ['icon' => 'house', 'label' => __('site.real_estate.land_area'), 'value' => __('listing.area', ['value' => $price->number((float) $property->land_area_m2)])] : null,
             $property->rooms !== null ? ['icon' => 'door', 'label' => __('home.search.fields.rooms'), 'value' => (string) $property->rooms] : null,

@@ -201,11 +201,39 @@ return [
 
     'property_type' => [
         'apartment' => 'Квартира',
-        'house' => 'Дом',
+        'house' => 'Дом / дача',
         'land' => 'Земельный участок',
         'commercial' => 'Коммерческая площадь',
         'hotel' => 'Отель',
-        'hotel_business' => 'Гостиница (бизнес)',
+        'hotel_business' => 'Отель / бизнес',
+    ],
+
+    'commercial_subtype' => [
+        'office' => 'Офис',
+        'shop' => 'Магазин',
+        'warehouse' => 'Склад',
+        'hotel_business' => 'Отель / бизнес',
+    ],
+
+    'vacation_type' => [
+        'hotel' => 'Отель',
+        'guesthouse' => 'Гостевой дом',
+        'apartment' => 'Квартира',
+        'house' => 'Дом / коттедж',
+        'hostel' => 'Хостел',
+    ],
+
+    'land_purpose' => [
+        'residential' => 'Жилое',
+        'agricultural' => 'Сельскохозяйственное',
+        'commercial' => 'Коммерческое',
+    ],
+
+    'land_utility' => [
+        'water' => 'Вода',
+        'electricity' => 'Электричество',
+        'gas' => 'Газ',
+        'road_access' => 'Подъездная дорога',
     ],
 
     'report_reason' => [

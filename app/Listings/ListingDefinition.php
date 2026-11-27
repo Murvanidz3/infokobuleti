@@ -29,4 +29,12 @@ interface ListingDefinition
      * @return array<string, mixed>
      */
     public function rulesFor(string $step, array $form): array;
+
+    /**
+     * Names of fields the form is currently showing.
+     *
+     * @param  array<string, mixed>  $form
+     * @return list<string>
+     */
+    public function visibleFieldNames(array $form): array;
 }

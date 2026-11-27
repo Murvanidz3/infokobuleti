@@ -8,6 +8,7 @@ use App\Enums\Currency;
 use App\Enums\ListingModule;
 use App\Enums\PropertyDeal;
 use App\Enums\PropertyType;
+use App\Enums\VacationType;
 use App\Models\Property;
 use App\Services\PriceFormatter;
 use App\Support\Listings\CardPresenter;
@@ -24,6 +25,10 @@ use Livewire\Attributes\Url;
 class PropertyIndex extends ListingIndex
 {
     public const array ROOM_OPTIONS = ['1', '2', '3', '4'];
+
+    /** vacation shows daily-rent stays; anything else is sale and monthly rent. */
+    #[Url(except: '')]
+    public string $rubric = '';
 
     #[Url(except: '')]
     public string $deal = '';
@@ -88,7 +93,7 @@ class PropertyIndex extends ListingIndex
 
     protected function filterProperties(): array
     {
-        return ['deal', 'type', 'currency', 'price_min', 'price_max', 'area_min', 'area_max', 'rooms', 'floor_min', 'floor_max', 'location', 'building', 'photos'];
+        return ['rubric', 'deal', 'type', 'currency', 'price_min', 'price_max', 'area_min', 'area_max', 'rooms', 'floor_min', 'floor_max', 'location', 'building', 'photos'];
     }
 
     protected function sortOptions(): array
@@ -115,16 +120,39 @@ class PropertyIndex extends ListingIndex
         };
     }
 
-    protected function applyFilters(Builder $query): void
+    public function showingVacation(): bool
     {
-        if (PropertyDeal::tryFrom($this->deal) !== null) {
-            $query->where('deal', $this->deal);
+        if ($this->rubric === 'vacation') {
+            return true;
         }
 
-        $types = array_values(array_intersect($this->strings($this->type), PropertyType::values()));
+        $types = $this->strings($this->type);
 
-        if ($types !== []) {
-            $query->whereIn('type', $types);
+        return $this->deal === PropertyDeal::DailyRent->value && $types !== [] && array_diff($types, [PropertyType::Hotel->value]) === [];
+    }
+
+    protected function applyFilters(Builder $query): void
+    {
+        if ($this->showingVacation()) {
+            $query->vacation();
+            $this->filterVacationTypes($query);
+        } else {
+            $query->realEstate();
+
+            if (in_array($this->deal, [PropertyDeal::Sale->value, PropertyDeal::Rent->value], true)) {
+                $query->where('deal', $this->deal);
+            }
+
+            $types = array_values(array_intersect($this->strings($this->type), [
+                PropertyType::Apartment->value,
+                PropertyType::House->value,
+                PropertyType::Land->value,
+                PropertyType::Commercial->value,
+            ]));
+
+            if ($types !== []) {
+                $query->whereIn('type', $types);
+            }
         }
 
         // Prices are compared in GEL (price_gel), converting the visitor's USD bounds at today's rate.
@@ -138,43 +166,45 @@ class PropertyIndex extends ListingIndex
             $query->where('price_gel', '<=', $max * $rate);
         }
 
-        if (($min = $this->number($this->area_min)) !== null) {
-            $query->where('area_m2', '>=', $min);
-        }
+        if (! $this->showingVacation()) {
+            if (($min = $this->number($this->area_min)) !== null) {
+                $query->where('area_m2', '>=', $min);
+            }
 
-        if (($max = $this->number($this->area_max)) !== null && $max > 0) {
-            $query->where('area_m2', '<=', $max);
-        }
+            if (($max = $this->number($this->area_max)) !== null && $max > 0) {
+                $query->where('area_m2', '<=', $max);
+            }
 
-        $rooms = array_values(array_intersect($this->strings($this->rooms), self::ROOM_OPTIONS));
+            $rooms = array_values(array_intersect($this->strings($this->rooms), self::ROOM_OPTIONS));
 
-        if ($rooms !== []) {
-            $query->where(function (Builder $query) use ($rooms): void {
-                $exact = array_map('intval', array_diff($rooms, ['4']));
+            if ($rooms !== []) {
+                $query->where(function (Builder $query) use ($rooms): void {
+                    $exact = array_map('intval', array_diff($rooms, ['4']));
 
-                if ($exact !== []) {
-                    $query->orWhereIn('rooms', $exact);
-                }
+                    if ($exact !== []) {
+                        $query->orWhereIn('rooms', $exact);
+                    }
 
-                if (in_array('4', $rooms, true)) {
-                    $query->orWhere('rooms', '>=', 4);
-                }
-            });
-        }
+                    if (in_array('4', $rooms, true)) {
+                        $query->orWhere('rooms', '>=', 4);
+                    }
+                });
+            }
 
-        if (is_numeric($this->floor_min)) {
-            $query->where('floor', '>=', (int) $this->floor_min);
-        }
+            if (is_numeric($this->floor_min)) {
+                $query->where('floor', '>=', (int) $this->floor_min);
+            }
 
-        if (is_numeric($this->floor_max)) {
-            $query->where('floor', '<=', (int) $this->floor_max);
+            if (is_numeric($this->floor_max)) {
+                $query->where('floor', '<=', (int) $this->floor_max);
+            }
         }
 
         if ($this->location !== '') {
             $query->whereIn('location_id', $this->locationIds($this->location));
         }
 
-        if (in_array($this->building, ['new', 'old'], true)) {
+        if (! $this->showingVacation() && in_array($this->building, ['new', 'old'], true)) {
             $query->whereIn('building_status', $this->building === 'new' ? [BuildingStatus::New->value, BuildingStatus::UnderConstruction->value] : [BuildingStatus::Old->value]);
         }
 
@@ -190,9 +220,19 @@ class PropertyIndex extends ListingIndex
 
     protected function filterOptions(): array
     {
+        $vacation = $this->showingVacation();
+
         return [
-            'dealOptions' => PropertyDeal::options(),
-            'typeOptions' => PropertyType::options(),
+            'vacation' => $vacation,
+            'dealOptions' => collect(PropertyDeal::options())->only([PropertyDeal::Sale->value, PropertyDeal::Rent->value])->all(),
+            'typeOptions' => $vacation
+                ? VacationType::options()
+                : collect(PropertyType::options())->only([
+                    PropertyType::Apartment->value,
+                    PropertyType::House->value,
+                    PropertyType::Land->value,
+                    PropertyType::Commercial->value,
+                ])->all(),
             'locationOptions' => $this->locationOptions(),
         ];
     }
@@ -202,35 +242,40 @@ class PropertyIndex extends ListingIndex
         $price = app(PriceFormatter::class);
         $chips = [];
 
-        if (($deal = PropertyDeal::tryFrom($this->deal)) !== null) {
+        if (! $this->showingVacation() && ($deal = PropertyDeal::tryFrom($this->deal)) !== null && $deal !== PropertyDeal::DailyRent) {
             $chips[] = ['label' => $deal->getLabel(), 'property' => 'deal'];
         }
 
         foreach ($this->strings($this->type) as $type) {
-            $chips[] = ['label' => PropertyType::tryFrom($type)?->getLabel() ?? $type, 'property' => 'type', 'value' => $type];
+            $label = $this->showingVacation()
+                ? (VacationType::tryFrom($type)?->getLabel() ?? $type)
+                : (PropertyType::tryFrom($type)?->getLabel() ?? $type);
+            $chips[] = ['label' => $label, 'property' => 'type', 'value' => $type];
         }
 
         if ($this->price_min !== '' || $this->price_max !== '') {
             $chips[] = ['label' => $this->rangeLabel($price, $this->price_min, $this->price_max, $this->currency === 'USD' ? 'USD' : 'GEL'), 'property' => 'price_min'];
         }
 
-        if ($this->area_min !== '' || $this->area_max !== '') {
+        if (! $this->showingVacation() && ($this->area_min !== '' || $this->area_max !== '')) {
             $chips[] = ['label' => $this->plainRange($this->area_min, $this->area_max, ' m²'), 'property' => 'area_min'];
         }
 
-        foreach ($this->strings($this->rooms) as $rooms) {
-            $chips[] = ['label' => $rooms === '4' ? __('site.filters.rooms_4_plus') : trans_choice('listing.rooms', (int) $rooms, ['count' => $rooms]), 'property' => 'rooms', 'value' => $rooms];
-        }
+        if (! $this->showingVacation()) {
+            foreach ($this->strings($this->rooms) as $rooms) {
+                $chips[] = ['label' => $rooms === '4' ? __('site.filters.rooms_4_plus') : trans_choice('listing.rooms', (int) $rooms, ['count' => $rooms]), 'property' => 'rooms', 'value' => $rooms];
+            }
 
-        if ($this->floor_min !== '' || $this->floor_max !== '') {
-            $chips[] = ['label' => __('site.filters.floor').': '.$this->plainRange($this->floor_min, $this->floor_max), 'property' => 'floor_min'];
+            if ($this->floor_min !== '' || $this->floor_max !== '') {
+                $chips[] = ['label' => __('site.filters.floor').': '.$this->plainRange($this->floor_min, $this->floor_max), 'property' => 'floor_min'];
+            }
         }
 
         if ($this->location !== '') {
             $chips[] = ['label' => $this->locationLabel($this->location), 'property' => 'location'];
         }
 
-        if ($this->building !== '') {
+        if (! $this->showingVacation() && $this->building !== '') {
             $chips[] = ['label' => __('site.filters.building_'.$this->building), 'property' => 'building'];
         }
 
@@ -251,6 +296,29 @@ class PropertyIndex extends ListingIndex
         };
 
         parent::removeFilter($property, $value);
+    }
+
+    /**
+     * @param  Builder<Property>  $query
+     */
+    private function filterVacationTypes(Builder $query): void
+    {
+        $types = array_values(array_intersect($this->strings($this->type), VacationType::values()));
+
+        if ($types === []) {
+            return;
+        }
+
+        $query->where(function (Builder $query) use ($types): void {
+            $query->whereIn('vacation_type', $types);
+
+            if (in_array(VacationType::Hotel->value, $types, true)) {
+                $query->orWhere(fn (Builder $query) => $query
+                    ->whereNull('vacation_type')
+                    ->where('type', PropertyType::Hotel->value)
+                    ->where('deal', PropertyDeal::DailyRent->value));
+            }
+        });
     }
 
     private function plainRange(string $min, string $max, string $unit = ''): string

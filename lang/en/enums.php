@@ -201,11 +201,39 @@ return [
 
     'property_type' => [
         'apartment' => 'Apartment',
-        'house' => 'House',
+        'house' => 'House / country house',
         'land' => 'Land',
         'commercial' => 'Commercial space',
         'hotel' => 'Hotel',
-        'hotel_business' => 'Hotel (business)',
+        'hotel_business' => 'Hotel / business',
+    ],
+
+    'commercial_subtype' => [
+        'office' => 'Office',
+        'shop' => 'Shop',
+        'warehouse' => 'Warehouse',
+        'hotel_business' => 'Hotel / business',
+    ],
+
+    'vacation_type' => [
+        'hotel' => 'Hotel',
+        'guesthouse' => 'Guesthouse',
+        'apartment' => 'Apartment',
+        'house' => 'House / cottage',
+        'hostel' => 'Hostel',
+    ],
+
+    'land_purpose' => [
+        'residential' => 'Residential',
+        'agricultural' => 'Agricultural',
+        'commercial' => 'Commercial',
+    ],
+
+    'land_utility' => [
+        'water' => 'Water',
+        'electricity' => 'Electricity',
+        'gas' => 'Gas',
+        'road_access' => 'Road access',
     ],
 
     'report_reason' => [

@@ -114,11 +114,12 @@ function apartmentWizardRules(): array
 {
     $enum = 'Illuminate\\Validation\\Rules\\Enum';
     $exists = 'Illuminate\\Validation\\Rules\\Exists';
+    $in = 'Illuminate\\Validation\\Rules\\In';
 
     return [
         'type' => [
-            'form.deal' => ['required', $enum.':in:"sale","rent","daily_rent"'],
-            'form.property_type' => ['required', $enum.':in:"apartment","house","land","commercial","hotel","hotel_business"'],
+            'form.deal' => ['required', $in.':in:"sale","rent"'],
+            'form.property_type' => ['required', $in.':in:"apartment","house","land","commercial"'],
         ],
         'details' => [
             'form.title.ka' => ['required', 'string', 'min:5', 'max:120'],
@@ -128,7 +129,6 @@ function apartmentWizardRules(): array
             'form.description.en' => ['nullable', 'string', 'max:5000'],
             'form.description.ru' => ['nullable', 'string', 'max:5000'],
             'form.area_m2' => ['required', 'numeric', 'between:1,100000'],
-            'form.land_area_m2' => ['nullable', 'numeric', 'between:1,10000000'],
             'form.rooms' => ['nullable', 'integer', 'between:1,50'],
             'form.bedrooms' => ['nullable', 'integer', 'between:0,50'],
             'form.bathrooms' => ['nullable', 'integer', 'between:0,20'],
@@ -257,8 +257,7 @@ it('registers one definition per listing kind', function () {
         'property.house',
         'property.land',
         'property.commercial',
-        'property.hotel_business',
-        'property.hotel',
+        'property.vacation',
         'classified.goods',
         'classified.service',
         'vacancy',
@@ -275,8 +274,7 @@ it('keeps the wizard steps in the current order', function (string $key) {
     'house' => 'property.house',
     'land' => 'property.land',
     'commercial' => 'property.commercial',
-    'hotel business' => 'property.hotel_business',
-    'hotel' => 'property.hotel',
+    'vacation' => 'property.vacation',
     'goods' => 'classified.goods',
     'service' => 'classified.service',
     'vacancy' => 'vacancy',
@@ -292,11 +290,13 @@ it('declares the fields the wizard edits, in validation order', function (string
 
     expect($actual)->toBe($fields);
 })->with([
-    'apartment' => ['property.apartment', propertyFields()],
-    'land' => ['property.land', propertyFields()],
-    'hotel' => ['property.hotel', propertyFields()],
-    'goods' => ['classified.goods', classifiedFields()],
-    'service' => ['classified.service', classifiedFields()],
+    'apartment' => ['property.apartment', apartmentFields()],
+    'house' => ['property.house', houseFields()],
+    'land' => ['property.land', landFields()],
+    'commercial' => ['property.commercial', commercialFields()],
+    'vacation' => ['property.vacation', vacationFields()],
+    'goods' => ['classified.goods', classifiedFields(true)],
+    'service' => ['classified.service', classifiedFields(false)],
     'vacancy' => ['vacancy', vacancyFields()],
 ]);
 
@@ -307,16 +307,41 @@ it('matches the pre-refactor rules for an apartment', function () {
         ->and(registryRuleSignatures('property.apartment', $form))->toBe(apartmentWizardRules());
 });
 
-it('keeps house, commercial and hotel-as-a-business on the apartment rules', function (string $key, string $type) {
-    $form = ['property_type' => $type, 'floor' => ''];
+it('gives a house the apartment facts plus yard area and no floor of the building', function () {
+    $form = ['property_type' => 'house', 'floor' => ''];
+    $details = wizardRuleSignatures('property', $form)['details'];
 
-    expect(wizardRuleSignatures('property', $form))->toBe(apartmentWizardRules())
-        ->and(registryRuleSignatures($key, $form))->toBe(apartmentWizardRules());
-})->with([
-    'house' => ['property.house', 'house'],
-    'commercial' => ['property.commercial', 'commercial'],
-    'hotel business' => ['property.hotel_business', 'hotel_business'],
-]);
+    expect(array_keys($details))->toBe([
+        'form.title.ka', 'form.title.en', 'form.title.ru',
+        'form.description.ka', 'form.description.en', 'form.description.ru',
+        'form.area_m2', 'form.land_area_m2', 'form.rooms', 'form.bedrooms', 'form.bathrooms',
+        'form.total_floors', 'form.condition', 'form.building_status', 'form.cadastral_code', 'form.listed_by',
+        'form.features', 'form.features.*',
+    ])
+        ->and($details['form.land_area_m2'])->toBe(['nullable', 'numeric', 'between:1,10000000'])
+        ->and($details)->not->toHaveKey('form.floor')
+        ->and(registryRuleSignatures('property.house', $form)['details'])->toBe($details);
+});
+
+it('requires a commercial subtype and keeps only area and floors', function () {
+    $enum = 'Illuminate\\Validation\\Rules\\Enum';
+    $form = ['property_type' => 'commercial', 'floor' => ''];
+    $rules = wizardRuleSignatures('property', $form);
+
+    expect(array_keys($rules['type']))->toBe(['form.deal', 'form.property_type', 'form.commercial_subtype'])
+        ->and($rules['type']['form.commercial_subtype'])->toBe(['required', $enum.':in:"office","shop","warehouse","hotel_business"'])
+        ->and(array_keys($rules['details']))->toBe([
+            'form.title.ka', 'form.title.en', 'form.title.ru',
+            'form.description.ka', 'form.description.en', 'form.description.ru',
+            'form.area_m2', 'form.floor', 'form.total_floors',
+        ])
+        ->and($rules['details']['form.area_m2'][0])->toBe('required')
+        ->and(registryRuleSignatures('property.commercial', $form))->toBe($rules);
+});
+
+it('reads a leftover hotel-as-a-business type as commercial', function () {
+    expect((new Registry)->forForm('property', ['property_type' => 'hotel_business'])->key())->toBe('property.commercial');
+});
 
 it('keeps an unknown property type on the apartment rules', function () {
     $form = ['property_type' => 'nope', 'floor' => ''];
@@ -325,31 +350,50 @@ it('keeps an unknown property type on the apartment rules', function () {
         ->and((new Registry)->forForm('property', $form)->key())->toBe('property.apartment');
 });
 
-it('requires plot size for land and still validates the apartment fields', function () {
-    $expected = apartmentWizardRules();
-    $expected['details']['form.area_m2'] = ['nullable', 'numeric', 'between:1,100000'];
-    $expected['details']['form.land_area_m2'] = ['required', 'numeric', 'between:1,10000000'];
-    $form = ['property_type' => 'land', 'floor' => ''];
+it('asks land only for plot size, purpose and utilities', function () {
+    $enum = 'Illuminate\\Validation\\Rules\\Enum';
+    $form = ['property_type' => 'land'];
+    $details = wizardRuleSignatures('property', $form)['details'];
 
-    expect(wizardRuleSignatures('property', $form))->toBe($expected)
-        ->and(registryRuleSignatures('property.land', $form))->toBe($expected)
-        ->and(array_keys($expected['details']))->toContain('form.rooms', 'form.floor', 'form.condition', 'form.features');
+    expect(array_keys($details))->toBe([
+        'form.title.ka', 'form.title.en', 'form.title.ru',
+        'form.description.ka', 'form.description.en', 'form.description.ru',
+        'form.land_area_m2', 'form.purpose', 'form.utilities', 'form.utilities.*',
+    ])
+        ->and($details['form.land_area_m2'])->toBe(['required', 'numeric', 'between:1,10000000'])
+        ->and($details['form.purpose'])->toBe(['required', $enum.':in:"residential","agricultural","commercial"'])
+        ->and($details['form.utilities'])->toBe(['array'])
+        ->and($details['form.utilities.*'])->toBe([$enum.':in:"water","electricity","gas","road_access"'])
+        ->and(registryRuleSignatures('property.land', $form)['details'])->toBe($details);
 });
 
-it('keeps built area optional for a hotel and still validates the apartment fields', function () {
-    $expected = apartmentWizardRules();
-    $expected['details']['form.area_m2'] = ['nullable', 'numeric', 'between:1,100000'];
-    $form = ['property_type' => 'hotel', 'floor' => ''];
+it('treats vacation as daily rent and shows stars and room count only for the stays that use them', function () {
+    $enum = 'Illuminate\\Validation\\Rules\\Enum';
+    $form = ['rubric' => 'vacation', 'vacation_type' => 'apartment'];
+    $rules = wizardRuleSignatures('property', $form);
+    $stars = collect((new Registry)->get('property.vacation')->step('details')->fields)->first(fn (Field $field): bool => $field->name === 'stars');
+    $rooms = collect((new Registry)->get('property.vacation')->step('details')->fields)->first(fn (Field $field): bool => $field->name === 'rooms_count');
 
-    expect(wizardRuleSignatures('property', $form))->toBe($expected)
-        ->and(registryRuleSignatures('property.hotel', $form))->toBe($expected);
+    expect($rules['type'])->toBe([
+        'form.vacation_type' => ['required', $enum.':in:"hotel","guesthouse","apartment","house","hostel"'],
+    ])
+        ->and(array_keys($rules['details']))->toContain('form.guests', 'form.bedrooms', 'form.distance_to_sea_m', 'form.check_in', 'form.check_out', 'form.stars', 'form.rooms_count', 'form.features')
+        ->and($rules['details'])->not->toHaveKey('form.rooms')
+        ->and($rules['price'])->toHaveKey('form.website')
+        ->and($rules['price'])->not->toHaveKey('form.deal')
+        ->and($stars->visible(['vacation_type' => 'hotel']))->toBeTrue()
+        ->and($stars->visible(['vacation_type' => 'apartment']))->toBeFalse()
+        ->and($rooms->visible(['vacation_type' => 'hostel']))->toBeTrue()
+        ->and($rooms->visible(['vacation_type' => 'guesthouse']))->toBeTrue()
+        ->and($rooms->visible(['vacation_type' => 'house']))->toBeFalse()
+        ->and((new Registry)->forForm('property', ['property_type' => 'hotel', 'deal' => 'daily_rent'])->key())->toBe('property.vacation');
 });
 
-it('accepts a hotel amenity only on a hotel listing', function () {
+it('accepts a hotel amenity only on a vacation listing', function () {
     $hotelAmenity = Amenity::factory()->scope(AmenityScope::Hotel)->create();
     $propertyAmenity = Amenity::factory()->scope(AmenityScope::Property)->create();
 
-    $hotelForm = ['property_type' => 'hotel', 'features' => [(string) $hotelAmenity->id, (string) $propertyAmenity->id]];
+    $hotelForm = ['rubric' => 'vacation', 'vacation_type' => 'hotel', 'features' => [(string) $hotelAmenity->id, (string) $propertyAmenity->id]];
     $apartmentForm = ['property_type' => 'apartment', 'features' => [(string) $hotelAmenity->id]];
 
     expect(Validator::make(['form' => $hotelForm], ListingForm::rules('property', 'details', $hotelForm))->errors()->has('form.features.0'))->toBeFalse()
@@ -364,7 +408,7 @@ it('matches the pre-refactor rules for goods and services', function () {
         ->and(registryRuleSignatures('classified.goods', $form))->toBe(classifiedWizardRules());
 });
 
-it('selects the service definition for a services category and keeps item condition', function () {
+it('selects the service definition for a services category and drops item condition', function () {
     $services = Category::factory()->create([
         'module' => CategoryModule::Classifieds,
         'parent_id' => null,
@@ -390,7 +434,8 @@ it('selects the service definition for a services category and keeps item condit
     expect((new Registry)->forForm('classified', $serviceForm)->key())->toBe('classified.service')
         ->and((new Registry)->forForm('classified', $goodsForm)->key())->toBe('classified.goods')
         ->and((new Registry)->forForm('classified', ['category_id' => (string) $services->id])->key())->toBe('classified.service')
-        ->and(array_keys(ListingForm::rules('classified', 'details', $serviceForm)))->toContain('form.condition', 'form.attribute_values.hourly')
+        ->and(array_keys(ListingForm::rules('classified', 'details', $serviceForm)))->toContain('form.attribute_values.hourly')
+        ->and(array_keys(ListingForm::rules('classified', 'details', $serviceForm)))->not->toContain('form.condition')
         ->and(array_keys(ListingForm::rules('classified', 'details', $goodsForm)))->toContain('form.condition')
         ->and(array_keys(ListingForm::rules('classified', 'details', $goodsForm)))->not->toContain('form.attribute_values.hourly');
 });
@@ -448,7 +493,7 @@ it('describes price, place and photos the way the wizard enforces them', functio
 })->with([
     'apartment' => ['property.apartment', PriceKind::Fixed, true, 1, 100000000000, true, true, true],
     'land' => ['property.land', PriceKind::Fixed, true, 1, 100000000000, true, true, true],
-    'hotel' => ['property.hotel', PriceKind::Fixed, true, 1, 100000000000, true, true, true],
+    'vacation' => ['property.vacation', PriceKind::Fixed, true, 1, 100000000000, false, true, true],
     'goods' => ['classified.goods', PriceKind::OptionalQuote, false, 0, 1000000000, false, false, false],
     'service' => ['classified.service', PriceKind::OptionalQuote, false, 0, 1000000000, false, false, false],
     'vacancy' => ['vacancy', PriceKind::SalaryRange, false, 0, 1000000, false, false, false],
@@ -482,26 +527,85 @@ it('sends an unknown module back to the type step', function () {
 /**
  * @return array<string, list<string>>
  */
-function propertyFields(): array
+function apartmentFields(): array
 {
-    return [
+    return propertyShape([
         'type' => ['deal', 'property_type'],
-        'details' => ['title', 'description', 'area_m2', 'land_area_m2', 'rooms', 'bedrooms', 'bathrooms', 'floor', 'total_floors', 'condition', 'building_status', 'cadastral_code', 'listed_by', 'features'],
-        'location' => ['location_id', 'address', 'lat', 'lng'],
-        'photos' => ['photos'],
-        'price' => ['price', 'currency', 'contact_name', 'contact_phone'],
-        'preview' => [],
-    ];
+        'details' => ['title', 'description', 'area_m2', 'rooms', 'bedrooms', 'bathrooms', 'floor', 'total_floors', 'condition', 'building_status', 'cadastral_code', 'listed_by', 'features'],
+    ]);
 }
 
 /**
  * @return array<string, list<string>>
  */
-function classifiedFields(): array
+function houseFields(): array
+{
+    return propertyShape([
+        'type' => ['deal', 'property_type'],
+        'details' => ['title', 'description', 'area_m2', 'land_area_m2', 'rooms', 'bedrooms', 'bathrooms', 'total_floors', 'condition', 'building_status', 'cadastral_code', 'listed_by', 'features'],
+    ]);
+}
+
+/**
+ * @return array<string, list<string>>
+ */
+function landFields(): array
+{
+    return propertyShape([
+        'type' => ['deal', 'property_type'],
+        'details' => ['title', 'description', 'land_area_m2', 'purpose', 'utilities'],
+    ]);
+}
+
+/**
+ * @return array<string, list<string>>
+ */
+function commercialFields(): array
+{
+    return propertyShape([
+        'type' => ['deal', 'property_type', 'commercial_subtype'],
+        'details' => ['title', 'description', 'area_m2', 'floor', 'total_floors'],
+    ]);
+}
+
+/**
+ * @return array<string, list<string>>
+ */
+function vacationFields(): array
+{
+    return propertyShape([
+        'type' => ['vacation_type'],
+        'details' => ['title', 'description', 'guests', 'bedrooms', 'distance_to_sea_m', 'check_in', 'check_out', 'stars', 'rooms_count', 'features'],
+        'price' => ['price', 'currency', 'contact_name', 'contact_phone', 'website'],
+    ]);
+}
+
+/**
+ * @param  array<string, list<string>>  $overrides
+ * @return array<string, list<string>>
+ */
+function propertyShape(array $overrides): array
+{
+    return array_replace([
+        'type' => [],
+        'details' => [],
+        'location' => ['location_id', 'address', 'lat', 'lng'],
+        'photos' => ['photos'],
+        'price' => ['price', 'currency', 'contact_name', 'contact_phone'],
+        'preview' => [],
+    ], $overrides);
+}
+
+/**
+ * @return array<string, list<string>>
+ */
+function classifiedFields(bool $condition = true): array
 {
     return [
         'type' => ['parent_category_id', 'category_id'],
-        'details' => ['title', 'description', 'condition', 'attribute_values'],
+        'details' => $condition
+            ? ['title', 'description', 'condition', 'attribute_values']
+            : ['title', 'description', 'attribute_values'],
         'location' => ['location_id', 'address', 'lat', 'lng'],
         'photos' => ['photos'],
         'price' => ['price', 'currency', 'negotiable', 'contact_name', 'contact_phone'],

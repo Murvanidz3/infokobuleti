@@ -20,7 +20,7 @@ return [
     ],
     'home' => [
         'categories' => [
-            'hotels' => 'Hotels',
+            'hotels' => 'Vacation',
             'apartments' => 'Apartments',
             'houses' => 'Houses',
             'cars' => 'Cars',
@@ -137,7 +137,7 @@ return [
     ],
     'real_estate' => [
         'title' => 'Real estate in Kobuleti',
-        'subtitle' => 'Apartments, houses, land and commercial space to buy, rent or rent by the day.',
+        'subtitle' => 'Apartments, houses, land and commercial space to buy or rent by the month.',
         'search_placeholder' => 'e.g. sea view',
         'land_area' => 'Land area',
         'bedrooms' => 'Bedrooms',
@@ -145,6 +145,10 @@ return [
         'per_m2' => 'Price per m²',
         'cadastral' => 'Cadastral code',
         'features' => 'Features',
+    ],
+    'vacation' => [
+        'title' => 'Places to stay in Kobuleti',
+        'subtitle' => 'Hotels, guesthouses, apartments, houses and hostels by the day.',
     ],
     'classifieds' => [
         'title' => 'Classifieds',

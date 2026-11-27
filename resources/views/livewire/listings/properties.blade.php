@@ -2,9 +2,11 @@
     <x-listing.page :total="$total" :chips="$chips" :editing-search="$editingSearch > 0" :sort-options="$sortOptions" :views="$views" :view="$display" :paginator="$paginator"
                     :has-more="$hasMore" :markers="$markers" :active-count="$activeCount" :targets="$targets" :search-placeholder="__('site.real_estate.search_placeholder')">
         <x-slot:filters>
-            <x-filters.group :title="__('home.search.fields.deal')">
-                <x-filters.pills model="deal" :multiple="false" :options="['' => __('site.filters.any')] + $dealOptions" />
-            </x-filters.group>
+            @unless ($vacation)
+                <x-filters.group :title="__('home.search.fields.deal')">
+                    <x-filters.pills model="deal" :multiple="false" :options="['' => __('site.filters.any')] + $dealOptions" />
+                </x-filters.group>
+            @endunless
 
             <x-filters.group :title="__('site.filters.type')">
                 <x-filters.pills model="type" :options="$typeOptions" />
@@ -22,21 +24,23 @@
                 <x-filters.range from="price_min" to="price_max" :prefix="$currency === 'USD' ? '$' : '₾'" step="100" :label="__('home.search.fields.price')" />
             </x-filters.group>
 
-            <x-filters.group :title="__('site.filters.area')">
-                <x-filters.range from="area_min" to="area_max" suffix="m²" :label="__('site.filters.area')" />
-            </x-filters.group>
+            @unless ($vacation)
+                <x-filters.group :title="__('site.filters.area')">
+                    <x-filters.range from="area_min" to="area_max" suffix="m²" :label="__('site.filters.area')" />
+                </x-filters.group>
 
-            <x-filters.group :title="__('home.search.fields.rooms')">
-                <x-filters.pills model="rooms" :options="['1' => '1', '2' => '2', '3' => '3', '4' => '4+']" />
-            </x-filters.group>
+                <x-filters.group :title="__('home.search.fields.rooms')">
+                    <x-filters.pills model="rooms" :options="['1' => '1', '2' => '2', '3' => '3', '4' => '4+']" />
+                </x-filters.group>
 
-            <x-filters.group :title="__('site.filters.floor')">
-                <x-filters.range from="floor_min" to="floor_max" :label="__('site.filters.floor')" />
-            </x-filters.group>
+                <x-filters.group :title="__('site.filters.floor')">
+                    <x-filters.range from="floor_min" to="floor_max" :label="__('site.filters.floor')" />
+                </x-filters.group>
 
-            <x-filters.group :title="__('site.filters.building')">
-                <x-filters.pills model="building" :multiple="false" :options="['' => __('site.filters.any'), 'new' => __('site.filters.building_new'), 'old' => __('site.filters.building_old')]" />
-            </x-filters.group>
+                <x-filters.group :title="__('site.filters.building')">
+                    <x-filters.pills model="building" :multiple="false" :options="['' => __('site.filters.any'), 'new' => __('site.filters.building_new'), 'old' => __('site.filters.building_old')]" />
+                </x-filters.group>
+            @endunless
 
             @if ($locationOptions)
                 <x-filters.group :title="__('home.search.fields.location')">

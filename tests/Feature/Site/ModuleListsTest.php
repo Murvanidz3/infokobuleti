@@ -9,6 +9,7 @@ use App\Enums\ItemCondition;
 use App\Enums\ListingStatus;
 use App\Enums\PropertyDeal;
 use App\Enums\PropertyType;
+use App\Enums\VacationType;
 use App\Livewire\Listings\ClassifiedIndex;
 use App\Livewire\Listings\PropertyIndex;
 use App\Livewire\Listings\VacancyIndex;
@@ -46,6 +47,16 @@ it('filters real estate by deal, type, area, rooms, floor and building age', fun
         ->and(titles(Livewire::test(PropertyIndex::class)->set('floor_min', '3')))->toBe(['Flat 2'])
         ->and(titles(Livewire::test(PropertyIndex::class)->set('building', 'new')))->toBe(['Flat 2'])
         ->and(titles(Livewire::test(PropertyIndex::class)->set('building', 'old')))->toBe(['Flat 5']);
+});
+
+it('keeps daily-rent stays on the vacation listing', function () {
+    namedProperty('Sale flat', ['deal' => PropertyDeal::Sale, 'type' => PropertyType::Apartment]);
+    namedProperty('Stay', ['deal' => PropertyDeal::DailyRent, 'type' => PropertyType::Hotel]);
+    namedProperty('Daily flat', ['deal' => PropertyDeal::DailyRent, 'type' => PropertyType::Apartment, 'vacation_type' => VacationType::Apartment]);
+
+    expect(titles(Livewire::test(PropertyIndex::class)))->toBe(['Sale flat'])
+        ->and(titles(Livewire::test(PropertyIndex::class)->set('rubric', 'vacation')))->toBe(['Daily flat', 'Stay'])
+        ->and(titles(Livewire::test(PropertyIndex::class)->set('deal', 'daily_rent')->set('type', ['hotel'])))->toBe(['Stay']);
 });
 
 it('compares real estate prices in GEL or USD', function () {

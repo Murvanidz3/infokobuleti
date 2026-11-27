@@ -180,6 +180,7 @@ it('creates a classified with its category attributes', function () {
         ->call('next')
         ->assertHasErrors('form.category_id')
         ->set('form.category_id', (string) $cars->id)
+        ->assertHasNoErrors('form.category_id')
         ->call('next')
         ->set('form.title.ka', 'Toyota Prius 2015')
         ->set('form.description.ka', 'კარგ მდგომარეობაში, ერთი მფლობელი, სერვისის ისტორიით.')
@@ -203,19 +204,31 @@ it('creates a classified with its category attributes', function () {
         ->and($classified->category_id)->toBe($cars->id);
 });
 
-it('turns the hotel choice into a daily-rent property and does not ask for rooms', function () {
+it('returns from the vacation tile to real estate', function () {
+    Livewire::actingAs($this->user)->test(ListingWizard::class)
+        ->call('chooseVacation')
+        ->assertSet('form.rubric', 'vacation')
+        ->call('chooseType', 'property')
+        ->assertSet('type', 'property')
+        ->assertSet('form.rubric', 'real_estate')
+        ->assertSet('form.deal', '')
+        ->assertSet('form.vacation_type', '');
+});
+
+it('turns the vacation choice into a daily-rent stay and does not ask for a deal', function () {
     $wifi = Amenity::factory()->create(['scope' => 'hotel']);
 
     Livewire::actingAs($this->user)->test(ListingWizard::class)
-        ->call('chooseHotel')
+        ->call('chooseVacation')
         ->assertSet('type', 'property')
+        ->assertSet('form.rubric', 'vacation')
         ->assertSet('form.deal', PropertyDeal::DailyRent->value)
-        ->assertSet('form.property_type', PropertyType::Hotel->value)
         ->assertSet('form.currency', Currency::GEL->value)
+        ->set('form.vacation_type', 'hotel')
         ->call('next')
         ->set('form.title.ka', 'სასტუმრო ზღვის ნიავი')
         ->set('form.description.ka', 'ოჯახური სასტუმრო ბულვართან ახლოს, საუზმით.')
-        ->set('form.rooms', '8')
+        ->set('form.rooms_count', '8')
         ->set('form.features', [(string) $wifi->id])
         ->call('next')
         ->set('form.location_id', (string) $this->location->id)
@@ -226,6 +239,8 @@ it('turns the hotel choice into a daily-rent property and does not ask for rooms
         ->assertDontSee(__('account.wizard.room.title'))
         ->set('form.price', '120')
         ->call('next')
+        ->assertSee($this->user->name)
+        ->assertSee('+995')
         ->call('submit')
         ->assertHasNoErrors();
 
@@ -234,9 +249,11 @@ it('turns the hotel choice into a daily-rent property and does not ask for rooms
     expect($property->status)->toBe(ListingStatus::Pending)
         ->and($property->deal)->toBe(PropertyDeal::DailyRent)
         ->and($property->type)->toBe(PropertyType::Hotel)
+        ->and($property->vacation_type?->value)->toBe('hotel')
         ->and($property->currency)->toBe(Currency::GEL)
         ->and((float) $property->price)->toBe(120.0)
-        ->and($property->rooms)->toBe(8)
+        ->and($property->rooms)->toBeNull()
+        ->and($property->rooms_count)->toBe(8)
         ->and($property->features->pluck('id')->all())->toBe([$wifi->id]);
 });
 
@@ -277,7 +294,7 @@ it('creates a vacancy linked to the business profile', function () {
 });
 
 it('edits a published listing without touching it until submit', function () {
-    $property = Property::factory()->published()->for($this->user)->create(['title' => ['ka' => 'ძველი სათაური', 'en' => 'Old title'], 'location_id' => $this->location->id, 'lat' => 41.82, 'lng' => 41.78]);
+    $property = Property::factory()->published()->for($this->user)->type(PropertyType::Apartment, PropertyDeal::Sale)->create(['title' => ['ka' => 'ძველი სათაური', 'en' => 'Old title'], 'location_id' => $this->location->id, 'lat' => 41.82, 'lng' => 41.78]);
     $property->addMedia(jpeg())->toMediaCollection('gallery');
 
     $this->actingAs($this->user)->get("/account/listings/property/{$property->id}/edit")->assertOk();

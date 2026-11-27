@@ -5,6 +5,7 @@ namespace App\Listings\Definitions;
 use App\Enums\AmenityScope;
 use App\Enums\Currency;
 use App\Listings\AbstractListingDefinition;
+use App\Listings\Field;
 use App\Listings\LocationRules;
 use App\Listings\MediaRules;
 use App\Listings\PriceKind;
@@ -15,9 +16,23 @@ use App\Listings\Support\SharedFields;
 
 abstract class AbstractPropertyDefinition extends AbstractListingDefinition
 {
-    abstract protected function areaRequired(): bool;
+    /**
+     * @return list<Field>
+     */
+    abstract protected function typeFields(): array;
 
-    abstract protected function landAreaRequired(): bool;
+    /**
+     * @return list<Field>
+     */
+    abstract protected function detailFields(): array;
+
+    /**
+     * @return list<Field>
+     */
+    protected function extraPriceFields(): array
+    {
+        return [];
+    }
 
     /**
      * @return list<string>
@@ -33,14 +48,17 @@ abstract class AbstractPropertyDefinition extends AbstractListingDefinition
     public function steps(): array
     {
         return [
-            new Step('type', 1, SharedFields::propertyType()),
+            new Step('type', 1, $this->typeFields()),
             new Step('details', 2, [
                 ...SharedFields::titleAndDescription(),
-                ...SharedFields::propertySpecifics($this->areaRequired(), $this->landAreaRequired(), $this->amenityScopes()),
+                ...$this->detailFields(),
             ]),
             new Step('location', 3, SharedFields::location($this->location())),
             new Step('photos', 4, [SharedFields::photos($this->media())]),
-            new Step('price', 5, SharedFields::fixedPriceAndContact($this->price())),
+            new Step('price', 5, [
+                ...SharedFields::fixedPriceAndContact($this->price()),
+                ...$this->extraPriceFields(),
+            ]),
             new Step('preview', 6, []),
         ];
     }

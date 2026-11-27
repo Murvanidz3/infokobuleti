@@ -4,7 +4,7 @@
 return [
     'main' => 'Main navigation',
     'home' => 'Home',
-    'hotels' => 'Hotels',
+    'hotels' => 'Vacation',
     'real_estate' => 'Real estate',
     'classifieds' => 'Classifieds',
     'jobs' => 'Jobs',

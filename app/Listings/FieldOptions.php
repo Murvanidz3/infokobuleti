@@ -9,6 +9,11 @@ enum FieldOptions: string
 {
     case Deals = 'deals';
     case PropertyTypes = 'propertyTypes';
+    case CommercialSubtypes = 'commercialSubtypes';
+    case VacationTypes = 'vacationTypes';
+    case LandPurposes = 'landPurposes';
+    case LandUtilities = 'landUtilities';
+    case Stars = 'stars';
     case PropertyConditions = 'propertyConditions';
     case BuildingStatuses = 'buildingStatuses';
     case ListedBy = 'listedBy';

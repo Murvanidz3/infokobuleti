@@ -2,22 +2,38 @@
 
 namespace App\Listings\Definitions;
 
+use App\Listings\Field;
+use App\Listings\Support\SharedFields;
+
 final class CommercialDefinition extends AbstractPropertyDefinition
 {
-    // TODO PR2: commercial listings still use the apartment field set.
-
     public function key(): string
     {
         return 'property.commercial';
     }
 
-    protected function areaRequired(): bool
+    /**
+     * @return list<Field>
+     */
+    protected function typeFields(): array
     {
-        return true;
+        return [
+            ...SharedFields::realEstateType(),
+            SharedFields::commercialSubtype(),
+        ];
     }
 
-    protected function landAreaRequired(): bool
+    /**
+     * Subtype is chosen on the rubric step. Area and floor only — no room grid.
+     *
+     * @return list<Field>
+     */
+    protected function detailFields(): array
     {
-        return false;
+        return [
+            SharedFields::area(required: true),
+            SharedFields::floor(),
+            SharedFields::totalFloors(),
+        ];
     }
 }

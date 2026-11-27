@@ -203,11 +203,39 @@ return [
 
     'property_type' => [
         'apartment' => 'ბინა',
-        'house' => 'სახლი',
+        'house' => 'სახლი/აგარაკი',
         'land' => 'მიწის ნაკვეთი',
         'commercial' => 'კომერციული ფართი',
         'hotel' => 'სასტუმრო',
-        'hotel_business' => 'სასტუმრო (ბიზნესი)',
+        'hotel_business' => 'სასტუმრო/ბიზნესი',
+    ],
+
+    'commercial_subtype' => [
+        'office' => 'ოფისი',
+        'shop' => 'მაღაზია',
+        'warehouse' => 'საწყობი',
+        'hotel_business' => 'სასტუმრო/ბიზნესი',
+    ],
+
+    'vacation_type' => [
+        'hotel' => 'სასტუმრო',
+        'guesthouse' => 'საოჯახო სასტუმრო',
+        'apartment' => 'ბინა',
+        'house' => 'სახლი/კოტეჯი',
+        'hostel' => 'ჰოსტელი',
+    ],
+
+    'land_purpose' => [
+        'residential' => 'საცხოვრებელი',
+        'agricultural' => 'სასოფლო-სამეურნეო',
+        'commercial' => 'კომერციული',
+    ],
+
+    'land_utility' => [
+        'water' => 'წყალი',
+        'electricity' => 'ელექტროობა',
+        'gas' => 'გაზი',
+        'road_access' => 'მისასვლელი გზა',
     ],
 
     'report_reason' => [
