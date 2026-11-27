@@ -38,8 +38,8 @@ class PropertyController extends Controller
 
         $currency = $cards->currency($property->currency);
         $facts = array_values(array_filter([
-            ['icon' => 'tag', 'label' => __('home.search.fields.deal'), 'value' => (string) $property->deal->getLabel()],
-            ['icon' => 'building', 'label' => __('site.filters.type'), 'value' => (string) ($property->vacation_type?->getLabel() ?? $property->type->getLabel())],
+            $property->isVacation() ? null : ['icon' => 'tag', 'label' => __('home.search.fields.deal'), 'value' => (string) $property->deal->getLabel()],
+            ['icon' => 'building', 'label' => __('site.filters.type'), 'value' => $property->categoryLabel()],
             $property->commercial_subtype !== null ? ['icon' => 'building', 'label' => __('account.wizard.fields.commercial_subtype'), 'value' => (string) $property->commercial_subtype->getLabel()] : null,
             $property->purpose !== null ? ['icon' => 'tag', 'label' => __('account.wizard.fields.purpose'), 'value' => (string) $property->purpose->getLabel()] : null,
             filled($property->utilities) ? ['icon' => 'wrench', 'label' => __('account.wizard.fields.utilities'), 'value' => collect($property->utilities)->map(fn (string $utility): string => (string) (LandUtility::tryFrom($utility)?->getLabel() ?? $utility))->implode(', ')] : null,
@@ -64,6 +64,7 @@ class PropertyController extends Controller
         return view('pages.real-estate.show', [
             'seo' => $seo->for($property),
             'property' => $property,
+            'breadcrumbs' => $this->breadcrumbs($property),
             'card' => $cards->property($property),
             'insight' => app(PriceInsight::class)->forProperty($property),
             'preview' => $preview,
@@ -76,5 +77,34 @@ class PropertyController extends Controller
             'saved' => $favorites->isSaved($property),
             'description' => $detail->description($property),
         ]);
+    }
+
+    /**
+     * Home, the section, the category, then this listing. Vacation stays link to the vacation
+     * rubric and use the vacation type, so a guesthouse is not filed under hotels.
+     *
+     * @return list<array{label: string, url?: string}>
+     */
+    private function breadcrumbs(Property $property): array
+    {
+        $vacation = $property->isVacation();
+        $category = $property->vacation_type !== null
+            ? $property->vacation_type->value
+            : $property->type->value;
+
+        return [
+            ['label' => __('nav.home'), 'url' => localized_route('home')],
+            [
+                'label' => __($vacation ? 'nav.hotels' : 'nav.real_estate'),
+                'url' => localized_route('real-estate.index', $vacation ? ['rubric' => 'vacation'] : []),
+            ],
+            [
+                'label' => $property->categoryLabel(),
+                'url' => localized_route('real-estate.index', $vacation
+                    ? ['rubric' => 'vacation', 'type' => [$category]]
+                    : ['type' => [$property->type->value]]),
+            ],
+            ['label' => (string) $property->title],
+        ];
     }
 }

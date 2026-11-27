@@ -4,18 +4,15 @@
     @endif
 
     <div class="container-page pt-5 pb-[clamp(56px,6vw,96px)]">
-        <x-breadcrumbs :items="[
-            ['label' => __('nav.home'), 'url' => localized_route('home')],
-            ['label' => __('nav.real_estate'), 'url' => localized_route('real-estate.index')],
-            ['label' => $property->type->getLabel(), 'url' => localized_route('real-estate.index', ['type' => [$property->type->value]])],
-            ['label' => $property->title],
-        ]" />
+        <x-breadcrumbs :items="$breadcrumbs" />
 
         <div class="mt-4 mb-5 flex flex-wrap items-end justify-between gap-4">
             <div class="min-w-0">
                 <div class="mb-2 flex flex-wrap items-center gap-2">
-                    <x-badge variant="navy">{{ $property->deal->getLabel() }}</x-badge>
-                    <x-badge variant="tint">{{ $property->type->getLabel() }}</x-badge>
+                    @unless ($property->isVacation())
+                        <x-badge variant="navy">{{ $property->deal->getLabel() }}</x-badge>
+                    @endunless
+                    <x-badge variant="tint">{{ $property->categoryLabel() }}</x-badge>
                     @if ($property->listed_by)
                         <x-badge variant="outline">{{ $property->listed_by->getLabel() }}</x-badge>
                     @endif
