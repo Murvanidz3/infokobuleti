@@ -18,6 +18,10 @@ return [
         'open_site' => 'Open the site',
         'security' => 'Account & security',
     ],
+    'sidebar' => [
+        'collapse' => 'Collapse menu',
+        'expand' => 'Expand menu',
+    ],
     'resources' => [
         'redirects' => [
             'singular' => 'redirect',

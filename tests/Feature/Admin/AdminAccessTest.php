@@ -106,6 +106,20 @@ it('navigates inside the admin without a full reload and preloads the georgian f
     expect($account[0] ?? 'missing account link')->not->toContain('wire:navigate');
 });
 
+it('renders a desktop control that collapses the sidebar to an icon rail', function () {
+    $html = $this->actingAs(staffWith(Role::Admin))->get('/admin')->assertOk()->getContent();
+
+    expect($html)->toContain('fi-body-has-sidebar-collapsible-on-desktop')
+        ->and($html)->not->toContain('fi-body-has-sidebar-fully-collapsible-on-desktop')
+        ->and($html)->toContain('filament:sidebar:desktop_open')
+        ->and($html)->toContain('ik-sidebar-pin')
+        ->and($html)->toContain('aria-controls="fi-main-sidebar"')
+        ->and($html)->toContain('$store.sidebar.close()')
+        ->and($html)->toContain('$store.sidebar.open(')
+        ->and($html)->toContain(__('admin.sidebar.collapse', [], 'ka'))
+        ->and($html)->toContain(__('admin.sidebar.expand', [], 'ka'));
+});
+
 it('marks the sms and system sidebar groups for a super admin', function () {
     $html = $this->actingAs(staffWith(Role::SuperAdmin))->get('/admin')->assertOk()->getContent();
 

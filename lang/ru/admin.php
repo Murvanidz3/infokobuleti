@@ -18,6 +18,10 @@ return [
         'open_site' => 'Открыть сайт',
         'security' => 'Аккаунт и безопасность',
     ],
+    'sidebar' => [
+        'collapse' => 'Свернуть меню',
+        'expand' => 'Развернуть меню',
+    ],
     'resources' => [
         'redirects' => [
             'singular' => 'редирект',

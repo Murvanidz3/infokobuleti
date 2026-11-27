@@ -67,6 +67,9 @@ html.fi {
     --ik-side-user: #eef1f4;
     --ik-side-user-hover: #e4e8ee;
     --ik-side-chevron: #5c6b80;
+    --ik-side-pin: #5c6b80;
+    --ik-side-pin-hover-bg: rgba(10, 26, 47, 0.06);
+    --ik-side-pin-hover: #0a1a2f;
     --ik-side-active-text: #0a1a2f;
     --ik-side-active-icon: #06748f;
     --ik-side-active-bg: linear-gradient(90deg, rgba(146, 254, 157, 0.34), rgba(0, 201, 255, 0.18));
@@ -125,6 +128,9 @@ html.fi.dark {
     --ik-side-user: #29292c;
     --ik-side-user-hover: #32343c;
     --ik-side-chevron: #898989;
+    --ik-side-pin: #898989;
+    --ik-side-pin-hover-bg: rgba(255, 255, 255, 0.06);
+    --ik-side-pin-hover: #fff;
     --ik-side-active-text: #fff;
     --ik-side-active-icon: #00c9ff;
     --ik-side-active-bg: linear-gradient(90deg, rgba(146, 254, 157, 0.14), rgba(0, 201, 255, 0.12));
@@ -191,7 +197,20 @@ html.fi.dark .fi-body::after {
 @media (min-width: 1024px) {
     html.fi .fi-body.fi-body-has-navigation::before,
     html.fi .fi-body.fi-body-has-navigation::after {
+        left: var(--collapsed-sidebar-width);
+        transition: left 200ms ease;
+    }
+
+    html.fi.ik-sidebar-desktop-open .fi-body.fi-body-has-navigation::before,
+    html.fi.ik-sidebar-desktop-open .fi-body.fi-body-has-navigation::after,
+    html.fi .fi-body.fi-body-has-navigation:has(.fi-sidebar.fi-sidebar-open)::before,
+    html.fi .fi-body.fi-body-has-navigation:has(.fi-sidebar.fi-sidebar-open)::after {
         left: var(--sidebar-width);
+    }
+
+    html.fi .fi-body.fi-body-has-navigation:has(.fi-sidebar:not(.fi-sidebar-open))::before,
+    html.fi .fi-body.fi-body-has-navigation:has(.fi-sidebar:not(.fi-sidebar-open))::after {
+        left: var(--collapsed-sidebar-width);
     }
 }
 
@@ -515,7 +534,8 @@ html.fi:not(.dark) .fi-sidebar .ik-admin-brand {
     color: var(--ik-side-heading);
 }
 
-html.fi .ik-admin-brand-dot {
+html.fi .ik-admin-brand-dot,
+html.fi .ik-sidebar-mark-dot {
     width: 0.4em;
     height: 0.4em;
     margin-left: 0.12em;
@@ -524,9 +544,155 @@ html.fi .ik-admin-brand-dot {
     box-shadow: 0 0 10px 2px rgba(0, 201, 255, 0.45);
 }
 
+html.fi .ik-sidebar-mark,
+html.fi .ik-sidebar-pin {
+    display: none;
+}
+
+html.fi .ik-sidebar-pin {
+    position: relative;
+    flex: none;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    margin: 0;
+    border: 0;
+    border-radius: 8px;
+    background: transparent;
+    padding: 0;
+    color: var(--ik-side-pin);
+    cursor: pointer;
+}
+
+html.fi .ik-sidebar-pin-icon {
+    width: 16px;
+    height: 16px;
+    transition: transform 150ms ease, color 150ms ease;
+}
+
+html.fi .fi-sidebar:not(.fi-sidebar-open) .ik-sidebar-pin-icon {
+    transform: rotate(180deg);
+}
+
+html.fi .ik-sidebar-pin:hover {
+    background: var(--ik-side-pin-hover-bg);
+    color: var(--ik-side-pin-hover);
+}
+
+html.fi .ik-sidebar-pin:focus-visible {
+    outline: 2px solid var(--ik-accent-to);
+    outline-offset: 2px;
+}
+
+html.fi .ik-sidebar-pin::after {
+    content: attr(data-tip);
+    position: absolute;
+    z-index: 40;
+    inset-inline-start: calc(100% + 8px);
+    top: 50%;
+    border-radius: 8px;
+    background: var(--ik-heading);
+    padding: 4px 8px;
+    color: var(--ik-bg);
+    font-size: 12px;
+    font-weight: 500;
+    line-height: 1.3;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(-50%);
+    transition: opacity 150ms ease;
+}
+
+html.fi .ik-sidebar-pin:hover::after,
+html.fi .ik-sidebar-pin:focus-visible::after {
+    opacity: 1;
+}
+
 @media (min-width: 1024px) {
+    html.fi .fi-sidebar {
+        transition: width 200ms ease;
+    }
+
+    html.fi .fi-main-ctn {
+        transition: width 200ms ease, opacity 150ms ease;
+    }
+
+    html.fi .fi-topbar-start {
+        display: none;
+    }
+
+    html.fi .fi-sidebar-header-ctn {
+        overflow: visible;
+    }
+
+    html.fi .fi-body-has-topbar .fi-sidebar-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+        height: auto;
+        min-height: 3.25rem;
+        background: transparent;
+        padding: 12px 14px 6px;
+        box-shadow: none;
+        --tw-ring-shadow: 0 0 #0000;
+    }
+
+    html.fi .fi-sidebar .fi-logo {
+        height: auto !important;
+    }
+
+    html.fi .ik-sidebar-pin {
+        display: inline-flex;
+    }
+
+    html.fi .fi-sidebar:not(.fi-sidebar-open) .fi-sidebar-header {
+        flex-direction: column;
+        justify-content: center;
+        gap: 6px;
+        padding-inline: 0;
+    }
+
+    html.fi .fi-sidebar:not(.fi-sidebar-open) .fi-sidebar-header-logo-ctn {
+        display: none;
+    }
+
+    html.fi .fi-sidebar:not(.fi-sidebar-open) .ik-sidebar-mark {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 32px;
+        height: 32px;
+    }
+
+    html.fi .fi-sidebar:not(.fi-sidebar-open) .ik-sidebar-mark-dot {
+        width: 14px;
+        height: 14px;
+        margin: 0;
+    }
+
     html.fi .fi-sidebar:not(.fi-sidebar-open) .fi-sidebar-nav {
         padding-inline: 8px;
+    }
+
+    html.fi .fi-sidebar:not(.fi-sidebar-open) .fi-sidebar-nav-groups {
+        width: 100%;
+        gap: 0;
+    }
+
+    html.fi .fi-sidebar:not(.fi-sidebar-open) .fi-sidebar-group + .fi-sidebar-group {
+        margin-top: 6px;
+        border-top: 1px solid var(--ik-side-border);
+        padding-top: 6px;
+    }
+
+    html.fi .fi-sidebar:not(.fi-sidebar-open) .fi-sidebar-group-btn,
+    html.fi .fi-sidebar:not(.fi-sidebar-open) .fi-sidebar-item-label,
+    html.fi .fi-sidebar:not(.fi-sidebar-open) .fi-user-menu-trigger-text,
+    html.fi .fi-sidebar:not(.fi-sidebar-open) .fi-user-menu-trigger > .fi-icon {
+        display: none;
     }
 
     html.fi .fi-sidebar:not(.fi-sidebar-open) .fi-sidebar-group-items,
@@ -548,11 +714,40 @@ html.fi .ik-admin-brand-dot {
         justify-content: center;
         padding: 0;
     }
+
+    html.fi .fi-sidebar:not(.fi-sidebar-open) .fi-sidebar-item-badge-ctn {
+        display: flex !important;
+        position: absolute;
+        top: 2px;
+        inset-inline-end: 0;
+        pointer-events: none;
+    }
+
+    html.fi .fi-sidebar:not(.fi-sidebar-open) .fi-sidebar-item-badge-ctn .fi-badge {
+        min-width: 16px;
+        min-height: 16px;
+        border-radius: 999px;
+        padding-inline: 4px;
+        font-size: 9px;
+        line-height: 16px;
+    }
+
+    html.fi .fi-sidebar:not(.fi-sidebar-open) .fi-sidebar-footer {
+        margin-inline: 8px;
+    }
+
+    html.fi .fi-sidebar:not(.fi-sidebar-open) .fi-user-avatar {
+        width: 32px;
+        height: 32px;
+    }
 }
 
 @media (prefers-reduced-motion: reduce) {
     html.fi .fi-sidebar,
-    html.fi .fi-sidebar * {
+    html.fi .fi-sidebar *,
+    html.fi .fi-main-ctn,
+    html.fi .fi-body.fi-body-has-navigation::before,
+    html.fi .fi-body.fi-body-has-navigation::after {
         transition: none !important;
         animation: none !important;
     }

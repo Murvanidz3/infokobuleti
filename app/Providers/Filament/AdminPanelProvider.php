@@ -80,8 +80,10 @@ class AdminPanelProvider extends PanelProvider
                 '*/impersonation/*',
                 '*/account/*',
             ])
+            // Icon rail on desktop. Fully collapsing would hide the sidebar instead.
             ->sidebarCollapsibleOnDesktop()
             ->sidebarWidth('18.5rem')
+            ->collapsedSidebarWidth('4.5rem')
             ->maxContentWidth('full')
             ->navigationGroups(collect(NavigationGroup::cases())->mapWithKeys(fn (NavigationGroup $group): array => [
                 // Labels are resolved per request, after the admin language is applied.
@@ -143,6 +145,16 @@ class AdminPanelProvider extends PanelProvider
 
     public function boot(): void
     {
+        FilamentView::registerRenderHook(
+            PanelsRenderHook::HEAD_START,
+            fn (): string => view('filament.hooks.sidebar-persist')->render(),
+        );
+
+        FilamentView::registerRenderHook(
+            PanelsRenderHook::SIDEBAR_LOGO_AFTER,
+            fn (): string => view('filament.hooks.sidebar-pin')->render(),
+        );
+
         FilamentView::registerRenderHook(
             PanelsRenderHook::SCRIPTS_AFTER,
             fn (): string => view('filament.hooks.navigation-fade')->render(),
