@@ -78,8 +78,9 @@ it('lets only super admins hand out staff roles', function () {
 it('navigates inside the admin without a full reload and preloads the georgian fonts', function () {
     $html = $this->actingAs(staffWith(Role::Admin))->get('/admin')->assertOk()->getContent();
 
-    expect($html)->toContain('class="fi dark"')
-        ->and($html)->not->toContain('fi-theme-switcher')
+    expect($html)->toContain('class="fi"')
+        ->and($html)->toContain('fi-theme-switcher')
+        ->and($html)->not->toContain("localStorage.setItem('filament:theme:mode', 'dark')")
         ->and($html)->toContain('data-nav-group="moderation"')
         ->and($html)->toContain('data-nav-group="listings"')
         ->and($html)->toContain('data-nav-group="content"')

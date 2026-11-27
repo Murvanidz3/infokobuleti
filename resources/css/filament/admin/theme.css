@@ -10,33 +10,49 @@
 @source '../../../../resources/views/filament/**/*';
 
 /*
- * Dark SaaS admin. Surfaces follow the sales-dashboard reference:
- * page #111219, cards near-black, hairline #29292c, text #dbdbdb / #898989,
- * accent #92FE9D → #00C9FF. Unlayered rules beat Filament's layered utilities.
+ * Admin surfaces. Night mode is the sales-dashboard palette (page #111219).
+ * Day mode uses the same accent on a light shell. `.dark` overrides the tokens.
  */
 html.fi {
-    color-scheme: dark;
-    --gray-50: #f4f4f5;
-    --gray-100: #e8e8ea;
-    --gray-200: #dbdbdb;
-    --gray-300: #c8c8cc;
-    --gray-400: #a3a3a8;
-    --gray-500: #898989;
-    --gray-600: #3a3b42;
-    --gray-700: #29292c;
-    --gray-800: #1a1b21;
-    --gray-900: #111219;
-    --gray-950: #111219;
-    --ik-bg: #111219;
-    --ik-card: #0c0d11;
-    --ik-border: #29292c;
-    --ik-text: #dbdbdb;
-    --ik-muted: #898989;
+    color-scheme: light;
+    --gray-50: #f8fafc;
+    --gray-100: #f1f5f9;
+    --gray-200: #e2e8f0;
+    --gray-300: #cbd5e1;
+    --gray-400: #94a3b8;
+    --gray-500: #64748b;
+    --gray-600: #475569;
+    --gray-700: #334155;
+    --gray-800: #1e293b;
+    --gray-900: #0f172a;
+    --gray-950: #0a1a2f;
+    --ik-bg: #f5f7fa;
+    --ik-card: #ffffff;
+    --ik-border: #e4e8ee;
+    --ik-text: #1a2332;
+    --ik-muted: #5c6b80;
+    --ik-heading: #0a1a2f;
+    --ik-brand: #0a1a2f;
+    --ik-input-bg: #ffffff;
+    --ik-overlay: #ffffff;
+    --ik-topbar-bg: #ffffff;
+    --ik-topbar-border: #e4e8ee;
+    --ik-topbar-text: #0a1a2f;
+    --ik-stat-bg: linear-gradient(160deg, #ffffff 10%, #f3f7fb 100%);
+    --ik-stat-label: #5c6b80;
+    --ik-stat-value: #0a1a2f;
+    --ik-row-border: #e4e8ee;
+    --ik-row-hover: rgba(10, 26, 47, 0.04);
+    --ik-badge-info: #06748f;
+    --ik-badge-gray-bg: rgba(10, 26, 47, 0.06);
+    --ik-kbd-bg: #f0f3f7;
+    --ik-chart-grid: rgba(10, 26, 47, 0.08);
+    --ik-chart-tooltip-bg: #ffffff;
     --ik-accent-from: #92fe9d;
     --ik-accent-to: #00c9ff;
-    --ik-success: #6beba4;
-    --ik-danger: #f52525;
-    --ik-warning: #e7ea68;
+    --ik-success: #0f8f55;
+    --ik-danger: #c81e1e;
+    --ik-warning: #8a6d00;
     --font-sans: 'Noto Sans Georgian Variable', 'Noto Sans Variable', system-ui, sans-serif;
     /* Sidebar defaults are the light shell. `.dark` overrides them below. */
     --ik-side-bg: #f6f7f9;
@@ -58,6 +74,45 @@ html.fi {
 }
 
 html.fi.dark {
+    color-scheme: dark;
+    --gray-50: #f4f4f5;
+    --gray-100: #e8e8ea;
+    --gray-200: #dbdbdb;
+    --gray-300: #c8c8cc;
+    --gray-400: #a3a3a8;
+    --gray-500: #898989;
+    --gray-600: #3a3b42;
+    --gray-700: #29292c;
+    --gray-800: #1a1b21;
+    --gray-900: #111219;
+    --gray-950: #111219;
+    --ik-bg: #111219;
+    --ik-card: #0c0d11;
+    --ik-border: #29292c;
+    --ik-text: #dbdbdb;
+    --ik-muted: #898989;
+    --ik-heading: #ffffff;
+    --ik-brand: #dadada;
+    --ik-input-bg: #101116;
+    --ik-overlay: #14151a;
+    --ik-topbar-bg: rgba(0, 0, 0, 0.45);
+    --ik-topbar-border: rgba(255, 255, 255, 0.08);
+    --ik-topbar-text: #ffffff;
+    --ik-stat-bg: linear-gradient(160deg, #050506 10%, rgba(12, 13, 17, 0.2) 100%);
+    --ik-stat-label: #d1d1d1;
+    --ik-stat-value: #ffffff;
+    --ik-row-border: rgba(41, 41, 44, 0.9);
+    --ik-row-hover: rgba(255, 255, 255, 0.03);
+    --ik-badge-info: #7adfff;
+    --ik-badge-gray-bg: rgba(255, 255, 255, 0.06);
+    --ik-kbd-bg: #1a1b21;
+    --ik-chart-grid: rgba(255, 255, 255, 0.08);
+    --ik-chart-tooltip-bg: #17181d;
+    --ik-accent-from: #92fe9d;
+    --ik-accent-to: #00c9ff;
+    --ik-success: #6beba4;
+    --ik-danger: #f52525;
+    --ik-warning: #e7ea68;
     --ik-side-bg: #15161e;
     --ik-side-border: #29292c;
     --ik-side-heading: #dbdbdb;
@@ -89,7 +144,7 @@ html.fi .fi-section-header-heading,
 html.fi .fi-modal-heading,
 html.fi .fi-simple-header-heading {
     letter-spacing: -0.03em;
-    color: #fff;
+    color: var(--ik-heading);
 }
 
 html.fi :focus-visible {
@@ -112,14 +167,25 @@ html.fi .fi-body::after {
 
 html.fi .fi-body::before {
     background:
+        radial-gradient(ellipse 70% 120% at 18% -10%, rgba(146, 254, 157, 0.16), transparent 58%),
+        radial-gradient(ellipse 60% 140% at 78% -20%, rgba(0, 201, 255, 0.14), transparent 55%);
+}
+
+html.fi.dark .fi-body::before {
+    background:
         radial-gradient(ellipse 70% 120% at 18% -10%, rgba(146, 254, 157, 0.28), transparent 58%),
         radial-gradient(ellipse 60% 140% at 78% -20%, rgba(0, 201, 255, 0.32), transparent 55%);
 }
 
 html.fi .fi-body::after {
+    opacity: 0.1;
+    background-image: radial-gradient(rgba(10, 26, 47, 0.45) 0.6px, transparent 0.65px);
+    background-size: 3px 3px;
+}
+
+html.fi.dark .fi-body::after {
     opacity: 0.22;
     background-image: radial-gradient(rgba(255, 255, 255, 0.55) 0.6px, transparent 0.65px);
-    background-size: 3px 3px;
 }
 
 @media (min-width: 1024px) {
@@ -442,7 +508,7 @@ html.fi .ik-admin-brand {
     font-family: Outfit, sans-serif;
     font-size: 1.35rem;
     letter-spacing: -0.02em;
-    color: #dadada;
+    color: var(--ik-brand);
 }
 
 html.fi:not(.dark) .fi-sidebar .ik-admin-brand {
@@ -506,9 +572,9 @@ html.fi .fi-topbar .fi-global-search {
 
 html.fi .fi-topbar .fi-input-wrp,
 html.fi .fi-topbar-database-notifications-btn {
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    border: 1px solid var(--ik-topbar-border);
     border-radius: 12px;
-    background: rgba(0, 0, 0, 0.45);
+    background: var(--ik-topbar-bg);
     box-shadow: none;
     backdrop-filter: blur(16px);
 }
@@ -521,11 +587,11 @@ html.fi .fi-topbar-close-sidebar-btn {
 }
 
 html.fi .fi-topbar .fi-input {
-    color: #fff;
+    color: var(--ik-topbar-text);
 }
 
 html.fi .fi-topbar .fi-input::placeholder {
-    color: rgba(255, 255, 255, 0.72);
+    color: var(--ik-muted);
 }
 
 /* Cards, tables, charts */
@@ -545,17 +611,16 @@ html.fi .fi-wi-stats-overview-stat {
     align-items: center;
     min-height: 8.5rem;
     padding-inline-end: 9.5rem;
-    background:
-        linear-gradient(160deg, #050506 10%, rgba(12, 13, 17, 0.2) 100%);
+    background: var(--ik-stat-bg);
 }
 
 html.fi .fi-wi-stats-overview-stat-label {
-    color: #d1d1d1;
+    color: var(--ik-stat-label);
     font-size: 0.9rem;
 }
 
 html.fi .fi-wi-stats-overview-stat-value {
-    color: #fff;
+    color: var(--ik-stat-value);
     font-size: 1.65rem;
     font-weight: 700;
     letter-spacing: -0.03em;
@@ -588,7 +653,7 @@ html.fi .fi-wi-chart-bg-color {
 }
 
 html.fi .fi-wi-chart-grid-color {
-    color: rgba(255, 255, 255, 0.08);
+    color: var(--ik-chart-grid);
 }
 
 html.fi .fi-wi-chart-text-color {
@@ -596,7 +661,7 @@ html.fi .fi-wi-chart-text-color {
 }
 
 html.fi .fi-wi-chart-tooltip-bg-color {
-    color: #17181d;
+    color: var(--ik-chart-tooltip-bg);
 }
 
 html.fi .fi-wi-chart-tooltip-text-color {
@@ -638,11 +703,11 @@ html.fi .fi-wi-stats-overview-stat-value {
 }
 
 html.fi .fi-ta-row {
-    border-block-end: 1px solid rgba(41, 41, 44, 0.9);
+    border-block-end: 1px solid var(--ik-row-border);
 }
 
 html.fi .fi-ta-row.fi-clickable:hover {
-    background: rgba(255, 255, 255, 0.03);
+    background: var(--ik-row-hover);
 }
 
 html.fi .fi-ta-cell {
@@ -679,11 +744,11 @@ html.fi .fi-badge.fi-color-warning {
 html.fi .fi-badge.fi-color-info,
 html.fi .fi-badge.fi-color-primary {
     background: rgba(0, 201, 255, 0.14);
-    color: #7adfff;
+    color: var(--ik-badge-info);
 }
 
 html.fi .fi-badge.fi-color-gray {
-    background: rgba(255, 255, 255, 0.06);
+    background: var(--ik-badge-gray-bg);
     color: var(--ik-text);
 }
 
@@ -741,7 +806,7 @@ html.fi .fi-fo-file-upload,
 html.fi .fi-select-input {
     border: 1px solid var(--ik-border);
     border-radius: 12px;
-    background: #101116;
+    background: var(--ik-input-bg);
     box-shadow: none;
 }
 
@@ -793,7 +858,7 @@ html.fi .fi-modal-window,
 html.fi .fi-dropdown-panel {
     border: 1px solid var(--ik-border);
     border-radius: 16px;
-    background: #14151a;
+    background: var(--ik-overlay);
     box-shadow: 0 24px 48px -24px rgba(0, 0, 0, 0.7);
 }
 
@@ -804,12 +869,12 @@ html.fi .fi-modal-close-overlay {
 html.fi .fi-no-notification:not(.fi-inline) {
     border: 1px solid var(--ik-border);
     border-radius: 14px;
-    background: #14151a;
+    background: var(--ik-overlay);
     color: var(--ik-text);
 }
 
 html.fi .fi-empty-state-heading {
-    color: #fff;
+    color: var(--ik-heading);
 }
 
 html.fi .fi-empty-state-description {
@@ -874,7 +939,7 @@ html.fi .ik-callout-danger {
 html.fi .ik-kbd {
     border: 1px solid var(--ik-border);
     border-radius: 6px;
-    background: #1a1b21;
+    background: var(--ik-kbd-bg);
     padding: 0 0.35rem;
     color: var(--ik-text);
     font-family: var(--mono-font-family, ui-monospace, monospace);

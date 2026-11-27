@@ -12,6 +12,7 @@ use App\Http\Middleware\SetAdminLocale;
 use App\Http\Middleware\TrackUserSessions;
 use Filament\Actions\Action;
 use Filament\Enums\DatabaseNotificationsPosition;
+use Filament\Enums\ThemeMode;
 use Filament\Enums\UserMenuPosition;
 use Filament\FontProviders\LocalFontProvider;
 use Filament\Forms\Components\Field;
@@ -62,8 +63,8 @@ class AdminPanelProvider extends PanelProvider
                 'warning' => Color::hex('#e7ea68'),
                 'info' => Color::hex('#00C9FF'),
             ])
-            ->darkMode(isForced: true)
-            ->themeSwitcher(false)
+            ->darkMode()
+            ->defaultThemeMode(ThemeMode::Dark)
             ->font(
                 'Noto Sans Georgian Variable',
                 provider: LocalFontProvider::class,
