@@ -18,6 +18,12 @@ return [
         'open_site' => 'საიტის ნახვა',
         'security' => 'ანგარიში და უსაფრთხოება',
     ],
+    'sidebar' => [
+        'collapse' => 'მენიუს ჩაკეცვა',
+        'expand' => 'მენიუს გაშლა',
+    ],
+    'search' => 'ძიება',
+    'notifications' => 'შეტყობინებები',
     'resources' => [
         'redirects' => [
             'singular' => 'გადამისამართება',
