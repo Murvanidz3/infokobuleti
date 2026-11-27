@@ -568,3 +568,153 @@ Do not rewrite slugs. Do not make edit skip moderation unless that is an explici
 - Admin and the wizard can both write the same row. Until PR 3, moderators can still bypass the new rules.
 - Category slugs `cars` and `services` are hardcoded on the homepage. Renaming those categories in admin breaks the tiles even if the registry is perfect.
 - This audit did not read a live database. If production categories were edited after seed, the tree in section 2 is the code’s intent, not a dump of production.
+
+## 8. Hotels decision: PR #4 path
+
+Owner decision, recorded here and not implemented: a hotel is a plain listing with no bookings. This section compares [PR #4](https://github.com/Murvanidz3/infokobuleti/pull/4) (`cursor/real-estate-ssge-model-cfab` at `b5feb7c`, base `cursor/listing-wizard-submit-fixes-0521` at `f05f45c`) with `develop` at `3033ca3`. Nothing was merged. No migration was run. The file list is `git diff --name-status f05f45c..b5feb7c` (the two commits GitHub shows on the PR): 164 files, +2458 / −3957, 42 deleted, 17 added, 105 modified.
+
+Retargeting that branch onto `develop` is a different set. `develop` does not contain `f05f45c` (“Keep published listing edits on the site”, 18 files, adds `ListingPhotos` and rewrites `SubmitListing`). `git log origin/develop..origin/cursor/real-estate-ssge-model-cfab` is three commits, not two. A merge of the branch tip, or a GitHub retarget, replays that parent. A rebase of only the PR commits is `git rebase --onto develop f05f45c`.
+
+### 8.1 Files the PR deletes
+
+Hotel module, bookings, and the public hotel pages:
+
+- `app/Actions/Hotels/AnswerBookingRequest.php`, `app/Actions/Hotels/UpdateAvailability.php`
+- `app/Enums/BookingStatus.php`, `app/Enums/HotelType.php`
+- `app/Filament/Resources/Hotels/HotelResource.php` and its four pages, plus `BookingRequestsRelationManager.php`, `RoomTypesRelationManager.php`
+- `app/Http/Controllers/Account/HotelRoomsController.php`, `app/Http/Controllers/Site/BookingRequestController.php`, `app/Http/Controllers/Site/HotelController.php`
+- `app/Livewire/Account/Bookings.php`, `app/Livewire/Account/HotelRooms.php`, `app/Livewire/Listings/HotelIndex.php`, `app/Livewire/Site/ReviewForm.php`
+- `app/Models/BookingRequest.php`, `app/Models/Hotel.php`, `app/Models/RoomAvailability.php`, `app/Models/RoomType.php`, `app/Models/RoomTypePriceRule.php`
+- `app/Notifications/BookingAnswered.php`, `app/Support/Listings/AvailabilityCalendar.php`
+- Factories: `BookingRequestFactory`, `HotelFactory`, `RoomAvailabilityFactory`, `RoomTypeFactory`, `RoomTypePriceRuleFactory`
+- `database/seeders/HotelSeeder.php`, `database/seeders/data/hotels.php`
+- Views: `components/card/hotel.blade.php`, `livewire/account/bookings.blade.php`, `livewire/account/hotel-rooms.blade.php`, `livewire/listings/hotels.blade.php`, `livewire/site/review-form.blade.php`, `pages/account/bookings.blade.php`, `pages/account/hotel-rooms.blade.php`, `pages/home/hotels.blade.php`, `pages/hotels/index.blade.php`, `pages/hotels/show.blade.php`
+
+The admin restyle on `develop` never edited `HotelResource`. Last touch of `app/Models/Hotel.php` on `develop` is the Phase 3 import. Deleting those files does not collide with PR #18 (admin sidebar) or the dark-admin commits.
+
+### 8.2 Files the PR adds
+
+- `app/Http/Controllers/Site/ProjectController.php`, `app/Livewire/Listings/ProjectIndex.php`, `app/Models/Project.php`
+- `app/Support/Listings/PropertyLegacyValues.php` (the enum rewrite the first migration calls)
+- `database/factories/ProjectFactory.php`, `database/seeders/ProjectSeeder.php`, `database/seeders/data/property_internet_previous.php`
+- `database/migrations/2026_11_05_090000_reshape_property_listings.php`
+- `database/migrations/2026_11_05_120000_retire_hotel_module_and_add_projects.php`
+- `resources/views/livewire/listings/projects.blade.php`, `resources/views/pages/real-estate/projects/index.blade.php`, `resources/views/pages/real-estate/projects/show.blade.php`
+- Tests: `ProjectBrowseTest`, `PropertyBrowseTest`, `PropertyIndexTest`, `ListingFormPropertyTest`, `PropertyLegacyValuesTest`
+
+Projects, a `pledge` deal, and the condition/type rename are in this PR. The owner decision in this section is only “hotel is a listing, no bookings”.
+
+### 8.3 Files the PR changes
+
+Shared listing code: `SubmitListing`, `DeleteAccount`, `ExportUserData`, `LaunchCheck`, `BackupRestoreTest`, `ListingModule`, `PropertyType`, `PropertyDeal`, `PropertyCondition`, `HomepageCuration`, `ModerationQueue`, `ModerationReview`, `SiteSettings`, `AdminStats`, `HomeController`, `BusinessProfileController`, `EventController`, `GuideController`, `OgImageController`, `PropertyController`, `Favorites`, `ListingWizard`, `ListingIndex`, `PropertyIndex`, `Amenity`, `BusinessProfile`, `HasSlug`, `Property`, `SavedSearch`, `User`, `AppServiceProvider`, `SiteSearch`, `AccountMenu`, `OwnerListings`, `SavedSearchMatcher`, `Catalog`, `HomepageData`, `PriceInsight`, `SitemapWriter`, `StructuredData`, `ReviewEligibility`, `CardPresenter`, `DetailPresenter`, `ListingForm`, `ListingQuery`, `ListingTypes`, `PublicUrl`, `NotificationPresenter`.
+
+Config: `config/listings.php` (drops `hotel` expiry, adds `project` = 90), `config/scout.php`, `config/seo.php`, `config/site.php`.
+
+Data: `SeedsDemoData`, `DemoSeeder`, `DemoUserSeeder`, `EngagementSeeder`, `PropertySeeder`, `data/amenities.php`, `FavoriteFactory`, `PropertyFactory`, `ReviewFactory`.
+
+Lang: `account`, `admin`, `enums`, `home`, `nav`, `site` in `ka`, `en`, and `ru`.
+
+Front: `resources/js/ui/listing.js`, `resources/js/ui/map.js`, `components/detail/map.blade.php`, `components/hero/search.blade.php`, `errors/layout.blade.php`, `livewire/account/favorites.blade.php`, wizard `details`, `location`, `price`, `type`, `livewire/listings/properties.blade.php`, `pages/business/show.blade.php`, `pages/events/show.blade.php`, `pages/guide/show.blade.php`, `pages/real-estate/index.blade.php`, `pages/real-estate/show.blade.php`, `pages/styleguide.blade.php`, `routes/web.php`.
+
+Tests: `DatabaseSeederTest`, `HomepageTest`, `PricingTest`, `RelationsTest`, `SchemaTest`, `SlugTest`, `StatusTransitionsTest`, `TranslatableContentTest`.
+
+`PropertyType` on the PR is `apartment`, `house`, `land`, `commercial`, `hotel` (`hotel_business` is gone). `PropertyDeal` gains `pledge`. `PropertyCondition` drops `needs_renovation` and adds `renovated`. `routes/web.php` replaces `hotels.index` / `hotels.show` / `hotels.booking` with a 301 from `/hotels/{slug?}` to `real-estate.type` for `type=hotel`, and adds `/real-estate/projects`. Every old hotel URL lands on the type index, not on the copied property.
+
+### 8.4 Migrations, and what they drop
+
+Both files are new. Neither exists on `develop`. `develop` already has every migration through `2026_11_04_090000_create_sms_manager_tables.php`, and so does the PR branch, so these two would run after phase 9, redirects, Pulse, and the SMS manager.
+
+**`2026_11_05_090000_reshape_property_listings`** does not touch hotels, rooms, or bookings.
+
+- Adds `properties.nearby` (jsonb, default `[]`) and an index on `properties.condition`.
+- Drops and recreates the generated column `properties.price_per_m2` as `round(price / nullif(coalesce(area_m2, land_area_m2), 0), 2)`. The inputs stay. Land rows that only have `land_area_m2` gain a value. `down()` puts back the old expression (`area_m2` only).
+- Calls `PropertyLegacyValues::apply()`: `hotel_business` → `hotel`, `needs_renovation` → `old_renovation`. Inserts extra amenity rows.
+- `down()` runs `PropertyLegacyValues::rollback()`. That maps every `type=hotel` back to `hotel_business` (including hotels created after the migration) and `pledge` → `sale`. It does not map `old_renovation` back to `needs_renovation`. The class comment says the two cannot be told apart. `needs_renovation` is gone even after rollback. `country_house` is in the rollback map but is not a value on `develop`’s `PropertyType`.
+
+**`2026_11_05_120000_retire_hotel_module_and_add_projects`** is the hotel move. `up()` order:
+
+1. Creates `hotel_module_snapshots` (`hotel_id`, `payload` jsonb). For each `hotels` row, the payload stores the hotel row, its `room_types`, `room_type_price_rules`, `room_availability`, and `booking_requests`.
+2. Inserts a `properties` row per hotel: `deal=daily_rent`, `type=hotel`, `currency=GEL`, `price` = `price_from`, else `min(room_types.base_price)`, else `0`, and `price_gel` set to that same number (no exchange conversion). Copies user, business, status, title, description, location, lat/lng, address, views, publish/expiry, moderation, risk, promotion level and expiry, timestamps, `deleted_at`, `rooms` from `rooms_count`, `distance_to_sea_m`, `contact_phone`, `listed_by=owner`. Slug gets a `-2` suffix when `properties` already has it. Does not copy `stars`, `type` (hotel vs guesthouse vs hostel), `check_in_from`, `check_out_until`, season months, `contact_email`, `website`, `rating_avg`, `reviews_count`, or `embedding`.
+3. Repoints `media` (model type `hotel` only), `favorites`, `reports`, `daily_stats`, `promotions`, and `conversations` onto the new property id. Room photos stay `model_type=room_type` and do not join the property gallery.
+4. Deletes `reviews` where `reviewable_type=hotel`. They are not in the snapshot.
+5. Deletes `amenityables` where `amenityable_type=hotel`. They are not copied onto the property and not snapshotted. Room amenity rows (`room_type`) are left in place.
+6. Stores ids of `properties.type=country_house`, then sets those rows to `house`. On `develop` that enum value does not exist, so this updates nothing unless stray rows do.
+7. Drops `properties.nearby` (the column the previous migration just added). Any checklist written between the two migrations is discarded. `develop` has no `nearby` column today, so there is no existing checklist to lose.
+8. Drops, in order, `booking_requests`, `room_availability`, `room_type_price_rules`, `room_types`, `hotels`.
+9. Creates `projects` (listing columns plus `developer`, `completion_on`, `price_per_m2`, `currency`, `price_gel`, contact, `distance_to_sea_m`).
+10. Recreates view `admin_listings` without `hotels` and with `projects`.
+11. Inserts 301 rows for `/hotels`, `/en/hotels`, `/ru/hotels` only.
+12. Rewrites `saved_searches` where `module=hotels` to `module=properties` and sets `filters.type` to `["hotel"]`, replacing any type filter that was already there.
+13. Deletes `listing_drafts` where `listing_type=hotel`. Not snapshotted.
+
+Not updated: `saved_search_hits.listing_type` (phase 9, present on both trees), `activity_log` subjects, and the settings key `homepage.featured_hotels` (those ids are hotel ids, not the new property ids).
+
+**What is gone from the live site after `up()`, even though some of it sits in `hotel_module_snapshots`:**
+
+| Data | Live row after `up()` | In snapshot | `down()` puts it back |
+| --- | --- | --- | --- |
+| Hotel row, including stars, check-in/out, season, email, website, rating | Only the property columns listed above. Stars, season, email, website, rating, hotel-vs-guesthouse type are not on the property. | Yes | Yes, into a recreated `hotels` row. `embedding` is unset on insert. |
+| Room types, seasonal price rules, availability, booking requests | Tables dropped. Not copied to any live table. | Yes | Yes, original ids. |
+| Hotel gallery | Moved onto the property. | Media rows stay in `media`. | Yes, media is pointed back at the hotel, then the property row is deleted. |
+| Room photos | Stay on `room_type` and leave the public gallery. | No, but media rows remain. | Reconnect if room ids match. Not moved onto the property meanwhile. |
+| Favorites, reports, daily stats, promotions, conversations | Pointed at the new property. | No | No. `down()` deletes the property and does not point these back at the hotel. They dangle. |
+| Reviews of hotels | Deleted. | No | No |
+| Hotel amenity links | Deleted. | No | No |
+| Hotel wizard drafts | Deleted. | No | No |
+| Saved searches for module `hotels` | Rewritten to properties / type hotel. | No | No |
+| `homepage.featured_hotels` | Setting left as hotel ids. Homepage block removed. | No | No |
+| `needs_renovation` | Stored as `old_renovation`. | No | No |
+| `/hotels/{slug}` | 301 to the hotel-type index, not the new property URL. | n/a | Route and the three index redirects are removed. Per-slug redirects were never rows. |
+| Featured-hotel price plan | Row, enum, and seeder stay. `Catalog` no longer offers the product; `PromoteListing` still lists `featured_hotel`. Homepage no longer has the hotels block. | n/a | Plan was never dropped. |
+
+`down()` of the retire migration does recreate the five dropped tables from `ListingSchema`, reinserts snapshot rows, restores media, deletes the copied property rows, restores `country_house` by the stored ids, re-adds an empty `nearby` column, and drops `hotel_module_snapshots` and `projects`. Projects created after the migration are dropped with the table. A property of type `hotel` created after the migration is not turned back into a hotel. `down()` is therefore a partial restore of hotels that existed at migration time, not a working undo of reviews, amenities, drafts, saved searches, curated picks, embeddings, or the non-media morphs.
+
+The featured-hotel plan (`price_plans` slug `featured-hotel-30`, `PricePlanProduct::FeaturedHotel`) is not in either migration. `AmenityScope::Hotel` and `BusinessType::Hotel` stay so old amenity rows still load. The PR body says the homepage no longer offers that slot.
+
+### 8.5 Rebase against current develop
+
+`git merge-base origin/develop origin/cursor/real-estate-ssge-model-cfab` is `dccf319`. `develop` has 45 commits after that. The PR branch has 3. Files both sides changed since that base: 11 (`AdminStats`, `HomeController`, `HomepageData`, `lang/{en,ka,ru}/admin.php`, `hero/search.blade.php`, `styleguide.blade.php`, `HomepageTest`, `StatusTransitionsTest`, `Pest.php`). No file that `develop` edited is a file the PR deletes. The admin redesign did not touch the hotel resource.
+
+A throwaway rebase of the two PR commits onto `origin/develop` (`git rebase --onto develop f05f45c`) stopped on commit 1 of 2:
+
+- `app/Livewire/ListingWizard.php`: one conflict, the import block.
+- `resources/views/components/hero/search.blade.php`: modify/delete. `develop` already removed that partial (the hero is `components/hero.blade.php` plus `compact-search`). The PR edits the deleted file. Resolution is to keep it deleted.
+
+Commit 2 was not replayed. It overlaps `develop` on 10 paths. `git merge-tree` of the whole branch tip (parent included) conflicts on five files: `AdminStats.php`, `HomepageTest.php`, `StatusTransitionsTest.php`, `tests/Pest.php` (that one is the parent commit), and the same hero modify/delete. `HomeController`, `HomepageData`, the three `admin.php` files, and `styleguide.blade.php` auto-merged.
+
+Git conflict size is small. The branch is still a bad rebase target because of what applies cleanly: property taxonomy (`pledge`, `hotel` replacing `hotel_business`, `needs_renovation` collapsed), a new `projects` module, Scout settings moved from the `algolia` key to the `meilisearch` key, real-estate routes rewritten to `/{type}` and `/{type}/{deal}`, and, if the parent comes along, a change that keeps published edits live. `develop`’s `SubmitListing` still forces `pending` on edit (section 6).
+
+### 8.6 Hotel references still on develop, and whether PR #4 covers them
+
+| On `develop` | Where | PR #4 |
+| --- | --- | --- |
+| Homepage counts, category tile, featured carousel | `HomepageData.php` lines 49, 60, 87–88 (`Hotel::query()`, `hotels.index`, `homepage.featured_hotels`) | Removed. Properties carousel uses `homepage.featured_properties`. Old featured-hotel ids are not remapped. |
+| Featured-hotel plan and purchase | `PricePlanSeeder` slug `featured-hotel-30`; `Catalog.php` line 82 adds `FeaturedHotel` for hotels; `PricePlanProduct::FeaturedHotel`; `HomepageCuration` field `featured_hotels` | Curation field and catalog entry go away. Enum, seeder row, billing copy, and the promote-listing icon stay. No migration deactivates the plan. |
+| `price_from` | `hotels.price_from` in `2026_10_25_100003`; admin label `ფასი -დან` | Copied into `properties.price`, then the column drops with `hotels`. Event `price_from` is a different column and stays. |
+| Public routes | `routes/web.php` lines 80–82 and account rooms at line 169 | Replaced by the 301 described above. Account room manager is deleted. |
+| Scout | `config/scout.php` line 130, `Hotel::class` filterable `status`, `type`, `stars`, `price`, `distance_to_sea_m`, `rating`, `_geo` | Hotel index removed. Project index added. The settings block moves to the `meilisearch` key. |
+| Sitemap | `SitemapWriter.php` lines 30 and 46, `hotels.index` and `hotels.show` | `hotels` removed, `projects` added. |
+| Wizard type `hotel` | `ListingForm::TYPES`, hotel rules, one default room in `SubmitListing` | Type removed. Hotel fields become `PropertyType::Hotel`. |
+| Morph map | `AppServiceProvider` aliases `hotel`, `room_type`, `booking_request` | Removed. |
+| Search, owner list, expiry | `SiteSearch` key `hotels`; `OwnerListings` type `hotel`; `config/listings.php` expiry `hotel` => 365 | Removed. The migration copies each row’s `expires_at`. A later renewal goes through `Settings::expiryDays()` for morph `property` (60 in config, or the admin setting), not 365. |
+| Tests and seed | `HomepageTest` builds `Hotel` factories; `HotelSeeder` | Hotel factory and seeder deleted. Homepage test is one of the rebase conflicts. |
+| Reviews | `ReviewForm` requires a booking for a hotel | Component deleted. Existing hotel reviews are deleted by the migration, not archived. |
+
+About 83 PHP/Blade files on `develop` still mention the hotel module. After the PR, `App\Models\Hotel` is gone. Leftovers are the featured-hotel product, `AmenityScope::Hotel`, `BusinessType::Hotel`, and `price_from` as a display string and as the events column.
+
+### 8.7 Recommendation
+
+Do not rebase PR #4 as-is, and do not merge it.
+
+Redo the hotel decision as a new PR on `develop`, phase 0 of the registry plan in section 7. Scope is only “a hotel is a property listing, no bookings”:
+
+- Copy each `hotels` row into `properties` first (`deal=daily_rent`, `type=hotel`, price from `price_from` or the minimum room price, slug preserved or suffixed). Keep the copy step. Also copy `contact_email` if the property row has somewhere to put it; otherwise archive it.
+- Snapshot rooms, price rules, availability, and bookings, as PR #4 does.
+- Also snapshot, or copy, what PR #4 deletes: hotel reviews, hotel amenity links, hotel drafts, `saved_searches` rows (keep the old JSON), and `homepage.featured_hotels` (rewrite ids to the new property ids or archive the setting).
+- Rename the five tables (`hotels`, `room_types`, `room_type_price_rules`, `room_availability`, `booking_requests`) to an `archive_` prefix. Do not `drop` them in this PR. Point `media`, favorites, reports, stats, promotions, and conversations at the new property, and teach `down()` to point every one of those back, not only `media`.
+- Add 301s from `/hotels/{slug}` to the new property URL, not only to the type index.
+- Leave `projects`, `pledge`, the `needs_renovation` collapse, the nearby add-then-drop, and the Scout key move out of this PR. The `price_per_m2` expression that uses `coalesce(area_m2, land_area_m2)` is worth its own migration; it is the land-area bug in section 6, and it is reversible.
+- Deactivate or stop selling `featured-hotel-30` in the same PR, since the homepage block goes away. Do not leave the plan purchasable with a stale Georgian description.
+- Do not bring `f05f45c`. Keeping a published edit live is a separate product decision, and `develop` currently returns edits to `pending`.
+
+The registry rollout in section 7 should treat this fresh PR as step 5, and should not grow a third hotel representation while it is open.
