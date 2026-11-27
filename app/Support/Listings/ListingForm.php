@@ -2,20 +2,11 @@
 
 namespace App\Support\Listings;
 
-use App\Enums\AmenityScope;
 use App\Enums\ApplyMethod;
-use App\Enums\BuildingStatus;
-use App\Enums\CategoryModule;
 use App\Enums\Currency;
-use App\Enums\EmploymentType;
-use App\Enums\Experience;
-use App\Enums\ItemCondition;
 use App\Enums\ListedBy;
-use App\Enums\PropertyCondition;
-use App\Enums\PropertyDeal;
-use App\Enums\PropertyType;
 use App\Enums\SalaryPeriod;
-use App\Enums\VacancyBenefit;
+use App\Listings\Registry;
 use App\Models\Category;
 use App\Models\Classified;
 use App\Models\Property;
@@ -23,14 +14,15 @@ use App\Models\User;
 use App\Models\Vacancy;
 use App\Support\Geo\SeaDistance;
 use App\Support\GeorgianPhone;
-use Closure;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Validation\Rule;
 
 /**
  * The add-listing wizard's form: steps, defaults, validation per step and module, and the mapping
  * between the form array and the listing models. The wizard (Livewire) and the submit action both
  * go through here, so a listing is validated the same way whichever path saved it.
+ *
+ * Steps, fields and rules come from the listing registry. This class keeps the form array, the
+ * stored-column mapping, and the same public constants the wizard already calls.
  *
  * The form is one array: common keys (title, description, location, photos, contact) plus the
  * keys of the chosen module.
@@ -38,20 +30,18 @@ use Illuminate\Validation\Rule;
 final class ListingForm
 {
     /** @var list<string> */
-    public const array STEPS = ['type', 'details', 'location', 'photos', 'price', 'preview'];
+    public const array STEPS = Registry::STEPS;
 
     /** @var list<string> */
-    public const array TYPES = ['property', 'classified', 'vacancy'];
+    public const array TYPES = Registry::MODULES;
 
-    public const int MAX_PHOTOS = 20;
+    public const int MAX_PHOTOS = Registry::MAX_PHOTOS;
 
     /** @var list<string> */
-    public const array LANGUAGES = ['ka', 'en', 'ru', 'tr', 'de'];
+    public const array LANGUAGES = Registry::LANGUAGES;
 
     /** Kobuleti municipality: pins outside are rejected. */
-    public const array BOUNDS = ['south' => 41.60, 'north' => 41.96, 'west' => 41.62, 'east' => 42.15];
-
-    private const string PHONE_PATTERN = '/^[\d\s()+-]{9,24}$/';
+    public const array BOUNDS = Registry::BOUNDS;
 
     /**
      * @return array<string, mixed>
@@ -150,16 +140,11 @@ final class ListingForm
      */
     public static function rules(string $type, string $step, array $form): array
     {
-        $rules = match ($step) {
-            'type' => self::typeRules($type),
-            'details' => self::detailRules($type, $form),
-            'location' => self::locationRules($type),
-            'photos' => [
-                'photos' => [self::requiresPhotos($type) ? 'required' : 'nullable', 'array', 'max:'.self::MAX_PHOTOS],
-            ],
-            'price' => self::priceRules($type, $form),
-            default => [],
-        };
+        if (! in_array($type, self::TYPES, true)) {
+            $rules = $step === 'type' ? ['type' => ['required']] : [];
+        } else {
+            $rules = self::registry()->forForm($type, $form)->rulesFor($step, $form);
+        }
 
         $prefixed = [];
 
@@ -232,12 +217,12 @@ final class ListingForm
 
     public static function requiresPhotos(string $type): bool
     {
-        return $type === 'property';
+        return self::registry()->forModule($type)?->media()->required ?? false;
     }
 
     public static function requiresPin(string $type): bool
     {
-        return $type === 'property';
+        return self::registry()->forModule($type)?->location()->pinRequired ?? false;
     }
 
     /**
@@ -342,172 +327,9 @@ final class ListingForm
         return array_filter($values, fn (mixed $value): bool => $value !== null);
     }
 
-    /**
-     * @return array<string, mixed>
-     */
-    private static function typeRules(string $type): array
+    private static function registry(): Registry
     {
-        return match ($type) {
-            'property' => [
-                'deal' => ['required', Rule::enum(PropertyDeal::class)],
-                'property_type' => ['required', Rule::enum(PropertyType::class)],
-            ],
-            'classified' => [
-                'category_id' => ['required', 'integer', self::leafCategory(CategoryModule::Classifieds)],
-            ],
-            'vacancy' => [
-                'category_id' => ['required', 'integer', self::leafCategory(CategoryModule::Vacancies)],
-                'employment_type' => ['required', Rule::enum(EmploymentType::class)],
-            ],
-            default => ['type' => ['required']],
-        };
-    }
-
-    /**
-     * @param  array<string, mixed>  $form
-     * @return array<string, mixed>
-     */
-    private static function detailRules(string $type, array $form): array
-    {
-        $rules = [
-            'title.ka' => ['required', 'string', 'min:5', 'max:120'],
-            'title.en' => ['nullable', 'string', 'max:120'],
-            'title.ru' => ['nullable', 'string', 'max:120'],
-            'description.ka' => ['required', 'string', 'min:20', 'max:5000'],
-            'description.en' => ['nullable', 'string', 'max:5000'],
-            'description.ru' => ['nullable', 'string', 'max:5000'],
-        ];
-
-        $amenityScopes = ($form['property_type'] ?? '') === PropertyType::Hotel->value
-            ? [AmenityScope::Property->value, AmenityScope::Hotel->value]
-            : [AmenityScope::Property->value];
-
-        return $rules + match ($type) {
-            'property' => [
-                'area_m2' => [in_array($form['property_type'] ?? '', [PropertyType::Land->value, PropertyType::Hotel->value], true) ? 'nullable' : 'required', 'numeric', 'between:1,100000'],
-                'land_area_m2' => [($form['property_type'] ?? '') === PropertyType::Land->value ? 'required' : 'nullable', 'numeric', 'between:1,10000000'],
-                'rooms' => ['nullable', 'integer', 'between:1,50'],
-                'bedrooms' => ['nullable', 'integer', 'between:0,50'],
-                'bathrooms' => ['nullable', 'integer', 'between:0,20'],
-                'floor' => ['nullable', 'integer', 'between:-3,100'],
-                'total_floors' => ['nullable', 'integer', 'between:1,100', self::notBelow($form['floor'] ?? null)],
-                'condition' => ['nullable', Rule::enum(PropertyCondition::class)],
-                'building_status' => ['nullable', Rule::enum(BuildingStatus::class)],
-                'cadastral_code' => ['nullable', 'string', 'max:32', 'regex:/^[\d.\/-]+$/'],
-                'listed_by' => ['required', Rule::enum(ListedBy::class)],
-                'features' => ['array'],
-                'features.*' => [Rule::exists('amenities', 'id')->whereIn('scope', $amenityScopes)],
-            ],
-            'classified' => [
-                'condition' => ['nullable', Rule::enum(ItemCondition::class)],
-                ...self::schemaRules($form),
-            ],
-            'vacancy' => [
-                'experience' => ['nullable', Rule::enum(Experience::class)],
-                'languages' => ['array'],
-                'languages.*' => [Rule::in(self::LANGUAGES)],
-                'benefits' => ['array'],
-                'benefits.*' => [Rule::enum(VacancyBenefit::class)],
-                'deadline' => ['nullable', 'date', 'after_or_equal:today', 'before:'.now()->addYear()->toDateString()],
-            ],
-            default => [],
-        };
-    }
-
-    /**
-     * @return array<string, mixed>
-     */
-    private static function locationRules(string $type): array
-    {
-        $pin = self::requiresPin($type) ? 'required' : 'nullable';
-
-        return [
-            'location_id' => ['required', 'integer', Rule::exists('locations', 'id')->where('is_active', true)],
-            'address' => ['nullable', 'string', 'max:190'],
-            'lat' => [$pin, 'numeric', 'between:'.self::BOUNDS['south'].','.self::BOUNDS['north']],
-            'lng' => [$pin, 'numeric', 'between:'.self::BOUNDS['west'].','.self::BOUNDS['east']],
-        ];
-    }
-
-    /**
-     * @param  array<string, mixed>  $form
-     * @return array<string, mixed>
-     */
-    private static function priceRules(string $type, array $form): array
-    {
-        $phone = ['string', 'max:24', 'regex:'.self::PHONE_PATTERN];
-
-        return match ($type) {
-            'property' => [
-                'price' => ['required', 'numeric', 'between:1,100000000000'],
-                'currency' => ['required', Rule::enum(Currency::class)],
-                'contact_name' => ['nullable', 'string', 'max:120'],
-                'contact_phone' => ['required', ...$phone],
-            ],
-            'classified' => [
-                'price' => ['nullable', 'numeric', 'between:0,1000000000'],
-                'currency' => ['required', Rule::enum(Currency::class)],
-                'negotiable' => ['boolean'],
-                'contact_name' => ['nullable', 'string', 'max:120'],
-                'contact_phone' => ['required', ...$phone],
-            ],
-            'vacancy' => [
-                'salary_min' => ['nullable', 'integer', 'between:0,1000000'],
-                'salary_max' => ['nullable', 'integer', 'between:0,1000000', self::notBelow($form['salary_min'] ?? null)],
-                'salary_currency' => ['required', Rule::enum(Currency::class)],
-                'salary_period' => ['required', Rule::enum(SalaryPeriod::class)],
-                'apply_method' => ['required', Rule::enum(ApplyMethod::class)],
-                'apply_phone' => [($form['apply_method'] ?? '') === ApplyMethod::Phone->value ? 'required' : 'nullable', ...$phone],
-                'apply_email' => [($form['apply_method'] ?? '') === ApplyMethod::Email->value ? 'required' : 'nullable', 'email:rfc', 'max:190'],
-            ],
-            default => [],
-        };
-    }
-
-    /**
-     * @param  array<string, mixed>  $form
-     * @return array<string, mixed>
-     */
-    private static function schemaRules(array $form): array
-    {
-        $category = Category::query()->find(self::int($form['category_id'] ?? null));
-
-        if ($category === null) {
-            return [];
-        }
-
-        return $category->schema()->rules('attribute_values');
-    }
-
-    /**
-     * An active category of the module without subcategories (listings go into the most specific one).
-     */
-    private static function leafCategory(CategoryModule $module): Closure
-    {
-        return function (string $attribute, mixed $value, Closure $fail) use ($module): void {
-            $valid = is_numeric($value) && Category::query()
-                ->whereKey((int) $value)
-                ->where('module', $module->value)
-                ->where('is_active', true)
-                ->whereDoesntHave('children', fn ($query) => $query->where('is_active', true))
-                ->exists();
-
-            if (! $valid) {
-                $fail(__('account.wizard.errors.category'));
-            }
-        };
-    }
-
-    /**
-     * The value must not be lower than another (optional) field's value.
-     */
-    private static function notBelow(mixed $other): Closure
-    {
-        return function (string $attribute, mixed $value, Closure $fail) use ($other): void {
-            if (is_numeric($value) && is_numeric($other) && (float) $value < (float) $other) {
-                $fail(__('account.wizard.errors.not_below'));
-            }
-        };
+        return app(Registry::class);
     }
 
     private static function nullable(mixed $value): ?string

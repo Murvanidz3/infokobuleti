@@ -12,6 +12,7 @@ use App\Contracts\TelegramBot;
 use App\Enums\Permission;
 use App\Enums\Role;
 use App\Http\Middleware\SetLocale;
+use App\Listings\Registry;
 use App\Models;
 use App\Policies\ListingPolicy;
 use App\Search\PostgresSearchEngine;
@@ -121,6 +122,7 @@ class AppServiceProvider extends ServiceProvider
         ]));
 
         $this->app->singleton(LocaleRouter::class);
+        $this->app->singleton(Registry::class);
 
         $this->app->singleton(FixedExchangeRates::class, fn () => new FixedExchangeRates(config('currency.fallback_rates')));
         $this->app->singleton(ExchangeRates::class, NationalBankExchangeRates::class);
