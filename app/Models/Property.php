@@ -109,6 +109,18 @@ class Property extends Model implements Listing, SearchableListing
     }
 
     /**
+     * The public category: a vacation stay uses its vacation type (a guesthouse is not a hotel).
+     */
+    public function categoryLabel(): string
+    {
+        if ($this->isVacation() && $this->vacation_type !== null) {
+            return $this->vacation_type->getLabel();
+        }
+
+        return $this->type->getLabel();
+    }
+
+    /**
      * @return BelongsTo<User, $this>
      */
     public function user(): BelongsTo

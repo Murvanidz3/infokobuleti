@@ -57,7 +57,9 @@ class CardPresenter
         return [
             'favorite' => $this->favoriteKey($property),
             'deal' => $property->deal === PropertyDeal::Sale ? 'sale' : 'rent',
-            'badge' => (string) $property->deal->getLabel(),
+            'badge' => $property->isVacation()
+                ? $property->categoryLabel()
+                : (string) $property->deal->getLabel(),
             'price' => $this->price->format($amount, $currency).$suffix,
             'converted' => $converted,
             'title' => (string) $property->title,

@@ -215,6 +215,7 @@ return [
         'shop' => 'მაღაზია',
         'warehouse' => 'საწყობი',
         'hotel_business' => 'სასტუმრო/ბიზნესი',
+        'other' => 'სხვა',
     ],
 
     'vacation_type' => [

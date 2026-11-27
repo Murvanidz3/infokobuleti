@@ -141,7 +141,9 @@ final class StructuredData
         ];
 
         return $this->result('property', $schema, $images, 'website', [
-            'type' => $property->type->getLabel().' · '.$property->deal->getLabel(),
+            'type' => $property->isVacation()
+                ? $property->categoryLabel()
+                : $property->type->getLabel().' · '.$property->deal->getLabel(),
             'price' => $price !== null ? $this->prices->format($price, $this->cards->currency($currency)) : null,
             'location' => $this->cards->locationText($property),
         ]);

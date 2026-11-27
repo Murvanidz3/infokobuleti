@@ -213,6 +213,7 @@ return [
         'shop' => 'Shop',
         'warehouse' => 'Warehouse',
         'hotel_business' => 'Hotel / business',
+        'other' => 'Other',
     ],
 
     'vacation_type' => [

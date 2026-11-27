@@ -24,6 +24,7 @@ use App\Enums\VacancyBenefit;
 use App\Enums\VacationType;
 use App\Exceptions\ListingLimitReached;
 use App\Listings\Registry;
+use App\Listings\ReviewSummary;
 use App\Models\Amenity;
 use App\Models\Category;
 use App\Models\ListingDraft;
@@ -647,6 +648,17 @@ class ListingWizard extends Component
      */
     private function summary(PriceFormatter $price): array
     {
+        if ($this->type === 'property') {
+            $form = ListingForm::normalize($this->type, $this->form);
+
+            return app(ReviewSummary::class)->facts(
+                app(Registry::class)->forForm($this->type, $form),
+                $form,
+                $this->options(),
+                $price,
+            );
+        }
+
         $form = $this->form;
         $options = $this->options();
         $currency = fn (string $key): string => in_array($form[$key] ?? '', Currency::values(), true) ? (string) $form[$key] : 'GEL';
@@ -660,28 +672,6 @@ class ListingWizard extends Component
         ];
 
         $pairs = [...$pairs, ...match ($this->type) {
-            'property' => ($form['rubric'] ?? '') === 'vacation' ? [
-                [__('account.wizard.fields.vacation_type'), $options['vacationTypes'][$form['vacation_type'] ?? ''] ?? null],
-                [__('account.wizard.fields.price'), $money($form['price'], 'currency')],
-                [__('account.wizard.fields.guests'), $form['guests'] ?? null],
-                [__('account.wizard.fields.bedrooms'), $form['bedrooms'] ?? null],
-                [__('account.wizard.fields.distance_to_sea_m'), filled($form['distance_to_sea_m'] ?? null) ? $form['distance_to_sea_m'].' m' : null],
-                [__('account.wizard.fields.stars'), $options['stars'][(string) ($form['stars'] ?? '')] ?? null],
-                [__('account.wizard.fields.rooms_count'), $form['rooms_count'] ?? null],
-            ] : [
-                [__('account.wizard.fields.deal'), $options['deals'][$form['deal']] ?? null],
-                [__('account.wizard.fields.property_type'), $options['propertyTypes'][$form['property_type']] ?? null],
-                [__('account.wizard.fields.commercial_subtype'), $options['commercialSubtypes'][$form['commercial_subtype'] ?? ''] ?? null],
-                [__('account.wizard.fields.price'), $money($form['price'], 'currency')],
-                [__('account.wizard.fields.area_m2'), filled($form['area_m2']) ? $form['area_m2'].' m²' : null],
-                [__('account.wizard.fields.land_area_m2'), filled($form['land_area_m2']) ? $form['land_area_m2'].' m²' : null],
-                [__('account.wizard.fields.rooms'), $form['rooms'] ?? null],
-                [__('account.wizard.fields.floor'), filled($form['floor'] ?? null) ? $form['floor'].(filled($form['total_floors'] ?? null) ? ' / '.$form['total_floors'] : '') : null],
-                [__('account.wizard.fields.condition'), $options['conditions'][$form['condition'] ?? ''] ?? null],
-                [__('account.wizard.fields.purpose'), $options['purposes'][$form['purpose'] ?? ''] ?? null],
-                [__('account.wizard.fields.utilities'), $chosen($options['utilities'], $form['utilities'] ?? [])],
-                [__('account.wizard.fields.features'), $chosen($options['features'], $form['features'] ?? [])],
-            ],
             'classified' => [
                 [__('account.wizard.fields.category_id'), Category::query()->find(is_numeric($form['category_id']) ? (int) $form['category_id'] : null)?->name],
                 [__('account.wizard.fields.price'), $money($form['price'], 'currency') ?? __('site.price.on_request')],

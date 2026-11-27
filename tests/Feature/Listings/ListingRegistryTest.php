@@ -329,7 +329,7 @@ it('requires a commercial subtype and keeps only area and floors', function () {
     $rules = wizardRuleSignatures('property', $form);
 
     expect(array_keys($rules['type']))->toBe(['form.deal', 'form.property_type', 'form.commercial_subtype'])
-        ->and($rules['type']['form.commercial_subtype'])->toBe(['required', $enum.':in:"office","shop","warehouse","hotel_business"'])
+        ->and($rules['type']['form.commercial_subtype'])->toBe(['required', $enum.':in:"office","shop","warehouse","hotel_business","other"'])
         ->and(array_keys($rules['details']))->toBe([
             'form.title.ka', 'form.title.en', 'form.title.ru',
             'form.description.ka', 'form.description.en', 'form.description.ru',
