@@ -9,7 +9,6 @@ use App\Models\BusinessProfile;
 use App\Models\Location;
 use App\Models\User;
 use Database\Factories\ClassifiedFactory;
-use Database\Factories\HotelFactory;
 use Database\Factories\PropertyFactory;
 use Database\Factories\Support\Kobuleti;
 use Database\Factories\VacancyFactory;
@@ -96,7 +95,7 @@ trait SeedsDemoData
     /**
      * Applies a non-published demo status to every n-th listing so moderation queues have content.
      *
-     * @template TFactory of HotelFactory|PropertyFactory|ClassifiedFactory|VacancyFactory
+     * @template TFactory of PropertyFactory|ClassifiedFactory|VacancyFactory
      *
      * @param  TFactory  $factory
      * @param  array<int, ListingStatus>  $statuses  position => status

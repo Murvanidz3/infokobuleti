@@ -2,7 +2,7 @@
 
 use App\Enums\Role;
 use App\Filament\Resources\Redirects\Pages\ManageRedirects;
-use App\Models\Hotel;
+use App\Models\Property;
 use App\Models\Redirect;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
@@ -44,8 +44,8 @@ describe('full-page cache', function () {
     beforeEach(fn () => config(['seo.page_cache.enabled' => true]));
 
     it('serves guests from the cache with their own CSRF token and nonce', function () {
-        $hotel = Hotel::factory()->published()->create();
-        $url = localized_route('hotels.show', [$hotel]);
+        $hotel = Property::factory()->published()->create();
+        $url = localized_route('real-estate.show', [$hotel]);
 
         $this->get($url)->assertOk()->assertHeader('X-Page-Cache', 'MISS');
 
@@ -62,20 +62,20 @@ describe('full-page cache', function () {
     });
 
     it('counts the views of cached detail pages once per visitor', function () {
-        $hotel = Hotel::factory()->published()->create();
-        $url = localized_route('hotels.show', [$hotel]);
+        $hotel = Property::factory()->published()->create();
+        $url = localized_route('real-estate.show', [$hotel]);
 
         $this->get($url);
         $this->get($url);
         $this->flushSession();
         $this->get($url)->assertHeader('X-Page-Cache', 'HIT');
 
-        expect((int) DB::table('daily_stats')->where('statable_type', 'hotel')->where('statable_id', $hotel->id)->sum('views'))->toBe(2);
+        expect((int) DB::table('daily_stats')->where('statable_type', 'property')->where('statable_id', $hotel->id)->sum('views'))->toBe(2);
     });
 
     it('shows changes at once and never caches signed-in pages', function () {
-        $hotel = Hotel::factory()->published()->create();
-        $url = localized_route('hotels.show', [$hotel]);
+        $hotel = Property::factory()->published()->create();
+        $url = localized_route('real-estate.show', [$hotel]);
         $this->get($url)->assertHeader('X-Page-Cache', 'MISS');
 
         $hotel->update(['title' => ['ka' => 'ახალი სახელი']]);

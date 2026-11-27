@@ -31,7 +31,7 @@ class NotificationPresenter
             'listing_expiring' => ['calendar', __('account.notifications.types.expiring', ['title' => $title]), __('account.notifications.types.expiring_text', ['date' => (string) ($data['date'] ?? '')]), localized_route('account.listings', ['group' => 'active']), true],
             'listing_expired' => ['calendar', __('account.notifications.types.expired', ['title' => $title]), __('account.notifications.types.expired_text'), localized_route('account.listings', ['group' => 'expired']), true],
             'inquiry_message' => ['message', __('account.notifications.types.message', ['title' => $title]), $this->excerpt($data['details']['text'] ?? null), $data['url'] ?? localized_route('account.messages'), false],
-            'inquiry_booking' => ['calendar', __('account.notifications.types.booking', ['title' => $title]), $this->details($data), $data['url'] ?? localized_route('account.bookings'), false],
+            'inquiry_booking' => ['calendar', __('account.notifications.types.booking', ['title' => $title]), $this->details($data), $data['url'] ?? localized_route('account.listings'), false],
             'inquiry_application' => ['briefcase', __('account.notifications.types.application', ['title' => $title]), $this->details($data), $data['url'] ?? localized_route('account.applications'), false],
             'booking_answered' => ($data['accepted'] ?? false)
                 ? ['check-circle', __('account.notifications.types.booking_accepted', ['title' => $title]), $data['note'] ?? null, $data['url'] ?? null, false]

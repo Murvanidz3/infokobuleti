@@ -4,8 +4,8 @@ use App\Actions\Messaging\SendMessage;
 use App\Actions\Messaging\StartConversation;
 use App\Livewire\Account\Messages;
 use App\Models\Conversation;
-use App\Models\Hotel;
 use App\Models\Message;
+use App\Models\Property;
 use App\Models\Report;
 use App\Models\User;
 use App\Notifications\NewInquiry;
@@ -20,7 +20,7 @@ beforeEach(function () {
     $this->seed(RoleSeeder::class);
     $this->owner = User::factory()->create();
     $this->guest = User::factory()->create();
-    $this->hotel = Hotel::factory()->published()->for($this->owner)->create();
+    $this->hotel = Property::factory()->published()->for($this->owner)->create();
     $this->conversation = app(StartConversation::class)->handle($this->guest, $this->owner, $this->hotel);
 });
 
@@ -87,7 +87,7 @@ it('blocks and unblocks the other user', function () {
         ->call('send')
         ->assertHasErrors('body');
 
-    $this->actingAs($this->guest)->post("/message/hotel/{$this->hotel->id}", ['body' => 'Please answer'])->assertSessionHas('toast', fn (array $toast) => $toast['type'] === 'error');
+    $this->actingAs($this->guest)->post("/message/property/{$this->hotel->id}", ['body' => 'Please answer'])->assertSessionHas('toast', fn (array $toast) => $toast['type'] === 'error');
 
     Livewire::actingAs($this->owner)->test(Messages::class, ['conversationId' => $this->conversation->id])->call('unblock');
     expect($this->guest->isBlockedWith($this->owner))->toBeFalse();
@@ -117,9 +117,9 @@ it('archives a conversation until a new message arrives', function () {
 });
 
 it('links the first message on a listing to the inbox', function () {
-    $other = Hotel::factory()->published()->for($this->owner)->create();
+    $other = Property::factory()->published()->for($this->owner)->create();
 
-    $this->actingAs($this->guest)->post("/message/hotel/{$other->id}", ['body' => 'Do you have parking?'])
+    $this->actingAs($this->guest)->post("/message/property/{$other->id}", ['body' => 'Do you have parking?'])
         ->assertSessionHas('toast', fn (array $toast) => str_contains($toast['action']['url'], '/account/messages/'));
 
     expect(Conversation::query()->where('subject_id', $other->id)->sole()->messages()->count())->toBe(1);

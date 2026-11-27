@@ -7,7 +7,6 @@ use App\Models\Category;
 use App\Models\Classified;
 use App\Models\Conversation;
 use App\Models\Event;
-use App\Models\Hotel;
 use App\Models\Place;
 use App\Models\Property;
 use App\Models\User;
@@ -21,7 +20,6 @@ beforeEach(function () {
 });
 
 dataset('listing resources', [
-    'hotels' => ['hotels', Hotel::class],
     'properties' => ['properties', Property::class],
     'classifieds' => ['classifieds', Classified::class],
     'vacancies' => ['vacancies', Vacancy::class],

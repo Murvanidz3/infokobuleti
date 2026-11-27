@@ -83,6 +83,7 @@ class PropertyFactory extends Factory
             PropertyType::House => fake()->numberBetween(90, 260),
             PropertyType::Land => null,
             PropertyType::Commercial => fake()->numberBetween(40, 300),
+            PropertyType::Hotel => fake()->numberBetween(80, 600),
             PropertyType::HotelBusiness => fake()->numberBetween(300, 1500),
         };
 
@@ -90,6 +91,7 @@ class PropertyFactory extends Factory
             PropertyDeal::Sale => [match ($type) {
                 PropertyType::Land => fake()->numberBetween(15, 200) * 1000,
                 PropertyType::HotelBusiness => fake()->numberBetween(25, 120) * 10000,
+                PropertyType::Hotel => fake()->numberBetween(15, 80) * 10000,
                 default => (int) round($area * fake()->numberBetween(850, 1400), -3),
             }, Currency::USD],
             PropertyDeal::Rent => [fake()->numberBetween(8, 30) * 100, Currency::GEL],
@@ -103,7 +105,7 @@ class PropertyFactory extends Factory
             'currency' => $currency,
             'area_m2' => $area,
             'land_area_m2' => in_array($type, [PropertyType::House, PropertyType::Land], true) ? fake()->numberBetween(3, 30) * 100 : null,
-            'rooms' => in_array($type, [PropertyType::Apartment, PropertyType::House], true) ? $rooms + ($type === PropertyType::House ? 2 : 0) : null,
+            'rooms' => in_array($type, [PropertyType::Apartment, PropertyType::House, PropertyType::Hotel], true) ? $rooms + ($type === PropertyType::House ? 2 : 0) : null,
             'bedrooms' => in_array($type, [PropertyType::Apartment, PropertyType::House], true) ? max(1, $rooms - 1) : null,
             'bathrooms' => $type === PropertyType::Land ? null : fake()->numberBetween(1, 2),
             'floor' => $isApartment ? $floor : null,
@@ -143,6 +145,10 @@ class PropertyFactory extends Factory
                 ['ka' => 'კომერციული ფართი პირველ სართულზე', 'en' => 'Ground-floor commercial space', 'ru' => 'Коммерческое помещение на первом этаже'],
                 ['ka' => 'მაღაზიის ფართი ცენტრში', 'en' => 'Retail space in the centre', 'ru' => 'Торговое помещение в центре'],
                 ['ka' => 'ოფისი ბულვართან ახლოს', 'en' => 'Office near the boulevard', 'ru' => 'Офис рядом с бульваром'],
+            ]),
+            PropertyType::Hotel => fake()->randomElement([
+                ['ka' => 'სასტუმრო ზღვის პირას', 'en' => 'Hotel by the sea', 'ru' => 'Отель у моря'],
+                ['ka' => 'საოჯახო სასტუმრო', 'en' => 'Family hotel', 'ru' => 'Семейный отель'],
             ]),
             PropertyType::HotelBusiness => fake()->randomElement([
                 ['ka' => 'მოქმედი საოჯახო სასტუმრო', 'en' => 'Operating guesthouse business', 'ru' => 'Действующий гостевой дом'],

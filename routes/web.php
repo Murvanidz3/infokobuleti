@@ -4,7 +4,6 @@ use App\Http\Controllers\Account\AccountSecurityController;
 use App\Http\Controllers\Account\ApplicationCvController;
 use App\Http\Controllers\Account\ConversationController;
 use App\Http\Controllers\Account\DataExportController;
-use App\Http\Controllers\Account\HotelRoomsController;
 use App\Http\Controllers\Account\ListingWizardController;
 use App\Http\Controllers\Account\OnboardingController;
 use App\Http\Controllers\Account\PushSubscriptionController;
@@ -19,14 +18,13 @@ use App\Http\Controllers\Billing\InvoiceController;
 use App\Http\Controllers\Billing\PaymentReturnController;
 use App\Http\Controllers\Billing\PromoteListingController;
 use App\Http\Controllers\HomeController;
-use App\Http\Controllers\Site\BookingRequestController;
 use App\Http\Controllers\Site\BusinessProfileController;
 use App\Http\Controllers\Site\ClassifiedController;
 use App\Http\Controllers\Site\ContactController;
 use App\Http\Controllers\Site\EventController;
 use App\Http\Controllers\Site\FavoriteController;
 use App\Http\Controllers\Site\GuideController;
-use App\Http\Controllers\Site\HotelController;
+use App\Http\Controllers\Site\HotelArchiveRedirectController;
 use App\Http\Controllers\Site\MessageController;
 use App\Http\Controllers\Site\NewsController;
 use App\Http\Controllers\Site\OgImageController;
@@ -77,9 +75,7 @@ app(LocaleRouter::class)->group(function (): void {
     Route::get('/_styleguide', StyleguideController::class)->name('styleguide');
 
     // Module list pages (Livewire filters inside) and detail pages.
-    Route::view('/hotels', 'pages.hotels.index')->name('hotels.index');
-    Route::get('/hotels/{hotel}', [HotelController::class, 'show'])->name('hotels.show');
-    Route::post('/hotels/{hotel}/booking', BookingRequestController::class)->middleware('throttle:interactions')->name('hotels.booking');
+    Route::get('/hotels/{slug?}', HotelArchiveRedirectController::class)->where('slug', '.*')->name('hotels.redirect');
 
     Route::view('/real-estate', 'pages.real-estate.index')->name('real-estate.index');
     Route::get('/real-estate/{property}', [PropertyController::class, 'show'])->name('real-estate.show');
@@ -165,8 +161,6 @@ app(LocaleRouter::class)->group(function (): void {
             Route::get('/account/messages/{conversation}', [ConversationController::class, 'show'])->whereNumber('conversation')->name('account.messages.show');
             Route::get('/account/messages/{conversation}/attachments/{media}', [ConversationController::class, 'attachment'])->whereNumber(['conversation', 'media'])->name('account.messages.attachment');
 
-            Route::view('/account/bookings', 'pages.account.bookings')->name('account.bookings');
-            Route::get('/account/hotels/{hotel}/rooms', HotelRoomsController::class)->whereNumber('hotel')->name('account.hotels.rooms');
             Route::view('/account/applications', 'pages.account.applications')->name('account.applications');
             Route::get('/account/applications/{application}/cv', ApplicationCvController::class)->whereNumber('application')->name('account.applications.cv');
 

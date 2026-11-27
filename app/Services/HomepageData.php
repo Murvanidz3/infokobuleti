@@ -4,13 +4,13 @@ namespace App\Services;
 
 use App\Enums\CategoryModule;
 use App\Enums\PlaceType;
+use App\Enums\PropertyDeal;
 use App\Enums\PropertyType;
 use App\Enums\SiteFeature;
 use App\Models\Article;
 use App\Models\Category;
 use App\Models\Classified;
 use App\Models\Event;
-use App\Models\Hotel;
 use App\Models\Place;
 use App\Models\Property;
 use App\Models\Vacancy;
@@ -46,7 +46,7 @@ class HomepageData
     public function categories(): array
     {
         $counts = PublicCache::remember('home.counts', fn (): array => [
-            'hotels' => ListingQuery::public(Hotel::query())->count(),
+            'hotels' => ListingQuery::public(Property::query())->where('deal', PropertyDeal::DailyRent)->where('type', PropertyType::Hotel)->count(),
             'apartments' => ListingQuery::public(Property::query())->where('type', PropertyType::Apartment)->count(),
             'houses' => ListingQuery::public(Property::query())->where('type', PropertyType::House)->count(),
             'cars' => ListingQuery::public(Classified::query())->whereIn('category_id', $this->categoryTree('cars'))->count(),
@@ -57,7 +57,7 @@ class HomepageData
         ], 'all');
 
         $tiles = [
-            'hotels' => ['listings', 'bed', localized_route('hotels.index')],
+            'hotels' => ['listings', 'bed', daily_rent_hotels_url()],
             'apartments' => ['listings', 'building', localized_route('real-estate.index', ['type' => ['apartment']])],
             'houses' => ['listings', 'house', localized_route('real-estate.index', ['type' => ['house']])],
             'cars' => ['listings', 'car', localized_route('classifieds.index', ['category' => 'cars'])],
@@ -84,9 +84,12 @@ class HomepageData
      */
     public function hotels(): array
     {
-        return $this->withSaved(PublicCache::remember('home.hotels.'.Hotel::rotationSeed(), fn (): array => $this->curated(
-            Hotel::query(), 'homepage.featured_hotels', 8, withPaidSlots: true,
-        )->map(fn (Hotel $hotel): array => $this->cards->hotel($hotel))->all()));
+        return $this->withSaved(PublicCache::remember('home.hotels.'.Property::rotationSeed(), fn (): array => $this->curated(
+            Property::query()->where('deal', PropertyDeal::DailyRent)->where('type', PropertyType::Hotel),
+            'homepage.featured_hotels',
+            8,
+            withPaidSlots: true,
+        )->map(fn (Property $property): array => $this->cards->property($property))->all()));
     }
 
     /**
@@ -95,7 +98,7 @@ class HomepageData
     public function properties(): array
     {
         return $this->withSaved(PublicCache::remember('home.properties.'.Property::rotationSeed(), fn (): array => $this->curated(
-            Property::query(), 'homepage.featured_properties', 6,
+            Property::query()->where('type', '!=', PropertyType::Hotel), 'homepage.featured_properties', 6,
         )->map(fn (Property $property): array => $this->cards->property($property))->all()));
     }
 
@@ -234,7 +237,7 @@ class HomepageData
      * Admin-picked items in their order, then paid homepage slots (hotels), then promoted ones
      * taking turns, up to $limit.
      *
-     * @template TModel of Hotel|Property
+     * @template TModel of Property
      *
      * @param  Builder<TModel>  $query
      * @return Collection<int, TModel>
@@ -253,7 +256,7 @@ class HomepageData
                 ListingQuery::public(clone $query)->with($relations)
                     ->whereKeyNot($featured->modelKeys())
                     ->featuredOnHome()
-                    ->orderByRaw('md5(id::text || ?)', [(string) Hotel::rotationSeed()])
+                    ->orderByRaw('md5(id::text || ?)', [(string) Property::rotationSeed()])
                     ->limit($limit - $featured->count())
                     ->get(),
             );

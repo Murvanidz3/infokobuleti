@@ -1,13 +1,15 @@
 <?php
 
+use App\Enums\Currency;
 use App\Enums\ListingStatus;
+use App\Enums\PropertyDeal;
+use App\Enums\PropertyType;
 use App\Enums\Role;
 use App\Filament\Pages\HomepageCuration;
 use App\Filament\Pages\SiteSettings;
-use App\Filament\Resources\Hotels\Pages\CreateHotel;
-use App\Filament\Resources\Hotels\Pages\EditHotel;
+use App\Filament\Resources\Properties\Pages\CreateProperty;
+use App\Filament\Resources\Properties\Pages\EditProperty;
 use App\Filament\Resources\Users\Pages\ListUsers;
-use App\Models\Hotel;
 use App\Models\Page;
 use App\Models\PricePlan;
 use App\Models\Property;
@@ -34,48 +36,51 @@ it('seeds the static pages and the price list', function () {
 it('saves KA, EN and RU fields and drops empty languages', function () {
     $owner = User::factory()->create();
 
-    Livewire::test(CreateHotel::class)
+    Livewire::test(CreateProperty::class)
         ->fillForm([
             'title' => ['ka' => 'სასტუმრო ზღვა', 'en' => 'Hotel Sea', 'ru' => ''],
-            'type' => 'hotel',
+            'deal' => PropertyDeal::DailyRent->value,
+            'type' => PropertyType::Hotel->value,
+            'price' => 120,
+            'currency' => Currency::GEL->value,
             'user_id' => $owner->id,
         ])
         ->call('create')
         ->assertHasNoFormErrors();
 
-    $hotel = Hotel::query()->latest('id')->firstOrFail();
+    $property = Property::query()->latest('id')->firstOrFail();
 
-    expect($hotel->getTranslations('title'))->toEqualCanonicalizing(['ka' => 'სასტუმრო ზღვა', 'en' => 'Hotel Sea'])
-        ->and($hotel->status)->toBe(ListingStatus::Draft);
+    expect($property->getTranslations('title'))->toEqualCanonicalizing(['ka' => 'სასტუმრო ზღვა', 'en' => 'Hotel Sea'])
+        ->and($property->status)->toBe(ListingStatus::Draft);
 
-    Livewire::test(EditHotel::class, ['record' => $hotel->getRouteKey()])
+    Livewire::test(EditProperty::class, ['record' => $property->getRouteKey()])
         ->assertSchemaStateSet(['title.en' => 'Hotel Sea'])
         ->fillForm(['title' => ['ka' => 'სასტუმრო ზღვა', 'en' => '', 'ru' => 'Отель Море']])
         ->call('save')
         ->assertHasNoFormErrors();
 
-    expect($hotel->fresh()->getTranslations('title'))->toEqualCanonicalizing(['ka' => 'სასტუმრო ზღვა', 'ru' => 'Отель Море']);
+    expect($property->fresh()->getTranslations('title'))->toEqualCanonicalizing(['ka' => 'სასტუმრო ზღვა', 'ru' => 'Отель Море']);
 });
 
 it('logs staff edits with the changed attributes', function () {
-    $hotel = Hotel::factory()->create(['stars' => 3]);
+    $property = Property::factory()->create(['rooms' => 3]);
 
-    Livewire::test(EditHotel::class, ['record' => $hotel->getRouteKey()])
-        ->fillForm(['stars' => 5])
+    Livewire::test(EditProperty::class, ['record' => $property->getRouteKey()])
+        ->fillForm(['rooms' => 5])
         ->call('save')
         ->assertHasNoFormErrors();
 
-    $activity = Activity::query()->where('log_name', 'admin')->where('subject_type', 'hotel')->where('subject_id', $hotel->id)->latest('id')->firstOrFail();
+    $activity = Activity::query()->where('log_name', 'admin')->where('subject_type', 'property')->where('subject_id', $property->id)->latest('id')->firstOrFail();
 
     expect($activity->causer_id)->toBe($this->admin->id)
-        ->and($activity->attribute_changes['attributes']['stars'])->toBe(5)
-        ->and($activity->attribute_changes['old']['stars'])->toBe(3);
+        ->and($activity->attribute_changes['attributes']['rooms'])->toBe(5)
+        ->and($activity->attribute_changes['old']['rooms'])->toBe(3);
 });
 
 it('does not log changes made outside the admin', function () {
     Filament::setServingStatus(false);
 
-    Hotel::factory()->create()->update(['stars' => 4]);
+    Property::factory()->create()->update(['rooms' => 4]);
 
     expect(Activity::query()->where('log_name', 'admin')->count())->toBe(0);
 });
@@ -119,7 +124,7 @@ it('saves site settings and uses them on the site', function () {
     Livewire::test(SiteSettings::class)
         ->fillForm([
             'contacts' => ['phone' => '+995 555 00 00 00', 'email' => 'hello@infokobuleti.com'],
-            'listings' => ['expiry_days' => ['property' => 45, 'hotel' => 365, 'classified' => 30, 'vacancy' => 30]],
+            'listings' => ['expiry_days' => ['property' => 45, 'classified' => 30, 'vacancy' => 30]],
         ])
         ->call('save')
         ->assertHasNoErrors();
@@ -147,7 +152,7 @@ it('puts the site in maintenance mode for visitors only', function () {
 });
 
 it('saves the homepage curation', function () {
-    $hotel = Hotel::factory()->create(['status' => ListingStatus::Published, 'published_at' => now()]);
+    $hotel = Property::factory()->type(PropertyType::Hotel, PropertyDeal::DailyRent)->create(['status' => ListingStatus::Published, 'published_at' => now()]);
 
     Livewire::test(HomepageCuration::class)
         ->fillForm(['featured_hotels' => [$hotel->id], 'season' => 'summer'])

@@ -204,6 +204,7 @@ return [
         'house' => 'House',
         'land' => 'Land',
         'commercial' => 'Commercial space',
+        'hotel' => 'Hotel',
         'hotel_business' => 'Hotel (business)',
     ],
 

@@ -26,24 +26,42 @@ class PricePlanSeeder extends Seeder
         $this->plan('bump', PricePlanProduct::Bump, ['ka' => 'ამოწევა', 'en' => 'Bump to the top', 'ru' => 'Поднятие'], 1, null, $sort++);
         $this->plan('auto-bump-7', PricePlanProduct::AutoBump, ['ka' => 'ავტო-ამოწევა 7 დღით', 'en' => 'Daily auto-bump for 7 days', 'ru' => 'Автоподнятие на 7 дней'], 5, 7, $sort++);
         $this->plan('business-30', PricePlanProduct::BusinessPackage, ['ka' => 'ბიზნეს პაკეტი, თვე', 'en' => 'Business package, monthly', 'ru' => 'Бизнес-пакет, месяц'], 99, 30, $sort++, listingsLimit: 50);
-        $this->plan('featured-hotel-30', PricePlanProduct::FeaturedHotel, ['ka' => 'რჩეული სასტუმრო მთავარზე, თვე', 'en' => 'Featured hotel on the homepage, monthly', 'ru' => 'Отель на главной, месяц'], 150, 30, $sort++);
+        $this->plan(
+            'featured-hotel-30',
+            PricePlanProduct::FeaturedHotel,
+            ['ka' => 'რჩეული სასტუმრო მთავარზე, თვე', 'en' => 'Featured hotel on the homepage, monthly', 'ru' => 'Отель на главной, месяц'],
+            150,
+            30,
+            $sort++,
+            active: false,
+            description: [
+                'ka' => 'ეს გეგმა აღარ იყიდება. სასტუმროები უძრავი ქონების განცხადებებია.',
+                'en' => 'This plan is no longer sold. Hotels are property listings.',
+                'ru' => 'Этот тариф больше не продаётся. Отели — это объявления недвижимости.',
+            ],
+        );
         $this->plan('banner-30', PricePlanProduct::Banner, ['ka' => 'ბანერი, თვე', 'en' => 'Banner, monthly', 'ru' => 'Баннер, месяц'], 200, 30, $sort);
     }
 
     /**
      * @param  array{ka: string, en: string, ru: string}  $name
      */
-    private function plan(string $code, PricePlanProduct $product, array $name, float $price, ?int $days, int $sort, ?int $listingsLimit = null): void
+    /**
+     * @param  array{ka: string, en: string, ru: string}  $name
+     * @param  array{ka: string, en: string, ru: string}|null  $description
+     */
+    private function plan(string $code, PricePlanProduct $product, array $name, float $price, ?int $days, int $sort, ?int $listingsLimit = null, bool $active = true, ?array $description = null): void
     {
         PricePlan::query()->firstOrCreate(['code' => $code], [
             'product' => $product,
             'name' => $name,
+            'description' => $description,
             'price' => $price,
             'currency' => 'GEL',
             'duration_days' => $days,
             'listings_limit' => $listingsLimit,
             'sort' => $sort,
-            'is_active' => true,
+            'is_active' => $active,
         ]);
     }
 }

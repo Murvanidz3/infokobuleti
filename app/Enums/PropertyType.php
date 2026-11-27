@@ -13,5 +13,6 @@ enum PropertyType: string implements FilamentLabel
     case House = 'house';
     case Land = 'land';
     case Commercial = 'commercial';
+    case Hotel = 'hotel';
     case HotelBusiness = 'hotel_business';
 }

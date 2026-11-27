@@ -1,13 +1,15 @@
 <?php
 
 use App\Enums\CategoryModule;
+use App\Enums\Currency;
 use App\Enums\ListingStatus;
+use App\Enums\PropertyDeal;
+use App\Enums\PropertyType;
 use App\Jobs\AnnounceToModerators;
 use App\Livewire\ListingWizard;
 use App\Models\Amenity;
 use App\Models\Category;
 use App\Models\Classified;
-use App\Models\Hotel;
 use App\Models\ListingDraft;
 use App\Models\Location;
 use App\Models\Property;
@@ -152,7 +154,7 @@ it('stores photos on the draft, strips metadata, reorders and removes them', fun
 
 it('searches addresses through the geocoder and sets the pin and area', function () {
     Livewire::actingAs($this->user)->test(ListingWizard::class)
-        ->call('chooseType', 'hotel')
+        ->call('chooseType', 'property')
         ->set('addressQuery', 'Rustaveli')
         ->call('searchAddress')
         ->assertCount('addressResults', 1)
@@ -201,33 +203,41 @@ it('creates a classified with its category attributes', function () {
         ->and($classified->category_id)->toBe($cars->id);
 });
 
-it('creates a hotel with its first room type', function () {
+it('turns the hotel choice into a daily-rent property and does not ask for rooms', function () {
     $wifi = Amenity::factory()->create(['scope' => 'hotel']);
 
     Livewire::actingAs($this->user)->test(ListingWizard::class)
-        ->call('chooseType', 'hotel')
-        ->set('form.hotel_type', 'guesthouse')
+        ->call('chooseHotel')
+        ->assertSet('type', 'property')
+        ->assertSet('form.deal', PropertyDeal::DailyRent->value)
+        ->assertSet('form.property_type', PropertyType::Hotel->value)
+        ->assertSet('form.currency', Currency::GEL->value)
         ->call('next')
         ->set('form.title.ka', 'სასტუმრო ზღვის ნიავი')
         ->set('form.description.ka', 'ოჯახური სასტუმრო ბულვართან ახლოს, საუზმით.')
-        ->set('form.amenities', [(string) $wifi->id])
+        ->set('form.rooms', '8')
+        ->set('form.features', [(string) $wifi->id])
         ->call('next')
         ->set('form.location_id', (string) $this->location->id)
         ->call('setPin', 41.8180, 41.7722)
         ->call('next')
         ->set('upload', jpeg())
         ->call('next')
-        ->set('form.room.name', 'ორადგილიანი ნომერი')
-        ->set('form.room.base_price', '120')
+        ->assertDontSee(__('account.wizard.room.title'))
+        ->set('form.price', '120')
         ->call('next')
         ->call('submit')
         ->assertHasNoErrors();
 
-    $hotel = Hotel::query()->with('roomTypes', 'amenities')->sole();
-    expect($hotel->status)->toBe(ListingStatus::Pending)
-        ->and($hotel->roomTypes)->toHaveCount(1)
-        ->and($hotel->fresh()->price_from)->toBe(120.0)
-        ->and($hotel->amenities->pluck('id')->all())->toBe([$wifi->id]);
+    $property = Property::query()->with('features')->sole();
+
+    expect($property->status)->toBe(ListingStatus::Pending)
+        ->and($property->deal)->toBe(PropertyDeal::DailyRent)
+        ->and($property->type)->toBe(PropertyType::Hotel)
+        ->and($property->currency)->toBe(Currency::GEL)
+        ->and((float) $property->price)->toBe(120.0)
+        ->and($property->rooms)->toBe(8)
+        ->and($property->features->pluck('id')->all())->toBe([$wifi->id]);
 });
 
 it('creates a vacancy linked to the business profile', function () {

@@ -42,12 +42,8 @@
 
     @php
         $numbers = match ($type) {
-            'hotel' => [
-                $number('stars', __('account.wizard.fields.stars'), ['min' => 1, 'max' => 5]),
-                $number('rooms_count', __('account.wizard.fields.rooms_count'), ['min' => 1, 'max' => 1000]),
-            ],
             'property' => [
-                $number('area_m2', __('account.wizard.fields.area_m2'), ['min' => 1, 'step' => '0.1'], ($form['property_type'] ?? '') === 'land'),
+                $number('area_m2', __('account.wizard.fields.area_m2'), ['min' => 1, 'step' => '0.1'], in_array($form['property_type'] ?? '', ['land', 'hotel'], true)),
                 $number('land_area_m2', __('account.wizard.fields.land_area_m2'), ['min' => 1], ($form['property_type'] ?? '') !== 'land'),
                 $number('rooms', __('account.wizard.fields.rooms'), ['min' => 1, 'max' => 50]),
                 $number('bedrooms', __('account.wizard.fields.bedrooms'), ['min' => 0, 'max' => 50]),
@@ -71,26 +67,7 @@
         </section>
     @endif
 
-    @if ($type === 'hotel')
-        <section class="grid gap-4 md:grid-cols-2">
-            <x-form.field :label="__('account.wizard.fields.check_in_from')" for="wizard-check-in" :error="$errors->first('form.check_in_from')" optional>
-                <input id="wizard-check-in" type="time" wire:model.blur="form.check_in_from" class="{{ $control }} {{ $border('form.check_in_from') }}">
-            </x-form.field>
-            <x-form.field :label="__('account.wizard.fields.check_out_until')" for="wizard-check-out" :error="$errors->first('form.check_out_until')" optional>
-                <input id="wizard-check-out" type="time" wire:model.blur="form.check_out_until" class="{{ $control }} {{ $border('form.check_out_until') }}">
-            </x-form.field>
-            <x-form.field :label="__('account.wizard.fields.season_start_month')" for="wizard-season-start" :error="$errors->first('form.season_start_month')" :hint="__('account.wizard.hints.season')" optional>
-                <x-form.select name="season_start" id="wizard-season-start" wire:model.live="form.season_start_month" :options="$options['months']" :placeholder="__('account.wizard.all_year')" />
-            </x-form.field>
-            <x-form.field :label="__('account.wizard.fields.season_end_month')" for="wizard-season-end" :error="$errors->first('form.season_end_month')" optional>
-                <x-form.select name="season_end" id="wizard-season-end" wire:model.live="form.season_end_month" :options="$options['months']" :placeholder="__('account.wizard.all_year')" />
-            </x-form.field>
-        </section>
-        <section>
-            <h2 class="text-[15px] font-semibold text-navy">{{ __('account.wizard.fields.amenities') }}</h2>
-            <x-account.check-pills class="mt-3" model="form.amenities" :options="$options['amenities']" :label="__('account.wizard.fields.amenities')" />
-        </section>
-    @elseif ($type === 'property')
+    @if ($type === 'property')
         <section class="flex flex-col gap-6">
             <div>
                 <h2 class="text-[15px] font-semibold text-navy">{{ __('account.wizard.fields.condition') }} <span class="text-xs font-medium text-secondary">({{ __('components.optional') }})</span></h2>

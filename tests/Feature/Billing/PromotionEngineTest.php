@@ -5,11 +5,12 @@ use App\Actions\Billing\PayFromBalance;
 use App\Enums\ListingStatus;
 use App\Enums\PaymentMethod;
 use App\Enums\PromotionType;
+use App\Enums\PropertyDeal;
+use App\Enums\PropertyType;
 use App\Enums\WalletEntryType;
 use App\Models\BusinessProfile;
 use App\Models\BusinessSubscription;
 use App\Models\Classified;
-use App\Models\Hotel;
 use App\Models\PricePlan;
 use App\Models\Promotion;
 use App\Models\Property;
@@ -25,7 +26,7 @@ use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Storage;
 
-function promote(Property|Hotel|Classified $listing, PromotionType $type, ?CarbonInterface $startsAt = null, ?CarbonInterface $endsAt = null): Promotion
+function promote(Property|Classified $listing, PromotionType $type, ?CarbonInterface $startsAt = null, ?CarbonInterface $endsAt = null): Promotion
 {
     return Promotion::factory()->create([
         'promotable_type' => $listing->getMorphClass(),
@@ -68,14 +69,14 @@ it('gives every VIP its turn on the homepage while Super VIP stays above', funct
 });
 
 it('puts paid homepage slots right after the admin-picked hotels', function () {
-    $regular = Hotel::factory()->published()->create(['published_at' => now()]);
-    $featured = Hotel::factory()->published()->create(['published_at' => now()->subYear()]);
+    $regular = Property::factory()->type(PropertyType::Hotel, PropertyDeal::DailyRent)->published()->create(['published_at' => now()]);
+    $featured = Property::factory()->type(PropertyType::Hotel, PropertyDeal::DailyRent)->published()->create(['published_at' => now()->subYear()]);
     promote($featured, PromotionType::FeaturedHome);
 
     $cards = app(HomepageData::class)->hotels();
 
-    expect($cards[0]['url'])->toBe(localized_route('hotels.show', [$featured]))
-        ->and($cards[1]['url'])->toBe(localized_route('hotels.show', [$regular]));
+    expect($cards[0]['url'])->toBe(localized_route('real-estate.show', [$featured]))
+        ->and($cards[1]['url'])->toBe(localized_route('real-estate.show', [$regular]));
 });
 
 it('extends a second purchase of the same promotion from the current end', function () {

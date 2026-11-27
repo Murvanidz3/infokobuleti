@@ -37,8 +37,8 @@
             </div>
             @if ($code === 404)
                 <nav aria-label="{{ __('nav.main') }}" class="mt-10 flex flex-wrap justify-center gap-x-6 gap-y-2 text-[14.5px]">
-                    @foreach (['hotels' => 'hotels', 'real_estate' => 'real-estate', 'classifieds' => 'classifieds', 'jobs' => 'jobs', 'guide' => 'guide', 'news' => 'news'] as $key => $path)
-                        <a href="{{ rtrim($home, '/').'/'.$path }}" class="font-medium text-navy hover:text-coral-pressed">{{ __('nav.'.$key) }}</a>
+                    @foreach (['hotels' => daily_rent_hotels_url(), 'real_estate' => rtrim($home, '/').'/real-estate', 'classifieds' => rtrim($home, '/').'/classifieds', 'jobs' => rtrim($home, '/').'/jobs', 'guide' => rtrim($home, '/').'/guide', 'news' => rtrim($home, '/').'/news'] as $key => $href)
+                        <a href="{{ $href }}" class="font-medium text-navy hover:text-coral-pressed">{{ __('nav.'.$key) }}</a>
                     @endforeach
                 </nav>
             @endif

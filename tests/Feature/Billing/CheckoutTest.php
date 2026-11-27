@@ -12,7 +12,6 @@ use App\Livewire\Billing\PromoteListing;
 use App\Models\Banner;
 use App\Models\BusinessProfile;
 use App\Models\BusinessSubscription;
-use App\Models\Hotel;
 use App\Models\Order;
 use App\Models\Payment;
 use App\Models\PricePlan;
@@ -128,10 +127,9 @@ it('bumps a listing to the top and starts a daily auto-bump', function () {
         ->and($auto->next_run_at->isSameHour(now()->addDay()))->toBeTrue();
 });
 
-it('promotes only the owner’s live listings and sells homepage slots only for hotels', function () {
+it('promotes only the owner’s live listings and does not sell the retired hotel plan', function () {
     $paused = Property::factory()->for($this->user)->create(['status' => ListingStatus::Paused]);
     $foreign = Property::factory()->published()->create();
-    $hotel = Hotel::factory()->published()->for($this->user)->create();
 
     $this->actingAs($this->user)->get("/account/promote/property/{$foreign->id}")->assertNotFound();
     $this->actingAs($this->user)->get("/account/promote/property/{$paused->id}")->assertOk()->assertSee(__('billing.promote.not_live'));
@@ -145,10 +143,6 @@ it('promotes only the owner’s live listings and sells homepage slots only for 
     Livewire::actingAs($this->user)
         ->test(PromoteListing::class, ['type' => 'property', 'id' => $this->listing->id])
         ->assertViewHas('groups', fn (array $groups) => ! in_array('featured_hotel', array_column($groups, 'product'), true));
-
-    Livewire::actingAs($this->user)
-        ->test(PromoteListing::class, ['type' => 'hotel', 'id' => $hotel->id])
-        ->assertViewHas('groups', fn (array $groups) => in_array('featured_hotel', array_column($groups, 'product'), true));
 
     expect(Order::query()->count())->toBe(0);
 });

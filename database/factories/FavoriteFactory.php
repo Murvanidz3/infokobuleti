@@ -3,7 +3,7 @@
 namespace Database\Factories;
 
 use App\Models\Favorite;
-use App\Models\Hotel;
+use App\Models\Property;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
@@ -19,8 +19,8 @@ class FavoriteFactory extends Factory
     {
         return [
             'user_id' => User::factory(),
-            'favoritable_type' => 'hotel',
-            'favoritable_id' => Hotel::factory(),
+            'favoritable_type' => 'property',
+            'favoritable_id' => Property::factory(),
         ];
     }
 }

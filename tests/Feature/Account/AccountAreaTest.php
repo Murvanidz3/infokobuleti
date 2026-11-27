@@ -14,7 +14,6 @@ use App\Livewire\Listings\PropertyIndex;
 use App\Models\Classified;
 use App\Models\DailyStat;
 use App\Models\Favorite;
-use App\Models\Hotel;
 use App\Models\Property;
 use App\Models\SavedSearch;
 use App\Models\User;
@@ -41,7 +40,7 @@ it('sends guests to sign in and renders every account page for a member', functi
 it('counts listings per group and shows only the owner’s own', function () {
     Property::factory()->published()->for($this->user)->create();
     Property::factory()->published()->for($this->user)->create(['expires_at' => now()->subDay()]);
-    Hotel::factory()->pending()->for($this->user)->create();
+    Vacancy::factory()->pending()->for($this->user)->create();
     Classified::factory()->for($this->user)->create(['status' => ListingStatus::Rejected, 'rejection_reason' => 'Blurry photos']);
     Property::factory()->published()->create(['title' => ['ka' => 'Somebody else', 'en' => 'Somebody else']]);
 
@@ -115,16 +114,16 @@ it('refuses actions that do not fit the status and never touches other people’
 });
 
 it('lists favorites across modules and removes them', function () {
-    $hotel = Hotel::factory()->published()->create(['title' => ['ka' => 'Sea Breeze', 'en' => 'Sea Breeze']]);
+    $hotel = Property::factory()->published()->create(['title' => ['ka' => 'Sea Breeze', 'en' => 'Sea Breeze']]);
     $gone = Property::factory()->draft()->create(['title' => ['ka' => 'Hidden flat', 'en' => 'Hidden flat']]);
-    $favorite = Favorite::factory()->create(['user_id' => $this->user->id, 'favoritable_type' => 'hotel', 'favoritable_id' => $hotel->id]);
+    $favorite = Favorite::factory()->create(['user_id' => $this->user->id, 'favoritable_type' => 'property', 'favoritable_id' => $hotel->id]);
     Favorite::factory()->create(['user_id' => $this->user->id, 'favoritable_type' => 'property', 'favoritable_id' => $gone->id]);
 
     Livewire::actingAs($this->user)->test(Favorites::class)
         ->assertSee('Sea Breeze')
         ->assertViewHas('items', fn (array $items) => collect($items)->firstWhere('title', 'Hidden flat')['available'] === false)
-        ->set('type', 'hotel')
-        ->assertViewHas('items', fn (array $items) => count($items) === 1)
+        ->set('type', 'property')
+        ->assertViewHas('items', fn (array $items) => count($items) === 2)
         ->call('remove', $favorite->id);
 
     expect(Favorite::query()->where('user_id', $this->user->id)->count())->toBe(1);

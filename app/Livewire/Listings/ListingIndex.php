@@ -432,7 +432,6 @@ abstract class ListingIndex extends Component
     protected function navKey(): string
     {
         return match ($this->module()) {
-            ListingModule::Hotels => 'hotels',
             ListingModule::Properties => 'real_estate',
             ListingModule::Classifieds => 'classifieds',
             ListingModule::Vacancies => 'jobs',

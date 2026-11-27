@@ -4,13 +4,10 @@ use App\Enums\Role;
 use App\Enums\SiteFeature;
 use App\Filament\Pages\SiteFeatures;
 use App\Filament\Resources\Properties\Pages\ViewProperty;
-use App\Livewire\Site\ReviewForm;
-use App\Models\BookingRequest;
 use App\Models\Conversation;
-use App\Models\Hotel;
 use App\Models\Message;
+use App\Models\Place;
 use App\Models\Property;
-use App\Models\Review;
 use App\Models\User;
 use App\Services\Trust\ReviewEligibility;
 use App\Support\Features;
@@ -19,48 +16,26 @@ use Livewire\Livewire;
 
 beforeEach(function () {
     $this->guest = User::factory()->create();
-    $this->hotel = Hotel::factory()->published()->create();
+    $this->place = Place::factory()->published()->create();
 });
 
-it('lets only guests who booked or talked to the hotel write a review', function () {
+it('lets only guests who talked to the place write a review', function () {
     $eligibility = app(ReviewEligibility::class);
 
-    expect($eligibility->reason($this->guest, $this->hotel))->toBe('no_contact')
-        ->and($eligibility->reason($this->hotel->user, $this->hotel))->toBe('own');
+    expect($eligibility->reason($this->guest, $this->place))->toBe('no_contact')
+        ->and($eligibility->reason($this->place->user, $this->place))->toBe('own');
 
-    BookingRequest::factory()->create(['hotel_id' => $this->hotel->id, 'user_id' => $this->guest->id]);
-    expect($eligibility->canReview($this->guest, $this->hotel))->toBeTrue();
-
-    // A conversation counts once the hotel side answered.
     $other = User::factory()->create();
-    $conversation = Conversation::factory()->create(['subject_type' => 'hotel', 'subject_id' => $this->hotel->id]);
-    $conversation->participants()->attach([$other->id, $this->hotel->user_id]);
+    $conversation = Conversation::factory()->create(['subject_type' => 'place', 'subject_id' => $this->place->id]);
+    $conversation->participants()->attach([$other->id, $this->place->user_id]);
     Message::factory()->create(['conversation_id' => $conversation->id, 'user_id' => $other->id]);
-    expect($eligibility->canReview($other, $this->hotel))->toBeFalse();
+    expect($eligibility->canReview($other, $this->place))->toBeFalse();
 
-    Message::factory()->create(['conversation_id' => $conversation->id, 'user_id' => $this->hotel->user_id]);
-    expect($eligibility->canReview($other, $this->hotel))->toBeTrue();
+    Message::factory()->create(['conversation_id' => $conversation->id, 'user_id' => $this->place->user_id]);
+    expect($eligibility->canReview($other, $this->place))->toBeTrue();
 
     Features::set(SiteFeature::TrustLayer, false);
-    expect($eligibility->canReview(User::factory()->create(), $this->hotel))->toBeTrue();
-});
-
-it('sends a review to moderation from the hotel page', function () {
-    BookingRequest::factory()->create(['hotel_id' => $this->hotel->id, 'user_id' => $this->guest->id]);
-
-    $this->actingAs($this->guest)->get(localized_route('hotels.show', [$this->hotel]))->assertOk()->assertSee(__('site.reviews.form.title'));
-    $this->get(localized_route('hotels.show', [$this->hotel]))->assertOk();
-
-    Livewire::actingAs($this->guest)->test(ReviewForm::class, ['hotelId' => $this->hotel->id])
-        ->set('rating', 9)
-        ->set('body', 'სუფთა ოთახები და ზღვის ხედი.')
-        ->call('submit')
-        ->assertSet('sent', true);
-
-    expect(Review::query()->sole())->rating->toBe(9)->status->value->toBe('pending');
-
-    Livewire::actingAs($this->guest)->test(ReviewForm::class, ['hotelId' => $this->hotel->id])
-        ->assertSee(__('site.reviews.form.blocked.already'));
+    expect($eligibility->canReview(User::factory()->create(), $this->place))->toBeTrue();
 });
 
 it('marks a property "owner verified" from the admin', function () {

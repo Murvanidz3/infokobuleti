@@ -24,7 +24,7 @@ function staffWith(Role $role, bool $twoFactor = true): User
 
 it('sends guests to the staff sign-in', function () {
     $this->get('/admin')->assertRedirect('/staff/login');
-    $this->get('/admin/hotels')->assertRedirect('/staff/login');
+    $this->get('/admin/properties')->assertRedirect('/staff/login');
 });
 
 it('keeps regular users, staff without two-factor and blocked staff out', function () {
@@ -46,7 +46,7 @@ it('limits moderators to the moderation screens', function () {
         $this->get($url)->assertOk();
     }
 
-    foreach (['/admin/users', '/admin/hotels', '/admin/properties', '/admin/categories', '/admin/payments', '/admin/price-plans', '/admin/settings', '/admin/activities'] as $url) {
+    foreach (['/admin/users', '/admin/properties', '/admin/properties', '/admin/categories', '/admin/payments', '/admin/price-plans', '/admin/settings', '/admin/activities'] as $url) {
         $this->get($url)->assertForbidden();
     }
 
@@ -56,7 +56,7 @@ it('limits moderators to the moderation screens', function () {
 it('lets admins manage everything except system settings', function () {
     $this->actingAs(staffWith(Role::Admin));
 
-    foreach (['/admin/users', '/admin/hotels', '/admin/categories', '/admin/payments', '/admin/moderation', '/admin/homepage'] as $url) {
+    foreach (['/admin/users', '/admin/properties', '/admin/categories', '/admin/payments', '/admin/moderation', '/admin/homepage'] as $url) {
         $this->get($url)->assertOk();
     }
 
@@ -94,7 +94,7 @@ it('navigates inside the admin without a full reload and preloads the georgian f
         ->and($html)->toContain('noto-sans-cyrillic')
         ->and($html)->toContain('livewire:navigated');
 
-    expect($html)->toMatch('/href="[^"]*\/admin\/hotels"[^>]*wire:navigate/');
+    expect($html)->toMatch('/href="[^"]*\/admin\/properties"[^>]*wire:navigate/');
 
     preg_match('/<a\b[^>]*href="[^"]*\/admin\/locale\/en"[^>]*>/', $html, $locale);
     expect($locale[0] ?? 'missing locale link')->not->toContain('wire:navigate');

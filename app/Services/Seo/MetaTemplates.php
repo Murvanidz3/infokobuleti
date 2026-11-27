@@ -13,7 +13,7 @@ final class MetaTemplates
 {
     /** Page types with an editable template; list pages and detail pages of every module. */
     public const array PAGES = [
-        'home', 'hotels', 'hotel', 'real_estate', 'property', 'classifieds', 'classified', 'jobs', 'job',
+        'home', 'real_estate', 'property', 'classifieds', 'classified', 'jobs', 'job',
         'guide', 'place', 'events', 'event', 'news', 'article', 'business', 'page',
     ];
 

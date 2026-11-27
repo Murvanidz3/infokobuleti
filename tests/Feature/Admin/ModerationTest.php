@@ -4,9 +4,8 @@ use App\Enums\ListingStatus;
 use App\Enums\Role;
 use App\Filament\Pages\ModerationQueue;
 use App\Filament\Pages\ModerationReview;
-use App\Filament\Resources\Hotels\Pages\ListHotels;
+use App\Filament\Resources\Properties\Pages\ListProperties;
 use App\Models\AdminListing;
-use App\Models\Hotel;
 use App\Models\Property;
 use App\Models\User;
 use App\Notifications\ListingModerated;
@@ -29,11 +28,11 @@ beforeEach(function () {
 });
 
 it('lists pending items from every module, newest first', function () {
-    $hotel = Hotel::factory()->create(['status' => ListingStatus::Pending, 'created_at' => now()->addMinute()]);
-    Hotel::factory()->create(['status' => ListingStatus::Published]);
+    $newer = Property::factory()->create(['status' => ListingStatus::Pending, 'created_at' => now()->addMinute()]);
+    Property::factory()->create(['status' => ListingStatus::Published]);
 
     Livewire::test(ModerationQueue::class)
-        ->assertCanSeeTableRecords([AdminListing::find('hotel:'.$hotel->id), AdminListing::find('property:'.$this->property->id)], inOrder: true)
+        ->assertCanSeeTableRecords([AdminListing::find('property:'.$newer->id), AdminListing::find('property:'.$this->property->id)], inOrder: true)
         ->assertCountTableRecords(2);
 });
 
@@ -87,15 +86,15 @@ it('renders the notification mail in the owner language', function () {
 });
 
 it('walks through the queue on the review screen', function () {
-    $older = Hotel::factory()->create(['status' => ListingStatus::Pending, 'created_at' => now()->subHour()]);
+    $older = Property::factory()->create(['status' => ListingStatus::Pending, 'created_at' => now()->subHour()]);
     $this->property->forceFill(['created_at' => now()])->save();
 
     Livewire::test(ModerationReview::class, ['key' => 'property:'.$this->property->id])
         ->assertSee($this->property->getTranslation('title', 'ka'))
         ->callAction('approve')
-        ->assertRedirect(ModerationReview::getUrl(['key' => 'hotel:'.$older->id]));
+        ->assertRedirect(ModerationReview::getUrl(['key' => 'property:'.$older->id]));
 
-    Livewire::test(ModerationReview::class, ['key' => 'hotel:'.$older->id])
+    Livewire::test(ModerationReview::class, ['key' => 'property:'.$older->id])
         ->callAction('skip')
         ->assertRedirect(ModerationQueue::getUrl());
 
@@ -107,9 +106,9 @@ it('approves from a module table too', function () {
     app(TwoFactorAuthenticator::class)->enable($admin, 'JBSWY3DPEHPK3PXP');
     $this->actingAs($admin->fresh());
 
-    $hotel = Hotel::factory()->create(['status' => ListingStatus::Pending]);
+    $property = Property::factory()->create(['status' => ListingStatus::Pending]);
 
-    Livewire::test(ListHotels::class)->callAction(TestAction::make('approve')->table($hotel));
+    Livewire::test(ListProperties::class)->callAction(TestAction::make('approve')->table($property));
 
-    expect($hotel->fresh()->status)->toBe(ListingStatus::Published);
+    expect($property->fresh()->status)->toBe(ListingStatus::Published);
 });

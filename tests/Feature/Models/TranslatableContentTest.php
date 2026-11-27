@@ -1,12 +1,12 @@
 <?php
 
-use App\Models\Hotel;
 use App\Models\Place;
+use App\Models\Property;
 use App\Support\Database\ListingSchema;
 use Illuminate\Support\Facades\DB;
 
 it('returns the title in the current locale', function (string $locale, string $expected) {
-    $hotel = Hotel::factory()->create(['title' => ['ka' => 'ზღვის ბრიზი', 'en' => 'Sea Breeze', 'ru' => 'Морской бриз']]);
+    $hotel = Property::factory()->create(['title' => ['ka' => 'ზღვის ბრიზი', 'en' => 'Sea Breeze', 'ru' => 'Морской бриз']]);
 
     app()->setLocale($locale);
 
@@ -18,7 +18,7 @@ it('returns the title in the current locale', function (string $locale, string $
 ]);
 
 it('falls back to English when a translation is missing', function () {
-    $hotel = Hotel::factory()->create(['title' => ['ka' => 'მზიური', 'en' => 'Mziuri']]);
+    $hotel = Property::factory()->create(['title' => ['ka' => 'მზიური', 'en' => 'Mziuri']]);
 
     app()->setLocale('ru');
 
@@ -35,7 +35,7 @@ it('stores translations as readable jsonb that SQL can query per locale', functi
 });
 
 it('exposes all translations for the admin forms', function () {
-    $hotel = Hotel::factory()->create(['title' => ['ka' => 'ლაზური', 'en' => 'Lazuri', 'ru' => 'Лазури']]);
+    $hotel = Property::factory()->create(['title' => ['ka' => 'ლაზური', 'en' => 'Lazuri', 'ru' => 'Лазури']]);
 
     expect($hotel->getTranslations('title'))->toBe(['ka' => 'ლაზური', 'en' => 'Lazuri', 'ru' => 'Лазури']);
 });

@@ -4,16 +4,13 @@ use App\Enums\ListingStatus;
 use App\Enums\Role;
 use App\Models\Amenity;
 use App\Models\Article;
-use App\Models\BookingRequest;
 use App\Models\Category;
 use App\Models\Classified;
 use App\Models\Event;
-use App\Models\Hotel;
 use App\Models\Location;
 use App\Models\Place;
 use App\Models\Property;
 use App\Models\Review;
-use App\Models\RoomType;
 use App\Models\User;
 use App\Models\Vacancy;
 use Database\Seeders\DatabaseSeeder;
@@ -28,8 +25,7 @@ beforeEach(function () {
 it('seeds the demo portal with the planned amount of content', function () {
     $this->seed(DatabaseSeeder::class);
 
-    expect(Hotel::count())->toBe(30)
-        ->and(Property::count())->toBe(60)
+    expect(Property::count())->toBe(60)
         ->and(Classified::count())->toBe(80)
         ->and(Vacancy::count())->toBe(40)
         ->and(Place::count())->toBe(25)
@@ -44,17 +40,12 @@ it('seeds the demo portal with the planned amount of content', function () {
 it('seeds consistent listing data', function () {
     $this->seed(DatabaseSeeder::class);
 
-    expect(RoomType::query()->whereNotIn('hotel_id', Hotel::query()->select('id'))->exists())->toBeFalse()
-        ->and(Hotel::query()->whereNull('price_from')->exists())->toBeFalse()
-        ->and(Property::query()->whereNull('price_gel')->exists())->toBeFalse()
+    expect(Property::query()->whereNull('price_gel')->exists())->toBeFalse()
         ->and(Classified::query()->whereNotNull('price')->whereNull('price_gel')->exists())->toBeFalse()
-        ->and(Hotel::query()->whereNull('location_id')->exists())->toBeFalse()
-        ->and(Hotel::query()->published()->whereNotNull('rating_avg')->count())->toBeGreaterThan(20)
-        ->and(Hotel::query()->where('promotion_level', 2)->count())->toBe(2)
-        ->and(Review::query()->count())->toBeGreaterThan(80)
-        ->and(BookingRequest::query()->count())->toBe(40);
+        ->and(Property::query()->whereNull('location_id')->exists())->toBeFalse()
+        ->and(Review::query()->count())->toBeGreaterThan(10);
 
-    foreach ([Hotel::class, Property::class, Classified::class, Vacancy::class] as $model) {
+    foreach ([Property::class, Classified::class, Vacancy::class] as $model) {
         expect($model::query()->where('status', ListingStatus::Pending)->exists())->toBeTrue("{$model} has nothing to moderate");
     }
 

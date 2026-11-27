@@ -1,16 +1,16 @@
 <?php
 
 use App\Enums\ListingStatus;
-use App\Livewire\Listings\HotelIndex;
+use App\Livewire\Listings\PropertyIndex;
 use App\Models\Article;
-use App\Models\Hotel;
 use App\Models\Place;
+use App\Models\Property;
 use App\Models\Vacancy;
 use App\Search\SiteSearch;
 use App\Services\Settings;
 use Livewire\Livewire;
 
-function searchTitles(string $query, string $module = 'hotels'): array
+function searchTitles(string $query, string $module = 'real_estate'): array
 {
     $group = collect(app(SiteSearch::class)->grouped($query, 20))->firstWhere('module', $module);
 
@@ -22,8 +22,8 @@ beforeEach(function () {
 });
 
 it('finds listings by whole words and prefixes in any language', function () {
-    Hotel::factory()->create(['title' => ['ka' => 'სასტუმრო ზღვისპირა', 'en' => 'Seaside Hotel', 'ru' => 'Отель у моря'], 'description' => ['en' => 'Pool and garden']]);
-    Hotel::factory()->create(['title' => ['ka' => 'მთის სახლი', 'en' => 'Mountain House', 'ru' => 'Горный дом'], 'description' => ['en' => 'Quiet place']]);
+    Property::factory()->create(['title' => ['ka' => 'სასტუმრო ზღვისპირა', 'en' => 'Seaside Hotel', 'ru' => 'Отель у моря'], 'description' => ['en' => 'Pool and garden']]);
+    Property::factory()->create(['title' => ['ka' => 'მთის სახლი', 'en' => 'Mountain House', 'ru' => 'Горный дом'], 'description' => ['en' => 'Quiet place']]);
 
     expect(searchTitles('seaside'))->toBe(['სასტუმრო ზღვისპირა'])
         ->and(searchTitles('sea'))->toBe(['სასტუმრო ზღვისპირა'])
@@ -33,8 +33,8 @@ it('finds listings by whole words and prefixes in any language', function () {
 });
 
 it('tolerates typos', function () {
-    Hotel::factory()->create(['title' => ['ka' => 'Sunrise', 'en' => 'Sunrise Hotel']]);
-    Hotel::factory()->create(['title' => ['ka' => 'Moonlight', 'en' => 'Moonlight Guesthouse']]);
+    Property::factory()->create(['title' => ['ka' => 'Sunrise', 'en' => 'Sunrise Hotel']]);
+    Property::factory()->create(['title' => ['ka' => 'Moonlight', 'en' => 'Moonlight Guesthouse']]);
 
     expect(searchTitles('Sunrize'))->toBe(['Sunrise'])
         ->and(searchTitles('moonlihgt'))->toBe(['Moonlight'])
@@ -52,8 +52,8 @@ it('uses the synonyms edited in the admin', function () {
 });
 
 it('never returns hidden or expired items', function () {
-    Hotel::factory()->create(['title' => ['ka' => 'Hidden draft hotel', 'en' => 'Hidden draft hotel'], 'status' => ListingStatus::Draft, 'published_at' => null]);
-    Hotel::factory()->create(['title' => ['ka' => 'Hidden expired hotel', 'en' => 'Hidden expired hotel'], 'expires_at' => now()->subDay()]);
+    Property::factory()->create(['title' => ['ka' => 'Hidden draft hotel', 'en' => 'Hidden draft hotel'], 'status' => ListingStatus::Draft, 'published_at' => null]);
+    Property::factory()->create(['title' => ['ka' => 'Hidden expired hotel', 'en' => 'Hidden expired hotel'], 'expires_at' => now()->subDay()]);
     Vacancy::factory()->pending()->create(['title' => ['ka' => 'Hidden job', 'en' => 'Hidden job']]);
     Article::factory()->draft()->create(['title' => ['ka' => 'Hidden article', 'en' => 'Hidden article']]);
 
@@ -64,27 +64,27 @@ it('never returns hidden or expired items', function () {
 });
 
 it('groups instant suggestions by module', function () {
-    Hotel::factory()->create(['title' => ['ka' => 'Kobuleti Palace', 'en' => 'Kobuleti Palace']]);
+    Property::factory()->create(['title' => ['ka' => 'Kobuleti Palace', 'en' => 'Kobuleti Palace']]);
     Place::factory()->create(['title' => ['ka' => 'Kobuleti beach', 'en' => 'Kobuleti beach']]);
 
     $groups = $this->getJson('/en/search/suggest?q=kobuleti')->assertOk()->json('groups');
 
-    expect(array_column($groups, 'module'))->toBe(['hotels', 'guide'])
+    expect(array_column($groups, 'module'))->toBe(['real_estate', 'guide'])
         ->and($groups[0]['items'][0])->toHaveKeys(['title', 'url', 'image', 'meta'])
-        ->and($groups[0]['all'])->toBe(localized_route('hotels.index', ['q' => 'kobuleti'], 'en'));
+        ->and($groups[0]['all'])->toBe(localized_route('real-estate.index', ['q' => 'kobuleti'], 'en'));
 });
 
 it('ignores queries shorter than two letters', function () {
-    Hotel::factory()->create();
+    Property::factory()->create();
 
     $this->getJson('/search/suggest?q=a')->assertOk()->assertExactJson(['groups' => []]);
 });
 
 it('searches inside a module list page, best match first', function () {
-    Hotel::factory()->create(['title' => ['ka' => 'Blue Lagoon', 'en' => 'Blue Lagoon']]);
-    Hotel::factory()->create(['title' => ['ka' => 'Green Garden', 'en' => 'Green Garden']]);
+    Property::factory()->create(['title' => ['ka' => 'Blue Lagoon', 'en' => 'Blue Lagoon']]);
+    Property::factory()->create(['title' => ['ka' => 'Green Garden', 'en' => 'Green Garden']]);
 
-    $component = Livewire::test(HotelIndex::class)->set('q', 'lagon');
+    $component = Livewire::test(PropertyIndex::class)->set('q', 'lagon');
 
-    expect(collect($component->viewData('items'))->pluck('name')->all())->toBe(['Blue Lagoon']);
+    expect(collect($component->viewData('items'))->pluck('title')->all())->toBe(['Blue Lagoon']);
 });

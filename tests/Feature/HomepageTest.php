@@ -1,9 +1,9 @@
 <?php
 
 use App\Enums\PropertyDeal;
+use App\Enums\PropertyType;
 use App\Models\Article;
 use App\Models\Classified;
-use App\Models\Hotel;
 use App\Models\Property;
 use App\Models\User;
 use App\Models\Vacancy;
@@ -92,14 +92,14 @@ it('returns 404 for unsupported locale prefixes', function () {
 
 it('renders favorite buttons with the visitor\'s saved state', function () {
     $user = User::factory()->create();
-    $hotels = Hotel::factory()->count(3)->create();
+    $hotels = Property::factory()->type(PropertyType::Hotel, PropertyDeal::DailyRent)->count(3)->create();
     Property::factory()->count(2)->create();
     app(Favorites::class)->toggle($user, $hotels[1]);
 
     $html = $this->actingAs($user)->get('/')->assertOk()->getContent();
 
-    expect(preg_match_all('/data-favorite="(hotel|property):\\d+"/', $html))->toBe(5)
-        ->and(preg_match_all('/data-favorite="hotel:'.$hotels[1]->id.'"\\s+aria-pressed="true"/', $html))->toBe(1)
+    expect(preg_match_all('/data-favorite="property:\\d+"/', $html))->toBe(5)
+        ->and(preg_match_all('/data-favorite="property:'.$hotels[1]->id.'"\\s+aria-pressed="true"/', $html))->toBe(1)
         ->and(preg_match_all('/data-favorite="[a-z_]+:\\d+"\\s+aria-pressed="true"/', $html))->toBe(1);
 });
 
@@ -114,9 +114,9 @@ it('tags property cards with their deal for the segmented filter', function () {
 });
 
 it('shows published listings from every module and nothing hidden', function () {
-    $hotel = Hotel::factory()->create(['title' => ['ka' => 'Sunrise Inn', 'en' => 'Sunrise Inn']]);
-    $draft = Hotel::factory()->draft()->create(['title' => ['ka' => 'Draft Palace', 'en' => 'Draft Palace']]);
-    $expired = Hotel::factory()->create(['title' => ['ka' => 'Expired Lodge', 'en' => 'Expired Lodge'], 'expires_at' => now()->subDay()]);
+    $hotel = Property::factory()->type(PropertyType::Hotel, PropertyDeal::DailyRent)->create(['title' => ['ka' => 'Sunrise Inn', 'en' => 'Sunrise Inn']]);
+    $draft = Property::factory()->type(PropertyType::Hotel, PropertyDeal::DailyRent)->draft()->create(['title' => ['ka' => 'Draft Palace', 'en' => 'Draft Palace']]);
+    $expired = Property::factory()->type(PropertyType::Hotel, PropertyDeal::DailyRent)->create(['title' => ['ka' => 'Expired Lodge', 'en' => 'Expired Lodge'], 'expires_at' => now()->subDay()]);
     $property = Property::factory()->create(['title' => ['ka' => 'ბინა ზღვის ხედით', 'en' => 'Flat with a sea view']]);
     $classified = Classified::factory()->create(['title' => ['ka' => 'ველოსიპედი', 'en' => 'Road bike']]);
     $vacancy = Vacancy::factory()->create(['title' => ['ka' => 'მიმტანი', 'en' => 'Waiter']]);
@@ -129,32 +129,32 @@ it('shows published listings from every module and nothing hidden', function () 
         ->assertSee('Road bike')
         ->assertSee('Waiter')
         ->assertSee('New boulevard')
-        ->assertSee(localized_route('hotels.show', [$hotel], 'en'), false)
+        ->assertSee(localized_route('real-estate.show', [$hotel], 'en'), false)
         ->assertDontSee('Draft Palace')
         ->assertDontSee('Expired Lodge');
 });
 
 it('puts admin-picked hotels first, then promoted ones', function () {
-    $plain = Hotel::factory()->create(['title' => ['ka' => 'Plain Hotel', 'en' => 'Plain Hotel'], 'promotion_level' => 0]);
-    $vip = Hotel::factory()->create(['title' => ['ka' => 'Vip Hotel', 'en' => 'Vip Hotel']]);
+    $plain = Property::factory()->type(PropertyType::Hotel, PropertyDeal::DailyRent)->create(['title' => ['ka' => 'Plain Hotel', 'en' => 'Plain Hotel'], 'promotion_level' => 0]);
+    $vip = Property::factory()->type(PropertyType::Hotel, PropertyDeal::DailyRent)->create(['title' => ['ka' => 'Vip Hotel', 'en' => 'Vip Hotel']]);
     $vip->forceFill(['promotion_level' => 2])->save();
-    $picked = Hotel::factory()->create(['title' => ['ka' => 'Picked Hotel', 'en' => 'Picked Hotel']]);
+    $picked = Property::factory()->type(PropertyType::Hotel, PropertyDeal::DailyRent)->create(['title' => ['ka' => 'Picked Hotel', 'en' => 'Picked Hotel']]);
     app(Settings::class)->put(['homepage.featured_hotels' => [$picked->id]]);
 
-    $names = array_column(app(HomepageData::class)->hotels(), 'name');
+    $names = array_column(app(HomepageData::class)->hotels(), 'title');
 
     expect($names)->toBe(['Picked Hotel', 'Vip Hotel', 'Plain Hotel']);
 });
 
 it('counts listings per category tile and caches the blocks until a listing changes', function () {
-    Hotel::factory()->count(2)->create();
-    Hotel::factory()->pending()->create();
+    Property::factory()->type(PropertyType::Hotel, PropertyDeal::DailyRent)->count(2)->create();
+    Property::factory()->type(PropertyType::Hotel, PropertyDeal::DailyRent)->pending()->create();
 
     // The tile order follows the season, so the hotels tile is found by its icon.
     $hotels = fn (): array => collect(app(HomepageData::class)->categories())->firstWhere('icon', 'bed');
     expect($hotels()['count'])->toContain('2');
 
-    Hotel::factory()->create();
+    Property::factory()->type(PropertyType::Hotel, PropertyDeal::DailyRent)->create();
 
     expect($hotels()['count'])->toContain('3');
 });

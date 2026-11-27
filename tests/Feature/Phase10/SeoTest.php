@@ -3,7 +3,6 @@
 use App\Enums\ListingStatus;
 use App\Models\Article;
 use App\Models\Event;
-use App\Models\Hotel;
 use App\Models\Property;
 use App\Models\Vacancy;
 use App\Services\Settings;
@@ -28,24 +27,22 @@ function schemaOfType(string $html, string $type): array
     return collect(jsonLd($html))->firstWhere('@type', $type) ?? [];
 }
 
-it('describes a hotel for search engines and social networks', function () {
-    $hotel = Hotel::factory()->published()->create(['stars' => 4, 'price_from' => 150, 'rating_avg' => 8.6, 'reviews_count' => 12]);
+it('describes a property for search engines and social networks', function () {
+    $property = Property::factory()->published()->create(['price' => 150, 'currency' => 'GEL']);
 
-    $html = $this->get(localized_route('hotels.show', [$hotel]))->assertOk()->getContent();
-    $schema = schemaOfType($html, 'Hotel') ?: schemaOfType($html, 'LodgingBusiness') ?: schemaOfType($html, 'BedAndBreakfast') ?: schemaOfType($html, 'Hostel');
+    $html = $this->get(localized_route('real-estate.show', [$property]))->assertOk()->getContent();
+    $schema = schemaOfType($html, 'RealEstateListing');
 
     expect($schema)->not->toBe([])
-        ->and($schema['name'])->toBe($hotel->title)
-        ->and($schema['address']['addressCountry'])->toBe('GE')
-        ->and($schema['aggregateRating']['reviewCount'])->toBe(12)
-        ->and($schema['makesOffer']['price'])->toEqual(150)
+        ->and($schema['name'])->toBe($property->title)
+        ->and($schema['about']['address']['addressCountry'])->toBe('GE')
         ->and($schema)->not->toHaveKey('telephone')
         ->and(schemaOfType($html, 'BreadcrumbList'))->not->toBe([]);
 
     expect($html)
-        ->toContain('<link rel="canonical" href="'.localized_route('hotels.show', [$hotel]).'">')
+        ->toContain('<link rel="canonical" href="'.localized_route('real-estate.show', [$property]).'">')
         ->toContain('hreflang="x-default"')
-        ->toContain('property="og:image" content="'.url("/og/hotel/{$hotel->id}-ka.jpg"))
+        ->toContain('property="og:image" content="'.url("/og/property/{$property->id}-ka.jpg"))
         ->toContain('name="twitter:card" content="summary_large_image"');
 });
 
@@ -85,27 +82,27 @@ it('adds the organization and the site search box to the homepage', function () 
 });
 
 it('uses the title and description templates set in the admin', function () {
-    $hotel = Hotel::factory()->published()->create(['price_from' => 90]);
+    $property = Property::factory()->published()->create(['price' => 90, 'currency' => 'GEL']);
     app(Settings::class)->put([
-        'seo.templates.hotel.title.ka' => '{title} — სასტუმრო {price} | {site}',
-        'seo.templates.hotel.description.en' => 'Book {title} in Kobuleti.',
+        'seo.templates.property.title.ka' => '{title} — {price} | {site}',
+        'seo.templates.property.description.en' => 'See {title} in Kobuleti.',
     ]);
 
-    $this->get(localized_route('hotels.show', [$hotel]))
-        ->assertSee('<title>'.$hotel->title.' — სასტუმრო ₾90 | infokobuleti</title>', false);
+    $this->get(localized_route('real-estate.show', [$property]))
+        ->assertSee('<title>'.$property->title.' — ₾90 | infokobuleti</title>', false);
 
     app()->setLocale('en');
-    $this->get(localized_route('hotels.show', [$hotel], 'en'))
-        ->assertSee('<meta name="description" content="Book '.e($hotel->getTranslation('title', 'en')).' in Kobuleti.">', false);
+    $this->get(localized_route('real-estate.show', [$property], 'en'))
+        ->assertSee('<meta name="description" content="See '.e($property->getTranslation('title', 'en')).' in Kobuleti.">', false);
 });
 
 it('keeps previews, account pages and search out of the index', function () {
-    $draft = Hotel::factory()->create(['status' => ListingStatus::Pending]);
+    $draft = Property::factory()->create(['status' => ListingStatus::Pending]);
 
     $this->get('/search?q=test')->assertSee('noindex', false);
     $this->get('/login')->assertSee('noindex', false);
 
-    $this->actingAs($draft->user)->get(localized_route('hotels.show', [$draft]))
+    $this->actingAs($draft->user)->get(localized_route('real-estate.show', [$draft]))
         ->assertOk()->assertSee('<meta name="robots" content="noindex, nofollow">', false)->assertDontSee('rel="canonical"', false);
 });
 
@@ -122,16 +119,16 @@ it('closes robots.txt outside production and opens it in production', function (
 });
 
 it('writes one sitemap per module with language alternates', function () {
-    $published = Hotel::factory()->published()->create();
-    $draft = Hotel::factory()->create(['status' => ListingStatus::Draft]);
+    $published = Property::factory()->published()->create();
+    $draft = Property::factory()->create(['status' => ListingStatus::Draft]);
     $path = storage_path('framework/testing/sitemap');
 
     $this->artisan('sitemap:generate', ['--path' => $path])->assertSuccessful();
 
-    $hotels = File::get($path.'/sitemaps/hotels.xml');
-    expect(File::get($path.'/sitemap.xml'))->toContain(url('/sitemaps/hotels.xml'))->toContain(url('/sitemaps/pages.xml'))
-        ->and($hotels)->toContain(localized_route('hotels.show', [$published]))
-        ->toContain('hreflang="en" href="'.localized_route('hotels.show', [$published], 'en').'"')
+    $estate = File::get($path.'/sitemaps/real-estate.xml');
+    expect(File::get($path.'/sitemap.xml'))->toContain(url('/sitemaps/real-estate.xml'))->toContain(url('/sitemaps/pages.xml'))
+        ->and($estate)->toContain(localized_route('real-estate.show', [$published]))
+        ->toContain('hreflang="en" href="'.localized_route('real-estate.show', [$published], 'en').'"')
         ->not->toContain('/'.$draft->slug.'<');
 
     File::deleteDirectory($path);
@@ -139,14 +136,14 @@ it('writes one sitemap per module with language alternates', function () {
 
 it('draws a share picture for public pages only', function () {
     Storage::fake('public');
-    $hotel = Hotel::factory()->published()->create();
-    $draft = Hotel::factory()->create(['status' => ListingStatus::Pending]);
+    $hotel = Property::factory()->published()->create();
+    $draft = Property::factory()->create(['status' => ListingStatus::Pending]);
 
-    $response = $this->get("/og/hotel/{$hotel->id}-ka.jpg")->assertOk()->assertHeader('Content-Type', 'image/jpeg');
+    $response = $this->get("/og/property/{$hotel->id}-ka.jpg")->assertOk()->assertHeader('Content-Type', 'image/jpeg');
     $size = getimagesizefromstring((string) file_get_contents($response->baseResponse->getFile()->getPathname()));
 
     expect([$size[0], $size[1]])->toBe([1200, 630]);
 
-    $this->get("/og/hotel/{$draft->id}-ka.jpg")->assertNotFound();
-    $this->get("/og/hotel/{$hotel->id}-de.jpg")->assertNotFound();
+    $this->get("/og/property/{$draft->id}-ka.jpg")->assertNotFound();
+    $this->get("/og/property/{$hotel->id}-de.jpg")->assertNotFound();
 });

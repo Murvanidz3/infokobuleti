@@ -5,7 +5,6 @@ namespace App\Support\Listings;
 use App\Models\BusinessProfile;
 use App\Models\Classified;
 use App\Models\Event;
-use App\Models\Hotel;
 use App\Models\Place;
 use App\Models\Property;
 use App\Models\Vacancy;
@@ -19,7 +18,6 @@ final class PublicUrl
     public static function for(Model $model, ?string $locale = null): ?string
     {
         $route = match (true) {
-            $model instanceof Hotel => 'hotels.show',
             $model instanceof Property => 'real-estate.show',
             $model instanceof Classified => 'classifieds.show',
             $model instanceof Vacancy => 'jobs.show',
