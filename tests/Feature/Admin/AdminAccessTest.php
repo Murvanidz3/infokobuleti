@@ -103,10 +103,13 @@ it('navigates inside the admin without a full reload and preloads the georgian f
 
     preg_match('/<a\b[^>]*href="[^"]*\/account\/[^"]*"[^>]*>/', $html, $account);
     expect($account[0] ?? 'missing account link')->not->toContain('wire:navigate');
+});
 
-    $super = $this->actingAs(staffWith(Role::SuperAdmin))->get('/admin')->assertOk()->getContent();
-    expect($super)->toContain('data-nav-group="sms"')
-        ->and($super)->toContain('data-nav-group="system"');
+it('marks the sms and system sidebar groups for a super admin', function () {
+    $html = $this->actingAs(staffWith(Role::SuperAdmin))->get('/admin')->assertOk()->getContent();
+
+    expect($html)->toContain('data-nav-group="sms"')
+        ->and($html)->toContain('data-nav-group="system"');
 });
 
 it('shows the admin in Georgian by default', function () {
