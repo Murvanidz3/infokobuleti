@@ -27,6 +27,8 @@ you are sure nothing is missing (`sudo rm -rf /var/www/infokobuleti`, after a sn
 - **Automatic:** a push to `develop` deploys staging, a push to `main` deploys production, after the
   tests pass in GitHub Actions (`.github/workflows/ci.yml`). Needs the repository secrets
   `DEPLOY_HOST`, `DEPLOY_PORT`, `DEPLOY_KNOWN_HOSTS`, `DEPLOY_SSH_KEY`.
+  Finished work is pushed to `develop` on every change so dev.infokobuleti.com updates. Production
+  still needs an explicit request to merge into `main`.
 - **From the PC:** `M:\infokobuleti.com\.provision\p11-deploy.cmd staging` (or `production`).
 - **What happens** (`deploy/activate.sh`): unpack into a new release, link `.env` and `storage`,
   install PHP packages if the package has none, `migrate --force`, `optimize`, regenerate the
