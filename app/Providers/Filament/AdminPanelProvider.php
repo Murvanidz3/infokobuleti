@@ -11,6 +11,8 @@ use App\Http\Middleware\SecurityHeaders;
 use App\Http\Middleware\SetAdminLocale;
 use App\Http\Middleware\TrackUserSessions;
 use Filament\Actions\Action;
+use Filament\Enums\DatabaseNotificationsPosition;
+use Filament\Enums\UserMenuPosition;
 use Filament\FontProviders\LocalFontProvider;
 use Filament\Forms\Components\Field;
 use Filament\Http\Middleware\AuthenticateSession;
@@ -53,10 +55,15 @@ class AdminPanelProvider extends PanelProvider
             ->brandLogoHeight('1.75rem')
             ->favicon(asset('favicon.ico'))
             ->colors([
-                'primary' => Color::hex('#d4602a'),
-                'gray' => Color::Slate,
-                'info' => Color::hex('#2f6f9f'),
+                'primary' => Color::hex('#00C9FF'),
+                'gray' => Color::Neutral,
+                'success' => Color::hex('#6beba4'),
+                'danger' => Color::hex('#f52525'),
+                'warning' => Color::hex('#e7ea68'),
+                'info' => Color::hex('#00C9FF'),
             ])
+            ->darkMode(isForced: true)
+            ->themeSwitcher(false)
             ->font(
                 'Noto Sans Georgian Variable',
                 provider: LocalFontProvider::class,
@@ -73,12 +80,14 @@ class AdminPanelProvider extends PanelProvider
                 '*/account/*',
             ])
             ->sidebarCollapsibleOnDesktop()
+            ->sidebarWidth('18.5rem')
             ->maxContentWidth('full')
             ->navigationGroups(collect(NavigationGroup::cases())->mapWithKeys(fn (NavigationGroup $group): array => [
                 // Labels are resolved per request, after the admin language is applied.
                 $group->name => FilamentNavigationGroup::make()->label(fn (): string => $group->getLabel()),
             ])->all())
-            ->databaseNotifications()
+            ->databaseNotifications(position: DatabaseNotificationsPosition::Topbar)
+            ->userMenu(position: UserMenuPosition::Sidebar)
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\Filament\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\Filament\Pages')
             ->pages([

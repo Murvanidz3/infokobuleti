@@ -33,8 +33,8 @@ class ListingsChart extends ChartWidget
             'datasets' => [[
                 'label' => __('admin.dashboard.new_listings'),
                 'data' => $series['values'],
-                'backgroundColor' => '#d4602a',
-                'borderRadius' => 4,
+                'backgroundColor' => '#00C9FF',
+                'borderRadius' => 6,
             ]],
         ];
     }

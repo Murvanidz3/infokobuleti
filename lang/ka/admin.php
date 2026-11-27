@@ -168,6 +168,8 @@ return [
         'active_listings' => 'აქტიური განცხადებები',
         'revenue_month' => 'შემოსავალი ამ თვეში',
         'revenue_last_month' => 'წინა თვე: :amount ₾',
+        'versus_yesterday' => 'გუშინდელთან',
+        'versus_last_month' => 'წინა თვესთან',
         'registrations' => 'რეგისტრაციები დღეების მიხედვით',
         'new_listings' => 'ახალი განცხადებები დღეების მიხედვით',
         'revenue' => 'შემოსავალი დღეების მიხედვით',

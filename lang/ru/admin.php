@@ -168,6 +168,8 @@ return [
         'active_listings' => 'Активные объявления',
         'revenue_month' => 'Выручка за месяц',
         'revenue_last_month' => 'Прошлый месяц: :amount ₾',
+        'versus_yesterday' => 'ко вчера',
+        'versus_last_month' => 'к прошлому месяцу',
         'registrations' => 'Регистрации по дням',
         'new_listings' => 'Новые объявления по дням',
         'revenue' => 'Выручка по дням',

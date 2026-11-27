@@ -15,6 +15,7 @@ use Filament\Support\Icons\Heroicon;
 use Filament\Widgets\StatsOverviewWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
 use Illuminate\Database\Query\Builder;
+use Illuminate\Support\HtmlString;
 
 /**
  * Key numbers: sign-ups, moderation backlog, live listings per module, revenue this month.
@@ -32,12 +33,15 @@ class AdminStats extends StatsOverviewWidget
         $user = auth()->user();
         $stats = [];
 
-        $today = User::query()->where('created_at', '>=', today())->count();
-        $week = User::query()->where('created_at', '>=', today()->subDays(6))->count();
+        $signups = $this->dailyCounts(User::query()->getQuery()->from('users'));
+        $today = (int) $signups[array_key_last($signups)];
+        $yesterday = (int) ($signups[array_key_last($signups) - 1] ?? 0);
+        $week = (int) array_sum($signups);
         $stats[] = Stat::make(__('admin.dashboard.new_users_today'), number_format($today))
-            ->description(__('admin.dashboard.last_7_days', ['count' => number_format($week)]))
+            ->description($this->delta($today, $yesterday, 'admin.dashboard.versus_yesterday', __('admin.dashboard.last_7_days', ['count' => number_format($week)])))
             ->icon(Heroicon::OutlinedUserPlus)
-            ->chart($this->dailyCounts(User::query()->getQuery()->from('users')));
+            ->chart($signups)
+            ->chartColor('primary');
 
         $pending = ModerationQueue::pendingQuery()->count();
         $stats[] = Stat::make(__('admin.dashboard.pending'), number_format($pending))
@@ -53,13 +57,19 @@ class AdminStats extends StatsOverviewWidget
             ->pluck('total', 'listing_type');
         $stats[] = Stat::make(__('admin.dashboard.active_listings'), number_format((int) $live->sum()))
             ->description(collect(['hotel', 'property', 'classified', 'vacancy'])->map(fn (string $type): string => __('admin.morph.'.$type).' '.($live[$type] ?? 0))->implode(' · '))
-            ->icon(Heroicon::OutlinedSquares2x2);
+            ->icon(Heroicon::OutlinedSquares2x2)
+            ->chart($this->dailyCounts(AdminListing::query()->getQuery()))
+            ->chartColor('primary');
 
         if ($user?->can(Permission::ManagePayments->value)) {
-            $stats[] = Stat::make(__('admin.dashboard.revenue_month'), number_format($this->revenueSince(now()->startOfMonth()), 2).' ₾')
-                ->description(__('admin.dashboard.revenue_last_month', ['amount' => number_format($this->revenueSince(now()->subMonthNoOverflow()->startOfMonth(), now()->startOfMonth()), 2)]))
+            $thisMonth = $this->revenueSince(now()->startOfMonth());
+            $lastMonth = $this->revenueSince(now()->subMonthNoOverflow()->startOfMonth(), now()->startOfMonth());
+            $stats[] = Stat::make(__('admin.dashboard.revenue_month'), number_format($thisMonth, 2).' ₾')
+                ->description($this->delta($thisMonth, $lastMonth, 'admin.dashboard.versus_last_month', __('admin.dashboard.revenue_last_month', ['amount' => number_format($lastMonth, 2)])))
                 ->icon(Heroicon::OutlinedBanknotes)
-                ->color('success');
+                ->color('success')
+                ->chart($this->dailyCounts(Payment::query()->where('status', PaymentStatus::Paid->value)->getQuery(), 'paid_at'))
+                ->chartColor('success');
         }
 
         return $stats;
@@ -78,15 +88,35 @@ class AdminStats extends StatsOverviewWidget
     }
 
     /**
+     * A percent pill plus the existing caption. A zero baseline has no meaningful percent.
+     */
+    private function delta(float $current, float $previous, string $noteKey, string $caption): HtmlString
+    {
+        $caption = '<span class="ik-delta-note">'.e($caption).'</span>';
+
+        if ($previous <= 0) {
+            return new HtmlString($caption);
+        }
+
+        $percent = (($current - $previous) / $previous) * 100;
+        $class = $percent >= 0 ? 'ik-delta ik-delta-up' : 'ik-delta ik-delta-down';
+        $formatted = ($percent >= 0 ? '+' : '').number_format($percent, 1);
+
+        return new HtmlString('<span class="'.$class.'">'.e($formatted).'%</span> '.$caption.' <span class="ik-delta-note">'.e(__($noteKey)).'</span>');
+    }
+
+    /**
      * Rows created per day over the last 7 days, for the sparkline.
      *
      * @return list<float>
      */
-    private function dailyCounts(Builder $query): array
+    private function dailyCounts(Builder $query, string $column = 'created_at'): array
     {
+        $column = in_array($column, ['created_at', 'paid_at'], true) ? $column : 'created_at';
+
         $counts = (clone $query)
-            ->where('created_at', '>=', today()->subDays(6))
-            ->selectRaw('date(created_at) as day, count(*) as total')
+            ->where($column, '>=', today()->subDays(6))
+            ->selectRaw('date('.$column.') as day, count(*) as total')
             ->groupBy('day')
             ->pluck('total', 'day');
 

@@ -21,7 +21,7 @@
                     @endif
 
                     @if ($listing && filled($listing->rejection_reason ?? null))
-                        <p class="mt-4 rounded-lg bg-danger-50 px-3 py-2 text-sm text-danger-700">{{ __('admin.fields.rejection_reason') }}: {{ $listing->rejection_reason }}</p>
+                        <p class="ik-callout ik-callout-danger">{{ __('admin.fields.rejection_reason') }}: {{ $listing->rejection_reason }}</p>
                     @endif
                 </x-filament::section>
 
@@ -57,10 +57,10 @@
 
                 <x-filament::section :heading="__('admin.moderation.shortcuts')">
                     <ul class="grid gap-1.5 text-sm text-gray-600 dark:text-gray-400">
-                        <li><kbd class="rounded border px-1.5 font-mono">A</kbd> {{ __('admin.moderation.approve') }}</li>
-                        <li><kbd class="rounded border px-1.5 font-mono">R</kbd> {{ __('admin.moderation.reject') }}</li>
-                        <li><kbd class="rounded border px-1.5 font-mono">S</kbd> {{ __('admin.moderation.skip') }}</li>
-                        <li><kbd class="rounded border px-1.5 font-mono">O</kbd> {{ __('admin.moderation.open') }}</li>
+                        <li><kbd class="ik-kbd">A</kbd> {{ __('admin.moderation.approve') }}</li>
+                        <li><kbd class="ik-kbd">R</kbd> {{ __('admin.moderation.reject') }}</li>
+                        <li><kbd class="ik-kbd">S</kbd> {{ __('admin.moderation.skip') }}</li>
+                        <li><kbd class="ik-kbd">O</kbd> {{ __('admin.moderation.open') }}</li>
                     </ul>
                     <p class="mt-3 text-sm text-gray-500">{{ trans_choice('admin.moderation.remaining', $remaining, ['count' => $remaining]) }}</p>
                 </x-filament::section>

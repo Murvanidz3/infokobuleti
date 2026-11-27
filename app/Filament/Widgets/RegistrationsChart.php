@@ -33,10 +33,8 @@ class RegistrationsChart extends ChartWidget
             'datasets' => [[
                 'label' => __('admin.dashboard.registrations'),
                 'data' => $series['values'],
-                'borderColor' => '#0a1a2f',
-                'backgroundColor' => 'rgba(10, 26, 47, 0.08)',
                 'fill' => true,
-                'tension' => 0.35,
+                'tension' => 0.4,
             ]],
         ];
     }

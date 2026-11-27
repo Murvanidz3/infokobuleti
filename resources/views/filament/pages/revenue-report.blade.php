@@ -17,33 +17,33 @@
 
     <x-filament::section :heading="__('admin.revenue.by_product')">
         <div style="overflow-x:auto">
-            <table class="fi-ta-table" style="width:100%;border-collapse:collapse">
+            <table class="ik-revenue">
                 <thead>
                     <tr>
                         @foreach (['product', 'orders', 'card', 'balance', 'refunded', 'net'] as $column)
-                            <th style="text-align:{{ $column === 'product' ? 'left' : 'right' }};padding:8px 10px;border-bottom:1px solid rgba(127,127,127,.25)" class="text-sm font-semibold">{{ __('admin.revenue.'.$column) }}</th>
+                            <th @class(['is-end' => $column !== 'product'])>{{ __('admin.revenue.'.$column) }}</th>
                         @endforeach
                     </tr>
                 </thead>
                 <tbody>
                     @forelse ($report['rows'] as $row)
                         <tr>
-                            <td style="padding:8px 10px" class="text-sm">{{ $row['label'] }}@if ($row['product'] === 'wallet_top_up') <span class="text-xs" style="opacity:.6">({{ __('admin.revenue.prepaid') }})</span>@endif</td>
-                            <td style="padding:8px 10px;text-align:right" class="text-sm">{{ $row['orders'] }}</td>
+                            <td>{{ $row['label'] }}@if ($row['product'] === 'wallet_top_up') <span class="ik-delta-note">({{ __('admin.revenue.prepaid') }})</span>@endif</td>
+                            <td class="is-end">{{ $row['orders'] }}</td>
                             @foreach (['card', 'balance', 'refunded', 'net'] as $column)
-                                <td style="padding:8px 10px;text-align:right" class="text-sm">{{ number_format($row[$column], 2, '.', ' ') }} ₾</td>
+                                <td class="is-end">{{ number_format($row[$column], 2, '.', ' ') }} ₾</td>
                             @endforeach
                         </tr>
                     @empty
-                        <tr><td colspan="6" style="padding:16px 10px" class="text-sm">{{ __('admin.revenue.empty') }}</td></tr>
+                        <tr><td colspan="6">{{ __('admin.revenue.empty') }}</td></tr>
                     @endforelse
                 </tbody>
                 <tfoot>
                     <tr>
-                        <td style="padding:10px;border-top:1px solid rgba(127,127,127,.25)" class="text-sm font-semibold">{{ __('admin.revenue.total') }}</td>
-                        <td style="padding:10px;text-align:right;border-top:1px solid rgba(127,127,127,.25)" class="text-sm font-semibold">{{ $report['totals']['orders'] }}</td>
+                        <td>{{ __('admin.revenue.total') }}</td>
+                        <td class="is-end">{{ $report['totals']['orders'] }}</td>
                         @foreach (['card', 'balance', 'refunded', 'net'] as $column)
-                            <td style="padding:10px;text-align:right;border-top:1px solid rgba(127,127,127,.25)" class="text-sm font-semibold">{{ number_format($report['totals'][$column], 2, '.', ' ') }} ₾</td>
+                            <td class="is-end">{{ number_format($report['totals'][$column], 2, '.', ' ') }} ₾</td>
                         @endforeach
                     </tr>
                 </tfoot>

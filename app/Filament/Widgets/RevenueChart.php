@@ -43,10 +43,8 @@ class RevenueChart extends ChartWidget
             'datasets' => [[
                 'label' => __('admin.dashboard.revenue'),
                 'data' => $series['values'],
-                'borderColor' => '#2e7d6b',
-                'backgroundColor' => 'rgba(46, 125, 107, 0.10)',
                 'fill' => true,
-                'tension' => 0.35,
+                'tension' => 0.4,
             ]],
         ];
     }

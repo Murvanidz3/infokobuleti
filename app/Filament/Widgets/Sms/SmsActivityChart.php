@@ -39,9 +39,9 @@ class SmsActivityChart extends ChartWidget
         return [
             'labels' => $all['labels'],
             'datasets' => [
-                ['label' => __('sms.stats.all'), 'data' => $all['values'], 'borderColor' => '#0a1a2f', 'backgroundColor' => 'rgba(10, 26, 47, 0.08)', 'fill' => true, 'tension' => 0.35],
-                ['label' => __('enums.sms_status.delivered'), 'data' => $delivered['values'], 'borderColor' => '#d4602a', 'tension' => 0.35],
-                ['label' => __('enums.sms_status.failed'), 'data' => $failed['values'], 'borderColor' => '#94a3b8', 'borderDash' => [4, 4], 'tension' => 0.35],
+                ['label' => __('sms.stats.all'), 'data' => $all['values'], 'borderColor' => '#00C9FF', 'backgroundColor' => 'rgba(0, 201, 255, 0.12)', 'fill' => true, 'tension' => 0.4],
+                ['label' => __('enums.sms_status.delivered'), 'data' => $delivered['values'], 'borderColor' => '#6beba4', 'tension' => 0.4],
+                ['label' => __('enums.sms_status.failed'), 'data' => $failed['values'], 'borderColor' => '#f52525', 'borderDash' => [4, 4], 'tension' => 0.4],
             ],
         ];
     }

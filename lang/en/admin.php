@@ -168,6 +168,8 @@ return [
         'active_listings' => 'Live listings',
         'revenue_month' => 'Revenue this month',
         'revenue_last_month' => 'Last month: :amount ₾',
+        'versus_yesterday' => 'from yesterday',
+        'versus_last_month' => 'from last month',
         'registrations' => 'Sign-ups per day',
         'new_listings' => 'New listings per day',
         'revenue' => 'Revenue per day',

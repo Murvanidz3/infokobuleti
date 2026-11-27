@@ -78,7 +78,9 @@ it('lets only super admins hand out staff roles', function () {
 it('navigates inside the admin without a full reload and preloads the georgian fonts', function () {
     $html = $this->actingAs(staffWith(Role::Admin))->get('/admin')->assertOk()->getContent();
 
-    expect($html)->toContain('wire:navigate.hover')
+    expect($html)->toContain('class="fi dark"')
+        ->and($html)->not->toContain('fi-theme-switcher')
+        ->and($html)->toContain('wire:navigate.hover')
         ->and($html)->toContain('rel="preload"')
         ->and($html)->toContain('noto-sans-georgian-georgian')
         ->and($html)->toContain('noto-sans-georgian-latin')
