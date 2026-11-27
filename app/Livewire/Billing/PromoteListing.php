@@ -21,7 +21,7 @@ use Livewire\Attributes\On;
 use Livewire\Component;
 
 /**
- * Promote one listing: VIP, Super VIP, homepage slot (hotels), bump or auto-bump, paid from the
+ * Promote one listing: VIP, Super VIP, bump or auto-bump, paid from the
  * balance or by card.
  */
 class PromoteListing extends Component
@@ -32,7 +32,6 @@ class PromoteListing extends Component
     private const array PRODUCTS = [
         PricePlanProduct::SuperVip,
         PricePlanProduct::Vip,
-        PricePlanProduct::FeaturedHotel,
         PricePlanProduct::Bump,
         PricePlanProduct::AutoBump,
     ];

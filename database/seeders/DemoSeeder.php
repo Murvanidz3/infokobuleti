@@ -15,7 +15,6 @@ class DemoSeeder extends Seeder
 
         $this->call([
             DemoUserSeeder::class,
-            HotelSeeder::class,
             PropertySeeder::class,
             ClassifiedSeeder::class,
             VacancySeeder::class,

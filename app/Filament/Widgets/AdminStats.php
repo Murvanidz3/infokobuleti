@@ -56,7 +56,7 @@ class AdminStats extends StatsOverviewWidget
             ->groupBy('listing_type')
             ->pluck('total', 'listing_type');
         $stats[] = Stat::make(__('admin.dashboard.active_listings'), number_format((int) $live->sum()))
-            ->description(collect(['hotel', 'property', 'classified', 'vacancy'])->map(fn (string $type): string => __('admin.morph.'.$type).' '.($live[$type] ?? 0))->implode(' · '))
+            ->description(collect(['property', 'classified', 'vacancy'])->map(fn (string $type): string => __('admin.morph.'.$type).' '.($live[$type] ?? 0))->implode(' · '))
             ->icon(Heroicon::OutlinedSquares2x2)
             ->chart($this->dailyCounts(AdminListing::query()->getQuery()))
             ->chartColor('primary');

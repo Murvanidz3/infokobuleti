@@ -4,7 +4,6 @@ use App\Actions\Privacy\ExportUserData;
 use App\Enums\Role;
 use App\Livewire\Account\Privacy;
 use App\Models\Favorite;
-use App\Models\Hotel;
 use App\Models\Message;
 use App\Models\Property;
 use App\Models\User;
@@ -43,8 +42,8 @@ it('exports the user data and sends a signed link that only the owner can use', 
 
 it('deletes the account: listings go, the person is anonymized, records stay', function () {
     $user = User::factory()->create(['email' => 'gone@example.com', 'phone' => '+995555000111']);
-    $hotel = Hotel::factory()->published()->for($user)->create();
-    Favorite::query()->create(['user_id' => $user->id, 'favoritable_type' => 'hotel', 'favoritable_id' => Hotel::factory()->published()->create()->id]);
+    $hotel = Property::factory()->published()->for($user)->create();
+    Favorite::query()->create(['user_id' => $user->id, 'favoritable_type' => 'property', 'favoritable_id' => Property::factory()->published()->create()->id]);
 
     Livewire::actingAs($user)->test(Privacy::class)
         ->set('confirming', true)
@@ -59,7 +58,7 @@ it('deletes the account: listings go, the person is anonymized, records stay', f
         ->and($deleted->email)->toEndWith('@deleted.invalid')
         ->and($deleted->phone)->toBeNull()
         ->and($deleted->name)->toBe(__('privacy.deleted_user'))
-        ->and(Hotel::query()->find($hotel->id))->toBeNull()
+        ->and(Property::query()->find($hotel->id))->toBeNull()
         ->and(Favorite::query()->where('user_id', $user->id)->count())->toBe(0)
         ->and(auth()->check())->toBeFalse();
 

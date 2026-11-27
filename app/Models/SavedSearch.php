@@ -35,7 +35,6 @@ class SavedSearch extends Model
     public function resultsUrl(bool $edit = false, ?string $locale = null): string
     {
         $route = match ($this->module) {
-            ListingModule::Hotels => 'hotels.index',
             ListingModule::Properties => 'real-estate.index',
             ListingModule::Classifieds => 'classifieds.index',
             ListingModule::Vacancies => 'jobs.index',

@@ -4,7 +4,6 @@ namespace App\Console\Commands;
 
 use App\Contracts\HumanVerifier;
 use App\Enums\Role;
-use App\Models\Hotel;
 use App\Models\Page;
 use App\Models\Property;
 use App\Models\User;
@@ -34,8 +33,8 @@ class LaunchCheck extends Command
         $checks = collect($health->last()['checks'])->keyBy('key');
         $lastCheck = $health->last()['at'];
         $gateways = array_diff((array) config('payments.gateways'), ['fake']);
-        $listings = Hotel::query()->count() + Property::query()->count();
-        $withoutPhotos = Hotel::query()->whereDoesntHave('media')->count() + Property::query()->whereDoesntHave('media')->count();
+        $listings = Property::query()->count();
+        $withoutPhotos = Property::query()->whereDoesntHave('media')->count();
 
         $rows = [
             ['Environment is production', app()->isProduction(), app()->environment()],

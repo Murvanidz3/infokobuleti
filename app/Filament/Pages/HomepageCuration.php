@@ -4,10 +4,11 @@ namespace App\Filament\Pages;
 
 use App\Enums\ListingStatus;
 use App\Enums\Permission;
+use App\Enums\PropertyDeal;
+use App\Enums\PropertyType;
 use App\Filament\NavigationGroup;
 use App\Filament\Support\ChecksPermission;
 use App\Filament\Support\Translatable;
-use App\Models\Hotel;
 use App\Models\Property;
 use App\Services\Settings;
 use BackedEnum;
@@ -24,6 +25,7 @@ use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Arr;
 use UnitEnum;
 
@@ -81,10 +83,12 @@ class HomepageCuration extends Page
                 Section::make(__('admin.homepage.featured'))->description(__('admin.homepage.featured_help'))->schema([
                     Select::make('featured_hotels')->label(__('admin.resources.hotels.plural'))
                         ->multiple()->maxItems(12)->searchable()
-                        ->options(fn (): array => self::options(Hotel::class)),
+                        ->options(fn (): array => self::options(
+                            Property::query()->where('deal', PropertyDeal::DailyRent)->where('type', PropertyType::Hotel),
+                        )),
                     Select::make('featured_properties')->label(__('admin.resources.properties.plural'))
                         ->multiple()->maxItems(12)->searchable()
-                        ->options(fn (): array => self::options(Property::class)),
+                        ->options(fn (): array => self::options(Property::query()->where('type', '!=', PropertyType::Hotel))),
                 ]),
                 Section::make(__('admin.homepage.hero'))->schema([
                     ToggleButtons::make('season')->label(__('admin.homepage.season'))->inline()->options([
@@ -131,12 +135,12 @@ class HomepageCuration extends Page
     /**
      * Published listings as select options, newest first.
      *
-     * @param  class-string<Hotel|Property>  $model
+     * @param  Builder<Property>  $query
      * @return array<int, string>
      */
-    private static function options(string $model): array
+    private static function options(Builder $query): array
     {
-        return $model::query()
+        return $query
             ->where('status', ListingStatus::Published)
             ->latest('published_at')
             ->limit(300)

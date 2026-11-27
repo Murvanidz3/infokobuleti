@@ -18,7 +18,6 @@ class StyleguideController extends Controller
 
         return view('pages.styleguide', [
             'categories' => $data->categories(),
-            'hotels' => $data->hotels(),
             'properties' => $data->properties(),
             'classifieds' => $data->classifieds(),
             'jobs' => $data->jobs(),

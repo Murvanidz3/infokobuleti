@@ -44,31 +44,6 @@ class StyleguideData
     /**
      * @return list<array{id: string, name: string, address: string, sea: string, rating: string, reviews: string, price: string, url: string, image: ?string, saved: bool}>
      */
-    public function hotels(): array
-    {
-        $hotels = [
-            ['id' => 'h1', 'sea' => 30, 'rating' => 9.4, 'reviews' => 312, 'price' => 220],
-            ['id' => 'h2', 'sea' => 120, 'rating' => 9.1, 'reviews' => 487, 'price' => 185],
-            ['id' => 'h3', 'sea' => 250, 'rating' => 9.6, 'reviews' => 158, 'price' => 95, 'saved' => true],
-            ['id' => 'h4', 'sea' => 50, 'rating' => 8.9, 'reviews' => 226, 'price' => 160],
-            ['id' => 'h5', 'sea' => 400, 'rating' => 9.0, 'reviews' => 94, 'price' => 70],
-            ['id' => 'h6', 'sea' => 80, 'rating' => 9.3, 'reviews' => 141, 'price' => 260],
-        ];
-
-        return array_map(fn (array $hotel): array => [
-            'id' => $hotel['id'],
-            'name' => __("demo.hotels.{$hotel['id']}.name"),
-            'address' => __("demo.hotels.{$hotel['id']}.address"),
-            'sea' => __('listing.to_sea', ['distance' => $this->price->number($hotel['sea'])]),
-            'rating' => number_format($hotel['rating'], 1),
-            'reviews' => $this->count('reviews', $hotel['reviews']),
-            'price' => $this->price->format($hotel['price']),
-            'url' => '#',
-            'image' => null,
-            'saved' => $hotel['saved'] ?? false,
-        ], $hotels);
-    }
-
     /**
      * @return list<array{id: string, deal: string, badge: string, price: string, converted: string, title: string, location: string, features: list<array{icon: string, text: string}>, url: string, image: ?string, saved: bool}>
      */

@@ -23,7 +23,7 @@
                 <h2 id="footer-portal" class="mb-4 text-[13px] font-semibold tracking-[0.02em] text-white">{{ __('footer.portal') }}</h2>
                 <ul class="flex flex-col gap-[11px] text-sm">
                     @foreach (config('site.nav') as $key => $route)
-                        <li><a href="{{ localized_route($route) }}" class="text-line-strong transition-colors hover:text-white">{{ __('nav.'.$key) }}</a></li>
+                        <li><a href="{{ nav_link($key, $route)['href'] }}" class="text-line-strong transition-colors hover:text-white">{{ __('nav.'.$key) }}</a></li>
                     @endforeach
                 </ul>
             </nav>

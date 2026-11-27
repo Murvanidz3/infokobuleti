@@ -3,7 +3,6 @@
 namespace App\Services\Seo;
 
 use App\Enums\EmploymentType;
-use App\Enums\HotelType;
 use App\Enums\PlaceType;
 use App\Enums\PropertyDeal;
 use App\Enums\PropertyType;
@@ -12,7 +11,6 @@ use App\Models\Article;
 use App\Models\BusinessProfile;
 use App\Models\Classified;
 use App\Models\Event;
-use App\Models\Hotel;
 use App\Models\Place;
 use App\Models\Property;
 use App\Models\Vacancy;
@@ -42,7 +40,6 @@ final class StructuredData
     public function for(Model $record): array
     {
         $seo = match (true) {
-            $record instanceof Hotel => $this->hotel($record),
             $record instanceof Property => $this->property($record),
             $record instanceof Vacancy => $this->vacancy($record),
             $record instanceof Classified => $this->classified($record),
@@ -97,48 +94,6 @@ final class StructuredData
                 ],
             ],
         ];
-    }
-
-    /**
-     * @return Seo
-     */
-    private function hotel(Hotel $hotel): array
-    {
-        $hotel->loadMissing(['media', 'location']);
-        $images = $this->images($hotel);
-        $schema = [
-            '@context' => self::CONTEXT,
-            '@type' => match ($hotel->type) {
-                HotelType::Hotel => 'Hotel',
-                HotelType::Hostel => 'Hostel',
-                HotelType::Guesthouse => 'BedAndBreakfast',
-                default => 'LodgingBusiness',
-            },
-            'name' => (string) $hotel->title,
-            'description' => $this->text($hotel->description, 500),
-            'url' => PublicUrl::for($hotel),
-            'image' => $images ?: null,
-            'address' => $this->address($hotel),
-            'geo' => $this->geo($hotel),
-            'starRating' => $hotel->stars ? ['@type' => 'Rating', 'ratingValue' => (int) $hotel->stars] : null,
-            'aggregateRating' => $this->rating($hotel->rating_avg, $hotel->reviews_count),
-            'checkinTime' => $hotel->check_in_from ? substr((string) $hotel->check_in_from, 0, 5) : null,
-            'checkoutTime' => $hotel->check_out_until ? substr((string) $hotel->check_out_until, 0, 5) : null,
-            'numberOfRooms' => $hotel->rooms_count ?: null,
-            'priceRange' => $hotel->price_from ? __('listing.price_from', ['price' => $this->prices->format((float) $hotel->price_from)]) : null,
-            'makesOffer' => $hotel->price_from ? [
-                '@type' => 'Offer',
-                'price' => round((float) $hotel->price_from, 2),
-                'priceCurrency' => 'GEL',
-                'priceSpecification' => ['@type' => 'UnitPriceSpecification', 'price' => round((float) $hotel->price_from, 2), 'priceCurrency' => 'GEL', 'unitCode' => 'DAY'],
-            ] : null,
-        ];
-
-        return $this->result('hotel', $schema, $images, 'website', [
-            'type' => (string) $hotel->type->getLabel(),
-            'price' => $hotel->price_from ? $this->prices->format((float) $hotel->price_from) : null,
-            'location' => $this->cards->locationText($hotel),
-        ]);
     }
 
     /**

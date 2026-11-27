@@ -11,7 +11,6 @@ use App\Enums\CategoryModule;
 use App\Enums\Currency;
 use App\Enums\EmploymentType;
 use App\Enums\Experience;
-use App\Enums\HotelType;
 use App\Enums\ItemCondition;
 use App\Enums\ListedBy;
 use App\Enums\PropertyCondition;
@@ -138,6 +137,24 @@ class ListingWizard extends Component
 
         $this->type = $type;
         $this->form = ListingForm::defaults($type, $this->user());
+        $this->resetValidation();
+        $this->persist();
+    }
+
+    /**
+     * The hotel card starts a daily-rent property of type hotel. There is no rooms step.
+     */
+    public function chooseHotel(): void
+    {
+        if ($this->editType !== null) {
+            return;
+        }
+
+        $this->type = 'property';
+        $this->form = ListingForm::defaults('property', $this->user());
+        $this->form['deal'] = PropertyDeal::DailyRent->value;
+        $this->form['property_type'] = PropertyType::Hotel->value;
+        $this->form['currency'] = Currency::GEL->value;
         $this->resetValidation();
         $this->persist();
     }
@@ -491,18 +508,17 @@ class ListingWizard extends Component
         ];
 
         return $common + match ($this->type) {
-            'hotel' => [
-                'hotelTypes' => HotelType::options(),
-                'amenities' => $this->amenities(AmenityScope::Hotel),
-                'months' => collect(range(1, 12))->mapWithKeys(fn (int $month): array => [(string) $month => now()->setDate(2026, $month, 1)->locale(app()->getLocale())->translatedFormat('F')])->all(),
-            ],
             'property' => [
                 'deals' => PropertyDeal::options(),
                 'propertyTypes' => PropertyType::options(),
                 'conditions' => PropertyCondition::options(),
                 'buildingStatuses' => BuildingStatus::options(),
                 'listedBy' => ListedBy::options(),
-                'features' => $this->amenities(AmenityScope::Property),
+                'features' => $this->amenities(
+                    ($this->form['property_type'] ?? '') === PropertyType::Hotel->value
+                        ? [AmenityScope::Property, AmenityScope::Hotel]
+                        : [AmenityScope::Property],
+                ),
             ],
             'classified' => [
                 'parents' => $this->categories(CategoryModule::Classifieds, null),
@@ -538,11 +554,14 @@ class ListingWizard extends Component
     }
 
     /**
+     * @param  AmenityScope|list<AmenityScope>  $scope
      * @return array<int, string>
      */
-    private function amenities(AmenityScope $scope): array
+    private function amenities(AmenityScope|array $scope): array
     {
-        return Amenity::query()->where('scope', $scope->value)->orderBy('sort')->get()
+        $scopes = array_map(fn (AmenityScope $item): string => $item->value, is_array($scope) ? $scope : [$scope]);
+
+        return Amenity::query()->whereIn('scope', $scopes)->orderBy('sort')->get()
             ->mapWithKeys(fn (Amenity $amenity): array => [(string) $amenity->id => (string) $amenity->name])->all();
     }
 
@@ -605,13 +624,6 @@ class ListingWizard extends Component
         ];
 
         $pairs = [...$pairs, ...match ($this->type) {
-            'hotel' => [
-                [__('account.wizard.fields.hotel_type'), $options['hotelTypes'][$form['hotel_type']] ?? null],
-                [__('account.wizard.fields.stars'), filled($form['stars']) ? $form['stars'].' ★' : null],
-                [__('account.wizard.fields.rooms_count'), $form['rooms_count']],
-                [__('account.wizard.fields.amenities'), $chosen($options['amenities'], $form['amenities'] ?? [])],
-                [__('account.wizard.room.base_price'), ($form['has_rooms'] ?? false) ? null : $money($form['room']['base_price'] ?? null, 'GEL')],
-            ],
             'property' => [
                 [__('account.wizard.fields.deal'), $options['deals'][$form['deal']] ?? null],
                 [__('account.wizard.fields.property_type'), $options['propertyTypes'][$form['property_type']] ?? null],

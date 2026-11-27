@@ -3,16 +3,16 @@
 use App\Enums\AmenityScope;
 use App\Enums\BusinessType;
 use App\Enums\PromotionType;
+use App\Enums\PropertyDeal;
+use App\Enums\PropertyType;
 use App\Enums\ReviewStatus;
 use App\Models\Amenity;
-use App\Models\BookingRequest;
 use App\Models\BusinessProfile;
 use App\Models\Category;
 use App\Models\Classified;
 use App\Models\Conversation;
 use App\Models\Event;
 use App\Models\Favorite;
-use App\Models\Hotel;
 use App\Models\Location;
 use App\Models\Message;
 use App\Models\Payment;
@@ -21,45 +21,20 @@ use App\Models\Promotion;
 use App\Models\Property;
 use App\Models\Report;
 use App\Models\Review;
-use App\Models\RoomAvailability;
-use App\Models\RoomType;
-use App\Models\RoomTypePriceRule;
 use App\Models\User;
 use App\Models\Vacancy;
 use App\Models\VacancyApplication;
 use Illuminate\Support\Facades\DB;
 
-it('links a hotel with its owner, business, room types, prices, availability and bookings', function () {
-    $business = BusinessProfile::factory()->type(BusinessType::Hotel)->create();
-    $hotel = Hotel::factory()->for($business->user)->for($business)->create();
-    $room = RoomType::factory()->for($hotel)->create();
-    RoomTypePriceRule::factory()->for($room, 'roomType')->create();
-    RoomAvailability::factory()->for($room, 'roomType')->create();
-    BookingRequest::factory()->for($hotel)->for($room, 'roomType')->create();
-
-    $hotel = Hotel::query()->with(['user', 'businessProfile', 'roomTypes.priceRules', 'roomTypes.availability', 'bookingRequests.roomType'])->find($hotel->id);
-
-    expect($hotel->user->is($business->user))->toBeTrue()
-        ->and($hotel->businessProfile->is($business))->toBeTrue()
-        ->and($hotel->roomTypes)->toHaveCount(1)
-        ->and($hotel->roomTypes->first()->priceRules)->toHaveCount(1)
-        ->and($hotel->roomTypes->first()->availability)->toHaveCount(1)
-        ->and($hotel->bookingRequests->first()->roomType->is($room))->toBeTrue();
-});
-
-it('keeps hotel amenities, room amenities and property features apart', function () {
+it('shows property features and hotel amenities together on a hotel listing', function () {
     $wifi = Amenity::factory()->scope(AmenityScope::Hotel)->create();
     $balcony = Amenity::factory()->scope(AmenityScope::Room)->create();
     $parking = Amenity::factory()->scope(AmenityScope::Property)->create();
+    $property = Property::factory()->type(PropertyType::Hotel, PropertyDeal::DailyRent)->create();
 
-    $hotel = Hotel::factory()->create();
-    $hotel->amenities()->attach([$wifi->id, $balcony->id]);
-    $property = Property::factory()->create();
-    $property->features()->attach($parking);
+    $property->features()->attach([$wifi->id, $balcony->id, $parking->id]);
 
-    expect($hotel->amenities()->pluck('amenities.id')->all())->toBe([$wifi->id])
-        ->and($property->features()->pluck('amenities.id')->all())->toBe([$parking->id])
-        ->and(DB::table('amenityables')->where('amenityable_type', 'property')->count())->toBe(1);
+    expect($property->features()->pluck('amenities.id')->all())->toEqualCanonicalizing([$wifi->id, $parking->id]);
 });
 
 it('connects vacancies with their employer, category and applications', function () {
@@ -96,29 +71,29 @@ it('ties events to their venue place', function () {
 });
 
 it('stores morph aliases instead of class names', function () {
-    $hotel = Hotel::factory()->create();
+    $property = Property::factory()->create();
     $user = User::factory()->create();
 
-    Favorite::factory()->for($user)->create(['favoritable_type' => $hotel->getMorphClass(), 'favoritable_id' => $hotel->id]);
+    Favorite::factory()->for($user)->create(['favoritable_type' => $property->getMorphClass(), 'favoritable_id' => $property->id]);
 
-    expect(DB::table('favorites')->value('favoritable_type'))->toBe('hotel')
-        ->and($hotel->isFavoritedBy($user))->toBeTrue()
-        ->and($hotel->isFavoritedBy(User::factory()->create()))->toBeFalse()
-        ->and($user->favorites()->with('favoritable')->first()->favoritable->is($hotel))->toBeTrue();
+    expect(DB::table('favorites')->value('favoritable_type'))->toBe('property')
+        ->and($property->isFavoritedBy($user))->toBeTrue()
+        ->and($property->isFavoritedBy(User::factory()->create()))->toBeFalse()
+        ->and($user->favorites()->with('favoritable')->first()->favoritable->is($property))->toBeTrue();
 });
 
 it('caches the rating from published reviews only', function () {
-    $hotel = Hotel::factory()->create();
+    $place = Place::factory()->create();
 
-    Review::factory()->create(['reviewable_type' => 'hotel', 'reviewable_id' => $hotel->id, 'rating' => 10]);
-    Review::factory()->create(['reviewable_type' => 'hotel', 'reviewable_id' => $hotel->id, 'rating' => 7]);
-    Review::factory()->pending()->create(['reviewable_type' => 'hotel', 'reviewable_id' => $hotel->id, 'rating' => 1]);
+    Review::factory()->create(['reviewable_type' => 'place', 'reviewable_id' => $place->id, 'rating' => 10]);
+    Review::factory()->create(['reviewable_type' => 'place', 'reviewable_id' => $place->id, 'rating' => 7]);
+    Review::factory()->pending()->create(['reviewable_type' => 'place', 'reviewable_id' => $place->id, 'rating' => 1]);
 
-    expect($hotel->fresh())->rating_avg->toBe(8.5)->reviews_count->toBe(2);
+    expect($place->fresh())->rating_avg->toBe(8.5)->reviews_count->toBe(2);
 
-    $hotel->reviews()->where('rating', 7)->first()->delete();
+    $place->reviews()->where('rating', 7)->first()->delete();
 
-    expect($hotel->fresh())->rating_avg->toBe(10.0)->reviews_count->toBe(1);
+    expect($place->fresh())->rating_avg->toBe(10.0)->reviews_count->toBe(1);
 });
 
 it('reviews business profiles and places too', function (string $model) {

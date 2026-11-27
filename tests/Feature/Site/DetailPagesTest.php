@@ -7,18 +7,15 @@ use App\Models\BusinessProfile;
 use App\Models\Classified;
 use App\Models\DailyStat;
 use App\Models\Event;
-use App\Models\Hotel;
 use App\Models\Page;
 use App\Models\Place;
 use App\Models\Property;
 use App\Models\Review;
-use App\Models\RoomType;
 use App\Models\User;
 use App\Models\Vacancy;
 use App\Services\ListingStats;
 
 dataset('modules', [
-    'hotel' => [Hotel::class, 'hotels.show'],
     'property' => [Property::class, 'real-estate.show'],
     'classified' => [Classified::class, 'classifieds.show'],
     'vacancy' => [Vacancy::class, 'jobs.show'],
@@ -47,48 +44,35 @@ it('hides unpublished items from visitors but lets the owner and staff preview t
 })->with('modules');
 
 it('returns 404 for expired, deleted and unknown items', function () {
-    $expired = Hotel::factory()->create(['expires_at' => now()->subDay()]);
-    $deleted = Hotel::factory()->create();
+    $expired = Property::factory()->create(['expires_at' => now()->subDay()]);
+    $deleted = Property::factory()->create();
     $deleted->delete();
 
-    $this->get(localized_route('hotels.show', [$expired]))->assertNotFound();
-    $this->get(localized_route('hotels.show', [$deleted]))->assertNotFound();
-    $this->get('/hotels/no-such-hotel')->assertNotFound()->assertSee(__('site.errors.404.title'));
-    $this->get('/en/hotels/no-such-hotel')->assertNotFound()->assertSee('Page not found');
+    $this->get(localized_route('real-estate.show', [$expired]))->assertNotFound();
+    $this->get(localized_route('real-estate.show', [$deleted]))->assertNotFound();
+    $this->get('/hotels/no-such-hotel')->assertRedirect(daily_rent_hotels_url());
+    $this->get('/en/hotels/no-such-hotel')->assertRedirect(daily_rent_hotels_url('en'));
 });
 
 it('counts a view once per visitor session, never for the owner', function () {
-    $hotel = Hotel::factory()->create(['views_count' => 0]);
-    $url = localized_route('hotels.show', [$hotel]);
+    $hotel = Property::factory()->create(['views_count' => 0]);
+    $url = localized_route('real-estate.show', [$hotel]);
 
     $this->get($url);
     $this->get($url);
 
     expect($hotel->fresh()->views_count)->toBe(1)
-        ->and(DailyStat::query()->where('statable_type', 'hotel')->where('statable_id', $hotel->id)->value('views'))->toBe(1);
+        ->and(DailyStat::query()->where('statable_type', 'property')->where('statable_id', $hotel->id)->value('views'))->toBe(1);
 
     $this->actingAs(User::query()->find($hotel->user_id))->get($url);
 
     expect($hotel->fresh()->views_count)->toBe(1);
 });
 
-it('shows hotel rooms, the availability calendar and the booking form', function () {
-    $hotel = Hotel::factory()->create(['season_start_month' => null, 'season_end_month' => null]);
-    RoomType::factory()->for($hotel)->create(['name' => ['ka' => 'ორადგილიანი ნომერი', 'en' => 'Double room'], 'base_price' => 150]);
-
-    $this->get(localized_route('hotels.show', [$hotel], 'en'))
-        ->assertOk()
-        ->assertSee('Double room')
-        ->assertSee('₾150')
-        ->assertSee(__('site.hotels.availability', [], 'en'))
-        ->assertSee('name="check_in"', false)
-        ->assertSee(localized_route('hotels.booking', [$hotel], 'en'), false);
-});
-
 it('never puts phone numbers in the page source', function () {
-    $hotel = Hotel::factory()->create(['contact_phone' => '+995599887766']);
+    $hotel = Property::factory()->create(['contact_phone' => '+995599887766']);
 
-    $this->get(localized_route('hotels.show', [$hotel]))
+    $this->get(localized_route('real-estate.show', [$hotel]))
         ->assertOk()
         ->assertDontSee('599887766')
         ->assertDontSee('599 88 77 66')
@@ -96,19 +80,19 @@ it('never puts phone numbers in the page source', function () {
 });
 
 it('shows published reviews only', function () {
-    $hotel = Hotel::factory()->create();
-    Review::factory()->for($hotel, 'reviewable')->create(['body' => 'Lovely stay by the sea']);
-    Review::factory()->for($hotel, 'reviewable')->pending()->create(['body' => 'Not yet moderated']);
+    $place = Place::factory()->create();
+    Review::factory()->for($place, 'reviewable')->create(['body' => 'Lovely stay by the sea']);
+    Review::factory()->for($place, 'reviewable')->pending()->create(['body' => 'Not yet moderated']);
 
-    $this->get(localized_route('hotels.show', [$hotel]))
+    $this->get(localized_route('guide.show', [$place]))
         ->assertSee('Lovely stay by the sea')
         ->assertDontSee('Not yet moderated');
 });
 
 it('shows a business profile with its published listings and nothing hidden', function () {
     $business = BusinessProfile::factory()->create(['name' => 'Sea Group']);
-    Hotel::factory()->create(['business_profile_id' => $business->id, 'user_id' => $business->user_id, 'title' => ['ka' => 'Sea Hotel', 'en' => 'Sea Hotel']]);
-    Hotel::factory()->draft()->create(['business_profile_id' => $business->id, 'user_id' => $business->user_id, 'title' => ['ka' => 'Secret Hotel', 'en' => 'Secret Hotel']]);
+    Property::factory()->create(['business_profile_id' => $business->id, 'user_id' => $business->user_id, 'title' => ['ka' => 'Sea Hotel', 'en' => 'Sea Hotel']]);
+    Property::factory()->draft()->create(['business_profile_id' => $business->id, 'user_id' => $business->user_id, 'title' => ['ka' => 'Secret Hotel', 'en' => 'Secret Hotel']]);
 
     $this->get(localized_route('business.show', [$business]))
         ->assertOk()
@@ -140,7 +124,7 @@ it('renders static pages and hides unpublished ones', function () {
 });
 
 it('records statistics with an atomic upsert', function () {
-    $hotel = Hotel::factory()->create();
+    $hotel = Property::factory()->create();
     $stats = app(ListingStats::class);
 
     $stats->record($hotel, 'phone_reveals');

@@ -39,7 +39,13 @@
 
             <div class="mt-4 grid grid-cols-2 gap-3 md:grid-cols-4" role="radiogroup" aria-labelledby="module-title">
                 @foreach ($modules as $value => $icon)
-                    <button type="button" role="radio" aria-checked="{{ $type === $value ? 'true' : 'false' }}" wire:click="chooseType('{{ $value }}')"
+                    @php($hotelPreset = $type === 'property' && ($form['property_type'] ?? '') === 'hotel' && ($form['deal'] ?? '') === 'daily_rent')
+                    @php($checked = match ($value) {
+                        'hotel' => $hotelPreset,
+                        'property' => $type === 'property' && ! $hotelPreset,
+                        default => $type === $value,
+                    })
+                    <button type="button" role="radio" aria-checked="{{ $checked ? 'true' : 'false' }}" wire:click="{{ $value === 'hotel' ? 'chooseHotel' : "chooseType('{$value}')" }}"
                             class="group flex min-h-[132px] flex-col items-center justify-center gap-3 rounded-tile border border-line bg-white px-3 py-5 text-center text-navy transition-[background-color,border-color,color,box-shadow] duration-250 hover:border-coral aria-checked:border-navy aria-checked:bg-navy aria-checked:text-white">
                         <span class="grid size-12 place-items-center rounded-full border border-current"><x-icon :name="$icon" :size="22" /></span>
                         <span class="text-[14.5px] leading-snug font-semibold">{{ __('account.wizard.modules.'.$value) }}</span>
@@ -49,13 +55,7 @@
         </section>
     @endunless
 
-    @if ($type === 'hotel')
-        <section>
-            <h2 class="text-[15px] font-semibold text-navy">{{ __('account.wizard.fields.hotel_type') }}</h2>
-            <x-account.choice-pills class="mt-3" model="form.hotel_type" :options="$options['hotelTypes']" :label="__('account.wizard.fields.hotel_type')" />
-            @error('form.hotel_type')<p class="mt-2 text-[13px] font-medium text-coral-pressed">{{ $message }}</p>@enderror
-        </section>
-    @elseif ($type === 'property')
+    @if ($type === 'property')
         <section class="flex flex-col gap-6">
             <div>
                 <h2 class="text-[15px] font-semibold text-navy">{{ __('account.wizard.fields.deal') }}</h2>

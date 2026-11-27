@@ -9,7 +9,6 @@ use App\Enums\CategoryModule;
 use App\Enums\Currency;
 use App\Enums\EmploymentType;
 use App\Enums\Experience;
-use App\Enums\HotelType;
 use App\Enums\ItemCondition;
 use App\Enums\ListedBy;
 use App\Enums\PropertyCondition;
@@ -19,7 +18,6 @@ use App\Enums\SalaryPeriod;
 use App\Enums\VacancyBenefit;
 use App\Models\Category;
 use App\Models\Classified;
-use App\Models\Hotel;
 use App\Models\Property;
 use App\Models\User;
 use App\Models\Vacancy;
@@ -43,7 +41,7 @@ final class ListingForm
     public const array STEPS = ['type', 'details', 'location', 'photos', 'price', 'preview'];
 
     /** @var list<string> */
-    public const array TYPES = ['property', 'hotel', 'classified', 'vacancy'];
+    public const array TYPES = ['property', 'classified', 'vacancy'];
 
     public const int MAX_PHOTOS = 20;
 
@@ -75,13 +73,6 @@ final class ListingForm
         ];
 
         return $common + match ($type) {
-            'hotel' => [
-                'hotel_type' => '', 'stars' => '', 'rooms_count' => '', 'check_in_from' => '14:00', 'check_out_until' => '12:00',
-                'season_start_month' => '', 'season_end_month' => '', 'amenities' => [],
-                'contact_email' => (string) $user->email, 'website' => '',
-                'room' => ['name' => '', 'capacity_adults' => '2', 'base_price' => '', 'units' => '1'],
-                'has_rooms' => false,
-            ],
             'property' => [
                 'deal' => '', 'property_type' => '', 'area_m2' => '', 'land_area_m2' => '', 'rooms' => '', 'bedrooms' => '',
                 'bathrooms' => '', 'floor' => '', 'total_floors' => '', 'condition' => '', 'building_status' => '',
@@ -125,15 +116,6 @@ final class ListingForm
         ];
 
         return $form + match (true) {
-            $listing instanceof Hotel => [
-                'hotel_type' => $value('type'), 'stars' => $value('stars'), 'rooms_count' => $value('rooms_count'),
-                'check_in_from' => substr($value('check_in_from'), 0, 5), 'check_out_until' => substr($value('check_out_until'), 0, 5),
-                'season_start_month' => $value('season_start_month'), 'season_end_month' => $value('season_end_month'),
-                'amenities' => $listing->amenities()->pluck('amenities.id')->map(fn (mixed $id): string => (string) $id)->all(),
-                'contact_email' => $value('contact_email'), 'website' => $value('website'),
-                'room' => ['name' => '', 'capacity_adults' => '2', 'base_price' => '', 'units' => '1'],
-                'has_rooms' => $listing->roomTypes()->exists(),
-            ],
             $listing instanceof Property => [
                 'deal' => $value('deal'), 'property_type' => $value('type'), 'area_m2' => self::number($listing->getAttribute('area_m2')),
                 'land_area_m2' => self::number($listing->getAttribute('land_area_m2')), 'rooms' => $value('rooms'), 'bedrooms' => $value('bedrooms'),
@@ -245,21 +227,17 @@ final class ListingForm
             $names["form.description.{$locale}"] = __('account.wizard.fields.description').' ('.strtoupper($locale).')';
         }
 
-        foreach (['name', 'capacity_adults', 'base_price', 'units'] as $field) {
-            $names["form.room.{$field}"] = __('account.wizard.room.'.$field);
-        }
-
         return $names;
     }
 
     public static function requiresPhotos(string $type): bool
     {
-        return in_array($type, ['hotel', 'property'], true);
+        return $type === 'property';
     }
 
     public static function requiresPin(string $type): bool
     {
-        return in_array($type, ['hotel', 'property'], true);
+        return $type === 'property';
     }
 
     /**
@@ -281,19 +259,6 @@ final class ListingForm
         ];
 
         return $common + match ($type) {
-            'hotel' => [
-                'type' => $form['hotel_type'],
-                'stars' => self::int($form['stars'] ?? null),
-                'rooms_count' => self::int($form['rooms_count'] ?? null),
-                'check_in_from' => self::nullable($form['check_in_from'] ?? null),
-                'check_out_until' => self::nullable($form['check_out_until'] ?? null),
-                'season_start_month' => self::int($form['season_start_month'] ?? null),
-                'season_end_month' => self::int($form['season_end_month'] ?? null),
-                'distance_to_sea_m' => SeaDistance::meters($lat, $lng),
-                'contact_phone' => self::phone($form['contact_phone'] ?? null),
-                'contact_email' => self::nullable($form['contact_email'] ?? null),
-                'website' => self::nullable($form['website'] ?? null),
-            ],
             'property' => [
                 'deal' => $form['deal'],
                 'type' => $form['property_type'],
@@ -383,7 +348,6 @@ final class ListingForm
     private static function typeRules(string $type): array
     {
         return match ($type) {
-            'hotel' => ['hotel_type' => ['required', Rule::enum(HotelType::class)]],
             'property' => [
                 'deal' => ['required', Rule::enum(PropertyDeal::class)],
                 'property_type' => ['required', Rule::enum(PropertyType::class)],
@@ -414,19 +378,13 @@ final class ListingForm
             'description.ru' => ['nullable', 'string', 'max:5000'],
         ];
 
+        $amenityScopes = ($form['property_type'] ?? '') === PropertyType::Hotel->value
+            ? [AmenityScope::Property->value, AmenityScope::Hotel->value]
+            : [AmenityScope::Property->value];
+
         return $rules + match ($type) {
-            'hotel' => [
-                'stars' => ['nullable', 'integer', 'between:1,5'],
-                'rooms_count' => ['nullable', 'integer', 'between:1,1000'],
-                'check_in_from' => ['nullable', 'date_format:H:i'],
-                'check_out_until' => ['nullable', 'date_format:H:i'],
-                'season_start_month' => ['nullable', 'integer', 'between:1,12', 'required_with:form.season_end_month'],
-                'season_end_month' => ['nullable', 'integer', 'between:1,12', 'required_with:form.season_start_month'],
-                'amenities' => ['array'],
-                'amenities.*' => [Rule::exists('amenities', 'id')->where('scope', AmenityScope::Hotel->value)],
-            ],
             'property' => [
-                'area_m2' => [($form['property_type'] ?? '') === PropertyType::Land->value ? 'nullable' : 'required', 'numeric', 'between:1,100000'],
+                'area_m2' => [in_array($form['property_type'] ?? '', [PropertyType::Land->value, PropertyType::Hotel->value], true) ? 'nullable' : 'required', 'numeric', 'between:1,100000'],
                 'land_area_m2' => [($form['property_type'] ?? '') === PropertyType::Land->value ? 'required' : 'nullable', 'numeric', 'between:1,10000000'],
                 'rooms' => ['nullable', 'integer', 'between:1,50'],
                 'bedrooms' => ['nullable', 'integer', 'between:0,50'],
@@ -438,7 +396,7 @@ final class ListingForm
                 'cadastral_code' => ['nullable', 'string', 'max:32', 'regex:/^[\d.\/-]+$/'],
                 'listed_by' => ['required', Rule::enum(ListedBy::class)],
                 'features' => ['array'],
-                'features.*' => [Rule::exists('amenities', 'id')->where('scope', AmenityScope::Property->value)],
+                'features.*' => [Rule::exists('amenities', 'id')->whereIn('scope', $amenityScopes)],
             ],
             'classified' => [
                 'condition' => ['nullable', Rule::enum(ItemCondition::class)],
@@ -480,13 +438,6 @@ final class ListingForm
         $phone = ['string', 'max:24', 'regex:'.self::PHONE_PATTERN];
 
         return match ($type) {
-            'hotel' => ($form['has_rooms'] ?? false) ? self::hotelContactRules($phone) : [
-                'room.name' => ['required', 'string', 'min:2', 'max:80'],
-                'room.capacity_adults' => ['required', 'integer', 'between:1,20'],
-                'room.base_price' => ['required', 'numeric', 'between:1,100000'],
-                'room.units' => ['required', 'integer', 'between:1,500'],
-                ...self::hotelContactRules($phone),
-            ],
             'property' => [
                 'price' => ['required', 'numeric', 'between:1,100000000000'],
                 'currency' => ['required', Rule::enum(Currency::class)],
@@ -511,19 +462,6 @@ final class ListingForm
             ],
             default => [],
         };
-    }
-
-    /**
-     * @param  list<string>  $phone
-     * @return array<string, mixed>
-     */
-    private static function hotelContactRules(array $phone): array
-    {
-        return [
-            'contact_phone' => ['required', ...$phone],
-            'contact_email' => ['nullable', 'email:rfc', 'max:190'],
-            'website' => ['nullable', 'url:http,https', 'max:190'],
-        ];
     }
 
     /**

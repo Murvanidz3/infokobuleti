@@ -83,7 +83,7 @@ class Property extends Model implements Listing, SearchableListing
      */
     public function features(): MorphToMany
     {
-        return $this->morphToMany(Amenity::class, 'amenityable')->where('amenities.scope', AmenityScope::Property);
+        return $this->morphToMany(Amenity::class, 'amenityable')->whereIn('amenities.scope', [AmenityScope::Property, AmenityScope::Hotel]);
     }
 
     /**
