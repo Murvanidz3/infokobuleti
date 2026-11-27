@@ -213,6 +213,7 @@ return [
         'shop' => 'Магазин',
         'warehouse' => 'Склад',
         'hotel_business' => 'Отель / бизнес',
+        'other' => 'Другое',
     ],
 
     'vacation_type' => [

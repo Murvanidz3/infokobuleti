@@ -13,4 +13,5 @@ enum CommercialSubtype: string implements FilamentLabel
     case Shop = 'shop';
     case Warehouse = 'warehouse';
     case HotelBusiness = 'hotel_business';
+    case Other = 'other';
 }

@@ -119,7 +119,26 @@ it('creates each commercial subtype once', function (string $subtype) {
         ->and($property->floor)->toBe(1)
         ->and($property->rooms)->toBeNull()
         ->and($property->bedrooms)->toBeNull();
-})->with(['office', 'shop', 'warehouse', 'hotel_business']);
+})->with(['office', 'shop', 'warehouse', 'hotel_business', 'other']);
+
+it('rejects a new commercial listing until a subtype is chosen', function () {
+    app()->setLocale('ka');
+
+    $wizard = Livewire::actingAs($this->user)->test(ListingWizard::class)
+        ->call('chooseType', 'property')
+        ->set('form.deal', PropertyDeal::Sale->value)
+        ->set('form.property_type', PropertyType::Commercial->value)
+        ->call('next')
+        ->assertHasErrors('form.commercial_subtype');
+
+    expect($wizard->errors()->first('form.commercial_subtype'))->toBe('კომერციული ფართის ტიპი სავალდებულოა.')
+        ->and(Property::query()->count())->toBe(0);
+
+    $wizard->set('form.commercial_subtype', CommercialSubtype::Other->value)
+        ->call('next')
+        ->assertHasNoErrors()
+        ->assertSet('step', 2);
+});
 
 it('creates each vacation type as a daily-rent stay', function (string $vacationType, string $storedType) {
     Livewire::actingAs($this->user)->test(ListingWizard::class)
