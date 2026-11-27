@@ -82,3 +82,20 @@
     background-color: var(--ik-navy);
     box-shadow: none;
 }
+
+/* Content fades in after an SPA navigation. The shell (sidebar, top bar) stays put. */
+@media (prefers-reduced-motion: no-preference) {
+    .fi-main {
+        animation: ik-admin-nav-fade 150ms ease;
+    }
+}
+
+@keyframes ik-admin-nav-fade {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}

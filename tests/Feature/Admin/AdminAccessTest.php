@@ -75,6 +75,28 @@ it('lets only super admins hand out staff roles', function () {
     expect(UserResource::assignableRoles())->toHaveKeys(['super_admin', 'admin', 'moderator', 'business', 'user']);
 });
 
+it('navigates inside the admin without a full reload and preloads the georgian fonts', function () {
+    $html = $this->actingAs(staffWith(Role::Admin))->get('/admin')->assertOk()->getContent();
+
+    expect($html)->toContain('wire:navigate.hover')
+        ->and($html)->toContain('rel="preload"')
+        ->and($html)->toContain('noto-sans-georgian-georgian')
+        ->and($html)->toContain('noto-sans-georgian-latin')
+        ->and($html)->toContain('noto-sans-cyrillic')
+        ->and($html)->toContain('livewire:navigated');
+
+    expect($html)->toMatch('/href="[^"]*\/admin\/hotels"[^>]*wire:navigate/');
+
+    preg_match('/<a\b[^>]*href="[^"]*\/admin\/locale\/en"[^>]*>/', $html, $locale);
+    expect($locale[0] ?? 'missing locale link')->not->toContain('wire:navigate');
+
+    preg_match('/<form\b[^>]*action="[^"]*\/logout"[^>]*>/', $html, $logout);
+    expect($logout[0] ?? 'missing logout form')->not->toContain('wire:navigate');
+
+    preg_match('/<a\b[^>]*href="[^"]*\/account\/[^"]*"[^>]*>/', $html, $account);
+    expect($account[0] ?? 'missing account link')->not->toContain('wire:navigate');
+});
+
 it('shows the admin in Georgian by default', function () {
     $this->actingAs(staffWith(Role::Admin))->get('/admin')
         ->assertSee(__('admin.dashboard.title', [], 'ka'))

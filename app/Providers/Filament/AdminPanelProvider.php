@@ -21,9 +21,11 @@ use Filament\Navigation\NavigationGroup as FilamentNavigationGroup;
 use Filament\Panel;
 use Filament\PanelProvider;
 use Filament\Support\Colors\Color;
+use Filament\Support\Facades\FilamentView;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\Column;
 use Filament\Tables\Filters\BaseFilter;
+use Filament\View\PanelsRenderHook;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use Illuminate\Cookie\Middleware\EncryptCookies;
 use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
@@ -31,6 +33,7 @@ use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\Support\Facades\Lang;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Vite;
 use Illuminate\Support\Str;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
 
@@ -54,8 +57,21 @@ class AdminPanelProvider extends PanelProvider
                 'gray' => Color::Slate,
                 'info' => Color::hex('#2f6f9f'),
             ])
-            ->font('Noto Sans Georgian Variable', provider: LocalFontProvider::class)
+            ->font(
+                'Noto Sans Georgian Variable',
+                provider: LocalFontProvider::class,
+                preload: fn (): array => $this->fontPreload(),
+            )
             ->viteTheme('resources/css/filament/admin/theme.css')
+            // Full page loads re-fetch the theme CSS, JS and fonts and flash the shell.
+            ->spa(hasPrefetching: true)
+            ->spaUrlExceptions([
+                '*/logout',
+                '*/admin/locale/*',
+                '*/admin/impersonate/*',
+                '*/impersonation/*',
+                '*/account/*',
+            ])
             ->sidebarCollapsibleOnDesktop()
             ->maxContentWidth('full')
             ->navigationGroups(collect(NavigationGroup::cases())->mapWithKeys(fn (NavigationGroup $group): array => [
@@ -112,6 +128,11 @@ class AdminPanelProvider extends PanelProvider
 
     public function boot(): void
     {
+        FilamentView::registerRenderHook(
+            PanelsRenderHook::SCRIPTS_AFTER,
+            fn (): string => view('filament.hooks.navigation-fade')->render(),
+        );
+
         // Every field, column, entry and filter takes its label from lang/{locale}/admin.php
         // ("fields.<name>"); names without a translation keep Filament's default label.
         $label = static function (string $name): ?string {
@@ -124,5 +145,28 @@ class AdminPanelProvider extends PanelProvider
         Column::configureUsing(fn (Column $column) => $column->label(fn (): ?string => $label($column->getName())));
         Entry::configureUsing(fn (Entry $entry) => $entry->label(fn (): ?string => $label($entry->getName())));
         BaseFilter::configureUsing(fn (BaseFilter $filter) => $filter->label(fn (): ?string => $label($filter->getName())));
+    }
+
+    /**
+     * The Georgian, Latin and Cyrillic files the admin actually paints, so the first
+     * paint does not swap fonts after the CSS arrives. Vite fingerprints them; the
+     * preload URL has to be the same one the stylesheet requests.
+     *
+     * @return list<string>
+     */
+    private function fontPreload(): array
+    {
+        if (Vite::isRunningHot()) {
+            return [];
+        }
+
+        return array_map(
+            static fn (string $file): string => Vite::asset($file),
+            [
+                'node_modules/@fontsource-variable/noto-sans-georgian/files/noto-sans-georgian-georgian-wght-normal.woff2',
+                'node_modules/@fontsource-variable/noto-sans-georgian/files/noto-sans-georgian-latin-wght-normal.woff2',
+                'node_modules/@fontsource-variable/noto-sans/files/noto-sans-cyrillic-wght-normal.woff2',
+            ],
+        );
     }
 }
