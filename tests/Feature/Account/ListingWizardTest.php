@@ -294,7 +294,7 @@ it('creates a vacancy linked to the business profile', function () {
 });
 
 it('edits a published listing without touching it until submit', function () {
-    $property = Property::factory()->published()->for($this->user)->create(['title' => ['ka' => 'ძველი სათაური', 'en' => 'Old title'], 'location_id' => $this->location->id, 'lat' => 41.82, 'lng' => 41.78]);
+    $property = Property::factory()->published()->for($this->user)->type(PropertyType::Apartment, PropertyDeal::Sale)->create(['title' => ['ka' => 'ძველი სათაური', 'en' => 'Old title'], 'location_id' => $this->location->id, 'lat' => 41.82, 'lng' => 41.78]);
     $property->addMedia(jpeg())->toMediaCollection('gallery');
 
     $this->actingAs($this->user)->get("/account/listings/property/{$property->id}/edit")->assertOk();
