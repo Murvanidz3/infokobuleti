@@ -84,7 +84,12 @@ class AdminPanelProvider extends PanelProvider
             ->maxContentWidth('full')
             ->navigationGroups(collect(NavigationGroup::cases())->mapWithKeys(fn (NavigationGroup $group): array => [
                 // Labels are resolved per request, after the admin language is applied.
-                $group->name => FilamentNavigationGroup::make()->label(fn (): string => $group->getLabel()),
+                // Items already have icons. Filament refuses a group icon in that case,
+                // and the collapsed sidebar needs the item icons, so the group mark is
+                // drawn in CSS from this stable key (theme.css).
+                $group->name => FilamentNavigationGroup::make()
+                    ->label(fn (): string => $group->getLabel())
+                    ->extraSidebarAttributes(['data-nav-group' => $group->value]),
             ])->all())
             ->databaseNotifications(position: DatabaseNotificationsPosition::Topbar)
             ->userMenu(position: UserMenuPosition::Sidebar)
